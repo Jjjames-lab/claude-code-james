@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Emergent Ripples - Algorithmic Art Demo</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.7.0/p5.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            padding: 20px;
+        }
+
+        .container {
+            display: flex;
+            gap: 20px;
+            width: 100%;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .canvas-wrapper {
+            flex: 1;
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            padding: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .sidebar {
+            width: 320px;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-radius: 16px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        h1 {
+            color: #333;
+            font-size: 1.5em;
+            margin-bottom: 8px;
+            text-align: center;
+        }
+
+        .description {
+            color: #666;
+            font-size: 0.9em;
+            text-align: center;
+            line-height: 1.5;
+            margin-bottom: 16px;
+        }
+
+        .section {
+            background: #f8f9fa;
+            border-radius: 12px;
+            padding: 16px;
+        }
+
+        .section-title {
+            font-size: 0.85em;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .seed-display {
+            text-align: center;
+            font-size: 2em;
+            font-weight: 700;
+            color: #667eea;
+            margin-bottom: 12px;
+        }
+
+        .seed-buttons {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+            margin-bottom: 12px;
+        }
+
+        .jump-group {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 12px;
+        }
+
+        .jump-input {
+            flex: 1;
+            padding: 8px 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 0.9em;
+        }
+
+        button {
+            padding: 10px 16px;
+            border: none;
+            border-radius: 8px;
+            font-size: 0.9em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            background: #667eea;
+            color: white;
+        }
+
+        button:hover {
+            background: #5568d3;
+            transform: translateY(-1px);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        button.secondary {
+            background: #e0e0e0;
+            color: #333;
+        }
+
+        button.secondary:hover {
+            background: #d0d0d0;
+        }
+
+        .control-group {
+            margin-bottom: 12px;
+        }
+
+        .control-group label {
+            display: block;
+            font-size: 0.85em;
+            color: #555;
+            margin-bottom: 6px;
+            font-weight: 500;
+        }
+
+        .control-group input[type="range"] {
+            width: 100%;
+            margin-bottom: 4px;
+        }
+
+        .value-display {
+            font-size: 0.85em;
+            color: #667eea;
+            font-weight: 600;
+            text-align: right;
+        }
+
+        .actions {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+        }
+
+        .info {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 12px;
+            border-radius: 8px;
+            font-size: 0.85em;
+            color: #856404;
+            line-height: 1.5;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="canvas-wrapper">
+            <div id="canvas-container"></div>
+        </div>
+
+        <div class="sidebar">
+            <div>
+                <h1>💧 Emergent Ripples</h1>
+                <p class="description">算法艺术：水滴涟漪的涌现之美</p>
+            </div>
+
+            <div class="info">
+                💡 提示：每个seed都会生成独特图案<br>
+                尝试不同的参数组合！
+            </div>
+
+            <div class="section">
+                <div class="section-title">🎲 Seed</div>
+                <div class="seed-display" id="seed-display">12345</div>
+                <div class="seed-buttons">
+                    <button onclick="prevSeed()">← Previous</button>
+                    <button onclick="nextSeed()">Next →</button>
+                    <button class="secondary" onclick="randomSeed()">🎲 Random</button>
+                </div>
+                <div class="jump-group">
+                    <input type="number" id="jump-input" class="jump-input" placeholder="Seed #">
+                    <button onclick="jumpToSeed()" style="width: auto;">Go</button>
+                </div>
+            </div>
+
+            <div class="section">
+                <div class="section-title">⚙️ Parameters</div>
+
+                <div class="control-group">
+                    <label>Ripple Count: <span id="ripple-count-value">8</span></label>
+                    <input type="range" id="ripple-count" min="3" max="20" value="8" step="1" oninput="updateParam('rippleCount', this.value)">
+                </div>
+
+                <div class="control-group">
+                    <label>Max Radius: <span id="max-radius-value">200</span></label>
+                    <input type="range" id="max-radius" min="50" max="400" value="200" step="10" oninput="updateParam('maxRadius', this.value)">
+                </div>
+
+                <div class="control-group">
+                    <label>Wave Speed: <span id="wave-speed-value">0.02</span></label>
+                    <input type="range" id="wave-speed" min="0.005" max="0.05" value="0.02" step="0.001" oninput="updateParam('waveSpeed', this.value)">
+                </div>
+
+                <div class="control-group">
+                    <label>Color Shift: <span id="color-shift-value">0</span></label>
+                    <input type="range" id="color-shift" min="0" max="360" value="0" step="10" oninput="updateParam('colorShift', this.value)">
+                </div>
+            </div>
+
+            <div class="section">
+                <div class="section-title">🎨 Colors</div>
+
+                <div class="control-group">
+                    <label>Primary Color</label>
+                    <input type="color" id="color-primary" value="#00d9ff" oninput="updateParam('colorPrimary', this.value)">
+                </div>
+
+                <div class="control-group">
+                    <label>Secondary Color</label>
+                    <input type="color" id="color-secondary" value="#ff6b9d" oninput="updateParam('colorSecondary', this.value)">
+                </div>
+            </div>
+
+            <div class="section">
+                <div class="section-title">🎬 Actions</div>
+                <div class="actions">
+                    <button onclick="regenerate()">🔄 Regenerate</button>
+                    <button class="secondary" onclick="resetParams()">↺ Reset</button>
+                    <button class="secondary" onclick="downloadPNG()" style="grid-column: span 2;">📥 Download PNG</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ============ PARAMETERS ============
+        let params = {
+            seed: 12345,
+            rippleCount: 8,
+            maxRadius: 200,
+            waveSpeed: 0.02,
+            colorShift: 0,
+            colorPrimary: '#00d9ff',
+            colorSecondary: '#ff6b9d'
+        };
+
+        let ripples = [];
+        let time = 0;
+
+        // ============ P5.JS SKETCH ============
+        function setup() {
+            let canvas = createCanvas(600, 600);
+            canvas.parent('canvas-container');
+            colorMode(HSB, 360, 100, 100, 1);
+            initializeRipples();
+        }
+
+        function draw() {
+            background(220, 20, 95);
+            translate(width / 2, height / 2);
+
+            time += params.waveSpeed;
+
+            // Draw each ripple
+            for (let ripple of ripples) {
+                ripple.update();
+                ripple.display();
+            }
+        }
+
+        // ============ RIPPLE CLASS ============
+        class Ripple {
+            constructor(x, y, maxR, phase, hueOffset) {
+                this.x = x;
+                this.y = y;
+                this.maxR = maxR;
+                this.phase = phase;
+                this.hueOffset = hueOffset;
+                this.waves = [];
+
+                // Create multiple wave rings for each ripple
+                let numWaves = floor(random(5, 12));
+                for (let i = 0; i < numWaves; i++) {
+                    this.waves.push({
+                        offset: random(0, 100),
+                        speed: random(0.5, 2),
+                        amplitude: random(0.3, 0.8),
+                        thickness: random(2, 6)
+                    });
+                }
+            }
+
+            update() {
+                // Waves evolve over time
+            }
+
+            display() {
+                noFill();
+
+                for (let wave of this.waves) {
+                    let wavePhase = this.phase + wave.offset;
+                    let r = (sin(time * wave.speed + wavePhase) * 0.5 + 0.5) * this.maxR;
+
+                    if (r > 0) {
+                        // Calculate color based on radius and phase
+                        let hue = (params.colorShift + this.hueOffset + r * 0.3) % 360;
+                        let saturation = map(r, 0, this.maxR, 60, 90);
+                        let brightness = map(r, 0, this.maxR, 40, 70);
+                        let alpha = map(r, 0, this.maxR, wave.amplitude, 0);
+
+                        stroke(hue, saturation, brightness, alpha);
+                        strokeWeight(wave.thickness);
+
+                        // Draw ellipse
+                        ellipse(this.x, this.y, r * 2, r * 2);
+                    }
+                }
+            }
+        }
+
+        // ============ INITIALIZATION ============
+        function initializeRipples() {
+            randomSeed(params.seed);
+            noiseSeed(params.seed);
+
+            ripples = [];
+
+            for (let i = 0; i < params.rippleCount; i++) {
+                // Position ripples using noise for organic feel
+                let angle = random(TWO_PI);
+                let dist = random(50, 150);
+                let x = cos(angle) * dist;
+                let y = sin(angle) * dist;
+                let maxR = random(params.maxRadius * 0.5, params.maxRadius);
+                let phase = random(TWO_PI);
+                let hueOffset = random(0, 60);
+
+                ripples.push(new Ripple(x, y, maxR, phase, hueOffset));
+            }
+        }
+
+        // ============ UI HANDLERS ============
+        function updateParam(name, value) {
+            params[name] = parseFloat(value);
+            document.getElementById(name + '-value').textContent = value;
+
+            if (name === 'rippleCount' || name === 'maxRadius') {
+                initializeRipples();
+            }
+        }
+
+        function regenerate() {
+            initializeRipples();
+            time = 0;
+        }
+
+        function resetParams() {
+            params = {
+                seed: params.seed,
+                rippleCount: 8,
+                maxRadius: 200,
+                waveSpeed: 0.02,
+                colorShift: 0,
+                colorPrimary: '#00d9ff',
+                colorSecondary: '#ff6b9d'
+            };
+
+            // Update UI
+            document.getElementById('ripple-count').value = params.rippleCount;
+            document.getElementById('ripple-count-value').textContent = params.rippleCount;
+            document.getElementById('max-radius').value = params.maxRadius;
+            document.getElementById('max-radius-value').textContent = params.maxRadius;
+            document.getElementById('wave-speed').value = params.waveSpeed;
+            document.getElementById('wave-speed-value').textContent = params.waveSpeed;
+            document.getElementById('color-shift').value = params.colorShift;
+            document.getElementById('color-shift-value').textContent = params.colorShift;
+            document.getElementById('color-primary').value = params.colorPrimary;
+            document.getElementById('color-secondary').value = params.colorSecondary;
+
+            regenerate();
+        }
+
+        // ============ SEED NAVIGATION ============
+        function prevSeed() {
+            params.seed = max(1, params.seed - 1);
+            updateSeedDisplay();
+            regenerate();
+        }
+
+        function nextSeed() {
+            params.seed++;
+            updateSeedDisplay();
+            regenerate();
+        }
+
+        function randomSeed() {
+            params.seed = floor(random(1, 100000));
+            updateSeedDisplay();
+            regenerate();
+        }
+
+        function jumpToSeed() {
+            let input = document.getElementById('jump-input');
+            let newSeed = parseInt(input.value);
+            if (!isNaN(newSeed) && newSeed > 0) {
+                params.seed = newSeed;
+                updateSeedDisplay();
+                regenerate();
+            }
+        }
+
+        function updateSeedDisplay() {
+            document.getElementById('seed-display').textContent = params.seed;
+        }
+
+        // ============ DOWNLOAD ============
+        function downloadPNG() {
+            saveCanvas('emergent-ripples-seed-' + params.seed, 'png');
+        }
+
+        // ============ INITIALIZE ============
+        window.onload = function() {
+            updateSeedDisplay();
+        };
+    </script>
+</body>
+</html>

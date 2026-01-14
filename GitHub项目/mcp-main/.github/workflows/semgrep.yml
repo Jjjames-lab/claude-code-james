@@ -1,0 +1,35 @@
+name: Semgrep
+on:
+  workflow_dispatch: {}
+  pull_request: {}
+  push:
+    branches:
+      - main
+    # paths:
+    #   - .github/workflows/semgrep.yml
+  schedule:
+    # random HH:MM to avoid a load spike on GitHub Actions at 00:00
+    - cron: '12 15 * * *'
+permissions: {}
+jobs:
+  semgrep:
+    name: semgrep/ci
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      security-events: write
+    # if: (github.actor != 'dependabot[bot]')
+    steps:
+      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 #v6.0.1
+      - uses: actions/setup-python@83679a892e2d95755f2dac6acb0bfd1e9ac5d548 #v6.1.0
+        with:
+          python-version: '3.13'
+          cache: 'pip'
+
+      - run: |
+          python -m pip install --require-hashes --requirement .github/workflows/semgrep-requirements.txt
+      - run: semgrep scan --config auto --sarif-output semgrep.sarif.json --no-error --dryrun --verbose
+      - name: Upload Semgrep scan results to GitHub Security tab
+        uses: github/codeql-action/upload-sarif@7434149006143a4d75b82a2f411ef15b03ccc2d7 # v4.31.9
+        with:
+          sarif_file: semgrep.sarif.json

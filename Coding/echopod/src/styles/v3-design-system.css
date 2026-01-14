@@ -1,0 +1,395 @@
+/* ============================================
+   「回声 Echo」V3.0 - 终极设计系统
+   Dark Poeticism Design System
+   ============================================ */
+
+/* ============================================
+   1. 字体引入
+   ============================================ */
+
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;600&family=Crimson+Pro:wght@200;300;400;600&family=Space+Mono:wght@400;700&display=swap');
+
+/* ============================================
+   2. CSS变量定义 - 情绪化调色板
+   ============================================ */
+
+:root {
+  /* ===== 深空色彩系统 ===== */
+  --color-void: #030105;          /* 虚空黑 - 主背景 */
+  --color-abyss: #0A0E1A;         /* 深渊蓝 - 次级背景 */
+  --color-deep-space: #050810;    /* 深空灰 */
+
+  /* ===== 极光色彩系统 (动态) ===== */
+  --aurora-hue: 300;              /* 基础色调 (紫) */
+  --aurora-primary: hsl(var(--aurora-hue), 80%, 60%);    /* 极光紫 */
+  --aurora-secondary: hsl(180, 80%, 60%);                /* 电光青 */
+  --aurora-tertiary: hsl(25, 90%, 60%);                  /* 等离子橙 */
+
+  /* ===== 文字色彩 ===== */
+  --color-stardust: #E8E4DF;      /* 星尘白 - 主要文字 */
+  --color-crystal: #C8C4BF;       /* 水晶白 - 次要文字 */
+  --color-bone: #B8B5AD;          /* 骨骼白 - 辅助文字 */
+  --color-mist: rgba(232, 228, 223, 0.5);  /* 雾气 */
+
+  /* ===== 语义色彩 ===== */
+  --color-plasma: #FF6B35;        /* 等离子橙 - 强调 */
+  --color-electric: #7B2CBF;      /* 电光紫 - 悬停 */
+
+  /* ===== 四季色彩系统 ===== */
+  --season-spring: hsl(120, 30%, 15%);    /* 春天 */
+  --season-summer: hsl(40, 40%, 18%);     /* 夏天 */
+  --season-autumn: hsl(20, 35%, 12%);     /* 秋天 */
+  --season-winter: hsl(200, 20%, 8%);     /* 冬天 */
+  --current-season: var(--season-spring);
+
+  /* ===== 字体家族 ===== */
+  --font-display: 'Cormorant Garamond', serif;
+  --font-body: 'Crimson Pro', serif;
+  --font-mono: 'Space Mono', monospace;
+
+  /* ===== 字号系统 ===== */
+  --text-epic: 72px;        /* 特大标题 */
+  --text-hero: 48px;        /* 页面标题 */
+  --text-saga: 24px;        /* 章节标题 */
+  --text-verse: 18px;       /* 正文 */
+  --text-whisper: 14px;     /* 辅助 */
+  --text-glyph: 12px;       /* 时间戳 */
+
+  /* ===== 间距系统 ===== */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-12: 48px;
+  --space-16: 64px;
+  --space-20: 80px;
+  --space-24: 96px;
+
+  /* ===== 动画时长 ===== */
+  --duration-instant: 100ms;
+  --duration-fast: 200ms;
+  --duration-normal: 300ms;
+  --duration-slow: 500ms;
+  --duration-slower: 800ms;
+  --duration-epic: 1200ms;
+
+  /* ===== 缓动函数 ===== */
+  --ease-liquid: cubic-bezier(0.4, 0, 0.2, 1);
+  --ease-breathe: cubic-bezier(0.4, 0, 0.6, 1);
+  --ease-float: cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+/* ============================================
+   3. 全局重置
+   ============================================ */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  font-size: 16px;
+  scroll-behavior: smooth;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  font-family: var(--font-body);
+  font-size: var(--text-verse);
+  font-weight: 300;
+  line-height: 1.9;
+  color: var(--color-stardust);
+  background-color: var(--color-void);
+  overflow-x: hidden;
+  transition: background-color 60s linear;
+  cursor: default;
+}
+
+/* ============================================
+   4. 排版系统
+   ============================================ */
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-display);
+  font-weight: 300;
+  line-height: 1.2;
+  letter-spacing: -0.02em;
+}
+
+h1 {
+  font-size: var(--text-epic);
+  font-weight: 300;
+}
+
+h2 {
+  font-size: var(--text-hero);
+  font-weight: 400;
+}
+
+h3 {
+  font-size: var(--text-saga);
+  font-weight: 400;
+}
+
+p {
+  margin-bottom: var(--space-4);
+  animation: text-breathe 6s var(--ease-breathe) infinite;
+}
+
+/* 文字呼吸效果 */
+@keyframes text-breathe {
+  0%, 100% {
+    letter-spacing: 0.02em;
+    word-spacing: 0.1em;
+  }
+  50% {
+    letter-spacing: 0.025em;
+    word-spacing: 0.12em;
+  }
+}
+
+/* 行高呼吸 */
+@keyframes line-height-breathe {
+  0%, 100% {
+    line-height: 1.8;
+  }
+  50% {
+    line-height: 1.85;
+  }
+}
+
+/* ============================================
+   5. 有机形状系统
+   ============================================ */
+
+.organic-shape {
+  border-radius: 30% 70% 70% 30% / 30% 30% 70% 70%;
+  animation: organic-morph 8s ease-in-out infinite;
+}
+
+@keyframes organic-morph {
+  0%, 100% {
+    border-radius: 30% 70% 70% 30% / 30% 30% 70% 70%;
+  }
+  25% {
+    border-radius: 58% 42% 75% 25% / 76% 46% 54% 24%;
+  }
+  50% {
+    border-radius: 50% 50% 33% 67% / 55% 27% 73% 45%;
+  }
+  75% {
+    border-radius: 33% 67% 58% 42% / 63% 68% 32% 37%;
+  }
+}
+
+/* ============================================
+   6. 动态极光渐变
+   ============================================ */
+
+.aurora-gradient {
+  background: linear-gradient(
+    90deg,
+    hsl(280, 80%, 60%),
+    hsl(180, 80%, 60%),
+    hsl(340, 80%, 60%),
+    hsl(25, 90%, 60%),
+    hsl(280, 80%, 60%)
+  );
+  background-size: 400% 400%;
+  animation: aurora-flow 20s ease infinite;
+}
+
+@keyframes aurora-flow {
+  0% {
+    background-position: 0% 50%;
+    filter: hue-rotate(0deg);
+  }
+  50% {
+    background-position: 100% 50%;
+    filter: hue-rotate(30deg);
+  }
+  100% {
+    background-position: 0% 50%;
+    filter: hue-rotate(0deg);
+  }
+}
+
+/* ============================================
+   7. 自定义滚动条
+   ============================================ */
+
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.02);
+}
+
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(
+    180deg,
+    rgba(255, 107, 53, 0.5),
+    rgba(8, 217, 214, 0.5)
+  );
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(
+    180deg,
+    rgba(255, 107, 53, 0.8),
+    rgba(8, 217, 214, 0.8)
+  );
+}
+
+/* ============================================
+   8. 液态过渡效果
+   ============================================ */
+
+.liquid-transition {
+  transition: all var(--duration-slow) var(--ease-liquid);
+}
+
+.liquid-morph-enter {
+  animation: liquid-morph-enter var(--duration-epic) var(--ease-liquid) both;
+}
+
+@keyframes liquid-morph-enter {
+  0% {
+    border-radius: 30% 70% 70% 30% / 30% 30% 70% 70%;
+    transform: scale(0.9) translateY(20px);
+    opacity: 0;
+  }
+  50% {
+    border-radius: 70% 30% 30% 70% / 70% 70% 30% 30%;
+  }
+  100% {
+    border-radius: 30% 70% 70% 30% / 30% 30% 70% 70%;
+    transform: scale(1) translateY(0);
+    opacity: 1;
+  }
+}
+
+/* ============================================
+   9. 发光效果
+   ============================================ */
+
+.glow-primary {
+  text-shadow:
+    0 0 10px rgba(255, 107, 53, 0.8),
+    0 0 20px rgba(255, 107, 53, 0.5),
+    0 0 30px rgba(255, 107, 53, 0.3);
+}
+
+.glow-secondary {
+  text-shadow:
+    0 0 10px rgba(123, 44, 191, 0.8),
+    0 0 20px rgba(123, 44, 191, 0.5),
+    0 0 30px rgba(123, 44, 191, 0.3);
+}
+
+.box-glow {
+  box-shadow:
+    0 0 20px rgba(255, 107, 53, 0.3),
+    0 0 40px rgba(255, 107, 53, 0.1);
+}
+
+.box-glow-hover:hover {
+  box-shadow:
+    0 0 30px rgba(255, 107, 53, 0.5),
+    0 0 60px rgba(255, 107, 53, 0.2);
+}
+
+/* ============================================
+   10. 诗意按钮系统
+   ============================================ */
+
+.poetic-button {
+  position: relative;
+  padding: var(--space-3) var(--space-6);
+  font-family: var(--font-body);
+  font-size: var(--text-verse);
+  font-weight: 400;
+  font-style: italic;
+  color: var(--color-stardust);
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  cursor: pointer;
+  overflow: hidden;
+  transition: all var(--duration-normal) var(--ease-liquid);
+}
+
+.poetic-button::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: var(--aurora-primary);
+  opacity: 0;
+  transition: opacity var(--duration-normal) var(--ease-liquid);
+}
+
+.poetic-button:hover {
+  border-color: var(--aurora-primary);
+  transform: translateY(-2px);
+}
+
+.poetic-button:hover::before {
+  opacity: 0.1;
+}
+
+.poetic-button:active {
+  transform: translateY(0);
+}
+
+/* ============================================
+   11. 实用类
+   ============================================ */
+
+.text-gradient {
+  background: linear-gradient(135deg, var(--aurora-primary), var(--aurora-secondary));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.mono {
+  font-family: var(--font-mono);
+  font-size: var(--text-glyph);
+  letter-spacing: 0.05em;
+}
+
+/* ============================================
+   12. 隐藏类（用于动画）
+   ============================================ */
+
+.fade-enter {
+  opacity: 0;
+  transform: translateY(20px);
+}
+
+.fade-enter-active {
+  opacity: 1;
+  transform: translateY(0);
+  transition: all var(--duration-slow) var(--ease-breathe);
+}
+
+.fade-exit {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.fade-exit-active {
+  opacity: 0;
+  transform: translateY(-20px);
+  transition: all var(--duration-normal) var(--ease-liquid);
+}

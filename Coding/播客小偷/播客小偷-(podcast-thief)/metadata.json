@@ -1,0 +1,5 @@
+{
+  "name": "播客小偷 (Podcast Thief)",
+  "description": "A specialized tool for Little Universe (XiaoYuZhou) podcasts that extracts audio content, generates structured transcripts, summaries, and visualizes keywords in a fluid turntable.",
+  "requestFramePermissions": []
+}

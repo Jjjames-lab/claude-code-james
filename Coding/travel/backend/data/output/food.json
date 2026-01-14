@@ -1,0 +1,145 @@
+[
+  {
+    "id": "food_001",
+    "name": "越南河粉",
+    "nameEn": "Pho",
+    "city": "河内",
+    "description": "越南国菜，清汤河粉，配牛肉或鸡肉。汤底由牛骨熬制数小时，加入八角、桂皮等香料。是越南人最爱的早餐。",
+    "type": "主食",
+    "price_range": {
+      "min": 15,
+      "max": 30,
+      "currency": "CNY",
+      "description": "15-30元"
+    },
+    "must_try": true,
+    "recommend_places": [
+      {
+        "name": "Pho 10 Ly Quoc Su",
+        "address": "10 Ly Quoc Su Street",
+        "specialty": "传统河粉",
+        "price_level": "中等"
+      },
+      {
+        "name": "Pho Gia Truyen",
+        "address": "49 Bat Dan Street",
+        "specialty": "牛肉河粉",
+        "price_level": "经济"
+      }
+    ],
+    "flavor_profile": [
+      "清淡",
+      "鲜美",
+      "有汤"
+    ],
+    "suitable_for": [
+      "所有人"
+    ],
+    "tips": [
+      "记得加柠檬和豆芽",
+      "可以根据口味加辣椒酱",
+      "早餐时间很多店都营业"
+    ],
+    "rating": {
+      "overall": 4.8,
+      "count": 856
+    },
+    "metadata": {
+      "source": "手动整理",
+      "crawl_time": "2026-01-08"
+    }
+  },
+  {
+    "id": "food_002",
+    "name": "越南春卷",
+    "nameEn": "Nem Ran",
+    "city": "越南",
+    "description": "越南传统小吃，用米纸包裹猪肉、虾、蔬菜等，油炸至金黄。外皮酥脆，内馅鲜美，蘸着鱼露食用。",
+    "type": "小吃",
+    "price_range": {
+      "min": 5,
+      "max": 15,
+      "currency": "CNY",
+      "description": "5-15元/个"
+    },
+    "must_try": true,
+    "recommend_places": [
+      {
+        "name": "Nem Restaurant",
+        "address": "河内还剑湖区",
+        "specialty": "传统春卷",
+        "price_level": "中等"
+      }
+    ],
+    "flavor_profile": [
+      "酥脆",
+      "鲜美",
+      "有嚼劲"
+    ],
+    "suitable_for": [
+      "所有人"
+    ],
+    "tips": [
+      "趁热吃最美味",
+      "蘸鱼露味道更正宗"
+    ],
+    "rating": {
+      "overall": 4.6,
+      "count": 543
+    },
+    "metadata": {
+      "source": "手动整理",
+      "crawl_time": "2026-01-08"
+    }
+  },
+  {
+    "id": "food_003",
+    "name": "越南滴漏咖啡",
+    "nameEn": "Ca Phe Sua Da",
+    "city": "越南",
+    "description": "越南特色咖啡，用滴漏壶慢慢滴入炼乳中，喝时搅拌，口感浓郁香甜。是体验越南慢生活的最佳方式。",
+    "type": "饮品",
+    "price_range": {
+      "min": 10,
+      "max": 25,
+      "currency": "CNY",
+      "description": "10-25元"
+    },
+    "must_try": true,
+    "recommend_places": [
+      {
+        "name": "Cafe Giang",
+        "address": "39 Nguyen Huu Huan, Hanoi",
+        "specialty": "鸡蛋咖啡",
+        "price_level": "中等"
+      },
+      {
+        "name": "Cafe Dinh",
+        "address": "13 Dinh Tien Hoang, Hanoi",
+        "specialty": "传统滴漏咖啡",
+        "price_level": "经济"
+      }
+    ],
+    "flavor_profile": [
+      "浓郁",
+      "香甜",
+      "提神"
+    ],
+    "suitable_for": [
+      "咖啡爱好者"
+    ],
+    "tips": [
+      "需要耐心等待滴漏",
+      "可以搭配酸奶",
+      "坐在路边小店体验最地道"
+    ],
+    "rating": {
+      "overall": 4.7,
+      "count": 678
+    },
+    "metadata": {
+      "source": "手动整理",
+      "crawl_time": "2026-01-08"
+    }
+  }
+]

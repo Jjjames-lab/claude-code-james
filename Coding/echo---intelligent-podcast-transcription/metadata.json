@@ -1,0 +1,7 @@
+{
+  "name": "Echo - Intelligent Podcast Transcription",
+  "description": "A world-class, design-driven podcast transcription platform using GLM-ASR-2512. Features real-time karaoke-style syncing, waveform visualization, and deep content understanding.",
+  "requestFramePermissions": [
+    "microphone"
+  ]
+}

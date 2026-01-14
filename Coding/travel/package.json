@@ -1,0 +1,28 @@
+{
+  "name": "ai-travel-advisor",
+  "version": "0.1.0",
+  "description": "AI旅行顾问 - 对话式旅行规划助手",
+  "scripts": {
+    "install:all": "npm install && cd frontend && npm install && cd ../backend && npm install",
+    "dev:frontend": "cd frontend && npm start",
+    "dev:backend": "cd backend && npm run dev",
+    "start:frontend": "cd frontend && npm start",
+    "start:backend": "cd backend && npm start",
+    "dev": "concurrently \"npm run dev:backend\" \"npm run dev:frontend\""
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  },
+  "repository": {
+    "type": "git",
+    "url": ""
+  },
+  "keywords": [
+    "travel",
+    "ai",
+    "chatbot",
+    "claude"
+  ],
+  "author": "",
+  "license": "ISC"
+}

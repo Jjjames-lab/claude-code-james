@@ -1,0 +1,180 @@
+[
+  {
+    "id": "attraction_001",
+    "name": "三十六行街",
+    "nameEn": "36 Streets",
+    "city": "河内",
+    "cityEn": "Hanoi",
+    "category": [
+      "文化",
+      "历史",
+      "购物"
+    ],
+    "description": "河内最古老的商业区，由36条各具特色的街道组成。每条街传统上经营一种商品，如银器街、丝绸街、纸街等。这里是体验河内当地人生活的最佳地点。",
+    "highlights": [
+      "历史悠久",
+      "当地生活",
+      "购物天堂"
+    ],
+    "location": {
+      "address": "河内市还剑湖区",
+      "latitude": 21.0341,
+      "longitude": 105.8491
+    },
+    "visit_info": {
+      "duration": "2-3小时",
+      "best_time": "上午或傍晚",
+      "opening_hours": "全天开放",
+      "ticket_price": {
+        "amount": 0,
+        "currency": "CNY",
+        "description": "免费"
+      },
+      "cost_level": "免费"
+    },
+    "experience": {
+      "suitable_for": [
+        "情侣",
+        "家庭",
+        "朋友"
+      ],
+      "activity_level": "低",
+      "crowd_level": "人多"
+    },
+    "tips": [
+      "可以骑人力三轮车游览",
+      "建议早晚去，避开中午高温",
+      "可以品尝当地小吃",
+      "记得讨价还价"
+    ],
+    "rating": {
+      "overall": 4.5,
+      "count": 1234
+    },
+    "tags": [
+      "必去",
+      "经典",
+      "文化体验"
+    ],
+    "metadata": {
+      "source": "手动整理",
+      "crawl_time": "2026-01-08"
+    }
+  },
+  {
+    "id": "attraction_002",
+    "name": "还剑湖",
+    "nameEn": "Hoan Kiem Lake",
+    "city": "河内",
+    "cityEn": "Hanoi",
+    "category": [
+      "自然",
+      "地标"
+    ],
+    "description": "河内的中心湖泊，湖名来源于传说中黎利太祖还剑给神龟的故事。清晨和傍晚是最佳游览时间，可以看到当地人在湖边锻炼、散步。",
+    "highlights": [
+      "城市地标",
+      "清晨散步",
+      "夜生活"
+    ],
+    "location": {
+      "address": "河内市中心",
+      "latitude": 21.0285,
+      "longitude": 105.8525
+    },
+    "visit_info": {
+      "duration": "1小时",
+      "best_time": "清晨或傍晚",
+      "opening_hours": "全天开放",
+      "ticket_price": {
+        "amount": 0,
+        "currency": "CNY",
+        "description": "免费"
+      },
+      "cost_level": "免费"
+    },
+    "experience": {
+      "suitable_for": [
+        "所有人"
+      ],
+      "activity_level": "低",
+      "crowd_level": "适中"
+    },
+    "tips": [
+      "清晨去看日出",
+      "晚上有夜市",
+      "可以步行环绕一周"
+    ],
+    "rating": {
+      "overall": 4.7,
+      "count": 2341
+    },
+    "tags": [
+      "必去",
+      "地标",
+      "免费"
+    ],
+    "metadata": {
+      "source": "手动整理",
+      "crawl_time": "2026-01-08"
+    }
+  },
+  {
+    "id": "attraction_003",
+    "name": "胡志明纪念馆",
+    "nameEn": "Ho Chi Minh Mausoleum",
+    "city": "河内",
+    "cityEn": "Hanoi",
+    "category": [
+      "历史",
+      "文化"
+    ],
+    "description": "越南国父胡志明的陵墓，是他长眠的地方。陵墓庄严肃穆，是越南人民缅怀伟人的重要场所。需要遵守着装要求，不能穿短裤、短裙。",
+    "highlights": [
+      "历史教育",
+      "瞻仰",
+      "庄严肃穆"
+    ],
+    "location": {
+      "address": "河内市巴亭广场",
+      "latitude": 21.0375,
+      "longitude": 105.8343
+    },
+    "visit_info": {
+      "duration": "1小时",
+      "best_time": "上午",
+      "opening_hours": "周二至周四、周末 7:30-10:30",
+      "ticket_price": {
+        "amount": 0,
+        "currency": "CNY",
+        "description": "免费"
+      },
+      "cost_level": "免费"
+    },
+    "experience": {
+      "suitable_for": [
+        "对历史感兴趣"
+      ],
+      "activity_level": "低",
+      "crowd_level": "多"
+    },
+    "tips": [
+      "必须穿戴整齐（长裤、有袖上衣）",
+      "保持安静",
+      "不能拍照",
+      "排队时间可能很长"
+    ],
+    "rating": {
+      "overall": 4.6,
+      "count": 1876
+    },
+    "tags": [
+      "历史",
+      "教育"
+    ],
+    "metadata": {
+      "source": "手动整理",
+      "crawl_time": "2026-01-08"
+    }
+  }
+]

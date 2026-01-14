@@ -1,0 +1,546 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>✨ Birthday Vibes Generator ✨</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 50%, #7e22ce 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 40px;
+            animation: bounceIn 1s ease;
+        }
+
+        @keyframes bounceIn {
+            0% {
+                transform: scale(0.3);
+                opacity: 0;
+            }
+            50% {
+                transform: scale(1.05);
+            }
+            70% {
+                transform: scale(0.9);
+            }
+            100% {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+        h1 {
+            font-size: 3.5rem;
+            background: linear-gradient(135deg, #60a5fa 0%, #a78bfa 50%, #f472b6 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-shadow: none;
+            margin-bottom: 15px;
+            font-weight: 900;
+            letter-spacing: -1px;
+        }
+
+        .subtitle {
+            color: #cbd5e1;
+            font-size: 1.4rem;
+            text-shadow: none;
+            font-weight: 300;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+        }
+
+        .main-content {
+            display: flex;
+            gap: 30px;
+            align-items: flex-start;
+        }
+
+        .left-panel {
+            flex: 0 0 350px;
+            background: white;
+            padding: 30px;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            position: sticky;
+            top: 20px;
+        }
+
+        .left-panel h2 {
+            color: #667eea;
+            margin-bottom: 25px;
+            text-align: center;
+            font-size: 1.8rem;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #555;
+            font-weight: 600;
+            font-size: 1rem;
+        }
+
+        input[type="text"],
+        input[type="number"] {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        input[type="text"]:focus,
+        input[type="number"]:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 10px rgba(102, 126, 234, 0.2);
+        }
+
+        .generate-btn {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 10px;
+        }
+
+        .generate-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .generate-btn:active {
+            transform: translateY(0);
+        }
+
+        .right-panel {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 25px;
+        }
+
+        .birthday-card {
+            background: linear-gradient(135deg, #e0f2fe 0%, #dbeafe 50%, #eef2ff 100%);
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            animation: slideIn 0.5s ease;
+            position: relative;
+            overflow: hidden;
+            border: 3px solid #3b82f6;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .birthday-card::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(59, 130, 246, 0.15) 0%, transparent 70%);
+            animation: rotate 20s linear infinite;
+        }
+
+        @keyframes rotate {
+            from {
+                transform: rotate(0deg);
+            }
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        .card-content {
+            position: relative;
+            z-index: 1;
+        }
+
+        .card-header {
+            text-align: center;
+            margin-bottom: 25px;
+        }
+
+        .card-title {
+            font-size: 2.5rem;
+            background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            font-weight: bold;
+        }
+
+        .card-subtitle {
+            font-size: 1.3rem;
+            color: #1e40af;
+            margin-top: 10px;
+        }
+
+        .card-body {
+            font-size: 1.2rem;
+            line-height: 1.8;
+            color: #1e293b;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.7);
+            border-radius: 15px;
+            border-left: 5px solid #3b82f6;
+        }
+
+        .card-footer {
+            text-align: center;
+            margin-top: 20px;
+            font-size: 1.1rem;
+            color: #1e40af;
+            font-weight: 600;
+        }
+
+        .age-badge {
+            display: inline-block;
+            background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+            color: white;
+            padding: 8px 20px;
+            border-radius: 25px;
+            font-weight: bold;
+            font-size: 1.5rem;
+            margin: 15px 0;
+            box-shadow: 0 4px 15px rgba(59, 130, 246, 0.4);
+        }
+
+        .interest-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .interest-tag {
+            background: linear-gradient(135deg, #60a5fa 0%, #3b82f6 100%);
+            color: white;
+            padding: 6px 15px;
+            border-radius: 20px;
+            font-size: 0.95rem;
+        }
+
+        .copy-btn {
+            background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 10px;
+            font-size: 0.95rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 15px;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .copy-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(59, 130, 246, 0.4);
+        }
+
+        .copy-btn:active {
+            transform: translateY(0);
+        }
+
+        .copy-btn.copied {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        }
+
+        .lucky-btn {
+            width: 100%;
+            padding: 12px;
+            background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 10px;
+        }
+
+        .lucky-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(245, 158, 11, 0.4);
+        }
+
+        .lucky-btn:active {
+            transform: translateY(0);
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: white;
+            font-size: 1.2rem;
+            opacity: 0.8;
+        }
+
+        .empty-state-icon {
+            font-size: 4rem;
+            margin-bottom: 20px;
+            animation: float 3s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% {
+                transform: translateY(0);
+            }
+            50% {
+                transform: translateY(-20px);
+            }
+        }
+
+        @media (max-width: 968px) {
+            .main-content {
+                flex-direction: column;
+            }
+
+            .left-panel {
+                flex: none;
+                width: 100%;
+                position: relative;
+                top: 0;
+            }
+
+            h1 {
+                font-size: 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>✨ BIRTHDAY VIBES ✨</h1>
+            <p class="subtitle">Create Personalized Birthday Magic</p>
+        </header>
+
+        <div class="main-content">
+            <div class="left-panel">
+                <h2>✨ CREATE MAGIC</h2>
+                <form id="birthdayForm">
+                    <div class="form-group">
+                        <label for="name">🎁 Name：</label>
+                        <input type="text" id="name" placeholder="Enter name" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="age">🎈 Age：</label>
+                        <input type="number" id="age" placeholder="Enter age" min="1" max="150" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="interests">🎯 Interests：</label>
+                        <input type="text" id="interests" placeholder="e.g., gaming, food, travel" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="adjective">💫 Adjective：</label>
+                        <input type="text" id="adjective" placeholder="e.g., amazing, fantastic" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="nouns">🌟 Plural Nouns：</label>
+                        <input type="text" id="nouns" placeholder="e.g., stars, dreams, adventures" required>
+                    </div>
+
+                    <button type="button" class="lucky-btn" id="luckyBtn">🎲 Feel Lucky</button>
+                    <button type="submit" class="generate-btn">🎊 Generate Card</button>
+                </form>
+            </div>
+
+            <div class="right-panel" id="cardsContainer">
+                <div class="empty-state" id="emptyState">
+                    <div class="empty-state-icon">🎁</div>
+                    <p>No cards yet~<br>Create your first one!</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const birthdayForm = document.getElementById('birthdayForm');
+        const cardsContainer = document.getElementById('cardsContainer');
+        const emptyState = document.getElementById('emptyState');
+        const luckyBtn = document.getElementById('luckyBtn');
+
+        // 随机词汇库
+        const randomData = {
+            names: ['Alex', 'Jordan', 'Taylor', 'Morgan', 'Casey', 'Riley', 'Quinn', 'Avery'],
+            interests: ['gaming', 'coding', 'traveling', 'cooking', 'reading', 'music', 'sports', 'art', 'photography', 'dancing'],
+            adjectives: ['amazing', 'fantastic', 'incredible', 'wonderful', 'spectacular', 'awesome', 'brilliant', 'fabulous', 'extraordinary', 'phenomenal'],
+            nouns: ['adventures', 'dreams', 'stars', 'memories', 'achievements', 'victories', 'surprises', 'treasures', 'moments', 'possibilities']
+        };
+
+        // Feel Lucky 按钮功能
+        luckyBtn.addEventListener('click', function() {
+            document.getElementById('name').value = randomData.names[Math.floor(Math.random() * randomData.names.length)];
+            document.getElementById('age').value = Math.floor(Math.random() * 50) + 18;
+            document.getElementById('interests').value = randomData.interests[Math.floor(Math.random() * randomData.interests.length)];
+            document.getElementById('adjective').value = randomData.adjectives[Math.floor(Math.random() * randomData.adjectives.length)];
+            document.getElementById('nouns').value = randomData.nouns[Math.floor(Math.random() * randomData.nouns.length)];
+        });
+
+        // 趣味生日祝贺语模板（使用5个字段）
+        const greetingTemplates = [
+            (name, age, interests, adjective, nouns) => `
+                Happy <strong>${age}</strong>th Birthday, <strong>${name}</strong>! 🎉<br><br>
+                You're truly <strong>${adjective}</strong>! Your passion for <strong>${interests}</strong> inspires everyone around you.<br><br>
+                May your special day be filled with <strong>${nouns}</strong> beyond your wildest dreams!<br>
+                Keep being your <strong>${adjective}</strong> self and chasing those <strong>${nouns}</strong>!<br><br>
+                Here's to another year of <strong>${interests}</strong> and infinite <strong>${nouns}</strong>! ✨
+            `,
+            (name, age, interests, adjective, nouns) => `
+                <strong>${name}</strong>, welcome to the <strong>${age}</strong> club! 🎂<br><br>
+                You're one <strong>${adjective}</strong> individual! Your love for <strong>${interests}</strong> makes you absolutely unforgettable.<br><br>
+                Today celebrates you and all the <strong>${nouns}</strong> you've achieved so far!<br>
+                May this year bring you more <strong>${adjective}</strong> moments and incredible <strong>${nouns}</strong>!<br><br>
+                Keep shining with <strong>${interests}</strong>! 🌟
+            `,
+            (name, age, interests, adjective, nouns) => `
+                🌟 It's <strong>${name}</strong>'s <strong>${adjective}</strong> Birthday! 🌟<br><br>
+                <strong>${age}</strong> never looked so good! Your dedication to <strong>${interests}</strong> is truly <strong>${adjective}</strong>.<br><br>
+                Wishing you a year packed with <strong>${nouns}</strong> and endless joy!<br>
+                May all your <strong>${nouns}</strong> come true and your <strong>${interests}</strong> adventures never end!<br><br>
+                Have the most <strong>${adjective}</strong> birthday ever! 🎊
+            `,
+            (name, age, interests, adjective, nouns) => `
+                Hey <strong>${name}</strong>! 🎈<br><br>
+                Can't believe you're <strong>${age}</strong>! Time flies when you're having fun with <strong>${interests}</strong>!<br><br>
+                You're such an <strong>${adjective}</strong> person, and we're lucky to have you.<br>
+                May your birthday bring <strong>${nouns}</strong> galore and <strong>${adjective}</strong> surprises!<br><br>
+                Here's to more <strong>${interests}</strong> and amazing <strong>${nouns}</strong> ahead! 🚀
+            `,
+            (name, age, interests, adjective, nouns) => `
+                <strong>${name}</strong>'s <strong>${age}</strong> Birthday Extravaganza! 💫<br><br>
+                Celebrating the most <strong>${adjective}</strong> person we know!<br>
+                Your passion for <strong>${interests}</strong> and your <strong>${adjective}</strong> spirit light up every room.<br><br>
+                May this birthday shower you with <strong>${nouns}</strong> and fill your heart with joy!<br>
+                Keep creating those <strong>${adjective}</strong> <strong>${nouns}</strong> and living your best life with <strong>${interests}</strong>!<br><br>
+                Happy Birthday, you <strong>${adjective}</strong> human! ✨
+            `
+        ];
+
+        // 复制卡片功能
+        function copyCardText(cardElement) {
+            const cardBody = cardElement.querySelector('.card-body');
+            const text = cardBody.innerText;
+
+            navigator.clipboard.writeText(text).then(() => {
+                const copyBtn = cardElement.querySelector('.copy-btn');
+                const originalText = copyBtn.innerHTML;
+                copyBtn.innerHTML = '✓ Copied!';
+                copyBtn.classList.add('copied');
+
+                setTimeout(() => {
+                    copyBtn.innerHTML = originalText;
+                    copyBtn.classList.remove('copied');
+                }, 2000);
+            }).catch(err => {
+                console.error('Failed to copy text: ', err);
+                alert('Failed to copy. Please try again!');
+            });
+        }
+
+        birthdayForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            const name = document.getElementById('name').value.trim();
+            const age = document.getElementById('age').value;
+            const interests = document.getElementById('interests').value.trim();
+            const adjective = document.getElementById('adjective').value.trim();
+            const nouns = document.getElementById('nouns').value.trim();
+
+            // 隐藏空状态提示
+            if (emptyState) {
+                emptyState.style.display = 'none';
+            }
+
+            // 随机选择一个祝贺语模板
+            const randomIndex = Math.floor(Math.random() * greetingTemplates.length);
+            const greetingContent = greetingTemplates[randomIndex](name, age, interests, adjective, nouns);
+
+            // 创建新卡片
+            const card = document.createElement('div');
+            card.className = 'birthday-card';
+            card.innerHTML = `
+                <div class="card-content">
+                    <div class="card-header">
+                        <div class="card-title">🎂 HAPPY BIRTHDAY 🎂</div>
+                        <div class="age-badge">${age} Years Young!</div>
+                    </div>
+                    <div class="card-body">
+                        ${greetingContent}
+                    </div>
+                    <div class="interest-tags">
+                        ${interests.split(',').map(interest => `<span class="interest-tag">${interest.trim()}</span>`).join('')}
+                    </div>
+                    <div style="text-align: center;">
+                        <button class="copy-btn" onclick="copyCardText(this.closest('.birthday-card'))">
+                            📋 Copy Card
+                        </button>
+                    </div>
+                    <div class="card-footer">
+                        ✨ Wishing You Infinite Joy ✨
+                    </div>
+                </div>
+            `;
+
+            // 将新卡片添加到容器顶部
+            cardsContainer.insertBefore(card, cardsContainer.firstChild);
+
+            // 清空表单
+            birthdayForm.reset();
+
+            // 滚动到新卡片位置
+            card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        });
+    </script>
+</body>
+</html>
