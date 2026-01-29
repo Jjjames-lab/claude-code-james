@@ -72,17 +72,30 @@ export class TranslationService {
     // 翻译未缓存的段落
     if (uncachedSegments.length > 0) {
       try {
+        const payload = {
+          segments: uncachedSegments,
+          target_lang: targetLang,
+        };
+        console.log('[TranslationService] 发送翻译请求:', {
+          segmentsCount: uncachedSegments.length,
+          targetLang,
+          firstSegment: uncachedSegments[0],
+        });
+
         const response = await fetch(`${API_BASE_URL}/llm/translate`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            segments: uncachedSegments,
-            target_lang: targetLang,
-          }),
+          body: JSON.stringify(payload),
         });
 
         if (!response.ok) {
-          throw new Error(`翻译请求失败: ${response.status}`);
+          const errorText = await response.text();
+          console.error('[TranslationService] API错误响应:', {
+            status: response.status,
+            statusText: response.statusText,
+            body: errorText,
+          });
+          throw new Error(`翻译请求失败: ${response.status} - ${errorText}`);
         }
 
         const result: TranslationAPIResponse = await response.json();

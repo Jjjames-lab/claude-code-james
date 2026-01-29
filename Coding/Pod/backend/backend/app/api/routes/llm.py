@@ -474,7 +474,7 @@ class TranslateResponse(BaseModel):
     provider: str
 
 
-@router.post("/api/v1/llm/translate", response_model=TranslateResponse)
+@router.post("/api/v1/llm/translate")
 async def translate_text(request: TranslateRequest):
     """
     批量翻译文本（逐字稿/章节）
@@ -488,7 +488,8 @@ async def translate_text(request: TranslateRequest):
         标准API响应格式，包含success和data字段
     """
     try:
-        logger.info(f"开始翻译，段落数量: {len(request.segments)}, 目标语言: {request.target_lang}")
+        logger.info(f"收到翻译请求: segments数量={len(request.segments)}, target_lang={request.target_lang}")
+        logger.info(f"第一个segment示例: id={request.segments[0].id if request.segments else 'N/A'}, text前50字符={request.segments[0].text[:50] if request.segments else 'N/A'}")
 
         # 获取 LLM 客户端
         client, provider = _get_llm_client()
