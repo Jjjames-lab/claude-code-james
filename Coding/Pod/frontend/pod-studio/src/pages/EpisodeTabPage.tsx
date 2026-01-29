@@ -43,6 +43,7 @@ export const EpisodeTabPage = () => {
   const [error, setError] = useState<string | null>(null);
   const [isProcessed, setIsProcessed] = useState(false);
   const [isTranscribing, setIsTranscribing] = useState(false);
+  const [useFunasr, setUseFunasr] = useState(true); // 默认使用 FunASR（更便宜更快）
   const [transcribingProgress, setTranscribingProgress] = useState<{
     stage: string;
     message: string;
@@ -233,12 +234,13 @@ export const EpisodeTabPage = () => {
       });
 
       // 1. ASR 转录
-      console.log('[EpisodeTabPage] 开始 ASR 转录...');
+      console.log('[EpisodeTabPage] 开始 ASR 转录，引擎:', useFunasr ? 'FunASR (推荐)' : '豆包标准版');
       const transcriptResult = await startTranscription(
         episodeData.audioUrl,
         episodeData.episodeId,
         undefined,  // engine (使用默认)
-        true,       // useStandard (使用豆包标准版)
+        !useFunasr,  // useStandard (如果不使用 FunASR，则用豆包标准版)
+        useFunasr,   // useFunasr (使用 FunASR)
         300000      // timeout (5分钟)
       );
 
@@ -457,6 +459,33 @@ export const EpisodeTabPage = () => {
                   <div className="flex items-center justify-center h-full">
                     <div className="text-center">
                       <p className="text-white/60 text-lg mb-4">该单集尚未处理</p>
+
+                      {/* FunASR 开关 */}
+                      <div className="mb-4 flex items-center justify-center gap-3">
+                        <label
+                          htmlFor="funasr-toggle"
+                          className="text-sm cursor-pointer flex items-center gap-2 px-4 py-2 rounded-lg transition-colors"
+                          style={{
+                            backgroundColor: useFunasr ? 'rgba(212, 197, 185, 0.15)' : 'rgba(255, 255, 255, 0.05)',
+                            border: '1px solid rgba(255, 255, 255, 0.1)',
+                          }}
+                        >
+                          <input
+                            id="funasr-toggle"
+                            type="checkbox"
+                            checked={useFunasr}
+                            onChange={(e) => setUseFunasr(e.target.checked)}
+                            className="w-4 h-4 rounded"
+                            style={{
+                              accentColor: 'rgba(212, 197, 185, 1)',
+                            }}
+                          />
+                          <span className="text-white/80 text-sm">
+                            {useFunasr ? '⚡ FunASR (推荐：便宜+快速)' : '豆包标准版'}
+                          </span>
+                        </label>
+                      </div>
+
                       <button
                         onClick={handleStartTranscription}
                         className="px-8 py-4 rounded-xl font-semibold text-base transition-all duration-300 hover:scale-105 flex items-center gap-3"

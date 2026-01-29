@@ -64,6 +64,30 @@ class XiaoyuzhouCrawler:
         """判断是否为播客主页链接"""
         return bool(re.search(r'/podcast/[a-zA-Z0-9]+', url))
 
+    def _is_playback_page(self, url: str) -> bool:
+        """判断URL是否为播放页面而非音频文件
+
+        Returns:
+            True: 播放页面（需要进一步提取）
+            False: 音频文件直接链接
+        """
+        # 检查是否包含音频文件扩展名
+        audio_extensions = ('.mp3', '.m4a', '.mp4', '.wav', '.ogg', '.opus', '.aac')
+        if url.lower().endswith(audio_extensions):
+            return False  # 是音频文件
+
+        # 检查是否是已知的播放页面域名
+        playback_domains = ['ximalaya.com', 'jt.ximalaya.com', 'qingting.fm', 'lizhi.fm']
+        if any(domain in url for domain in playback_domains):
+            # 如果URL路径不包含音频扩展名，很可能是播放页面
+            return True
+
+        # 检查URL路径模式
+        if any(pattern in url for pattern in ['/episode/', '/audio/', '/play/', '/player/']):
+            return True
+
+        return False
+
     async def parse_episode(self, url: str) -> Dict:
         """
         解析小宇宙节目链接
@@ -395,6 +419,18 @@ class XiaoyuzhouCrawler:
             if not episode:
                 raise ValueError(" episode 数据为空")
 
+            # 🔍 调试：打印所有可用字段
+            logger.info(f"📊 episode 对象的所有键: {list(episode.keys())}")
+            logger.info(f"📊 episode.get('enclosure'): {episode.get('enclosure')}")
+            logger.info(f"📊 episode.get('audio_url'): {episode.get('audio_url')}")
+            logger.info(f"📊 episode.get('url'): {episode.get('url')}")
+
+            # 检查是否有其他可能包含音频URL的字段
+            for key in episode.keys():
+                value = episode.get(key)
+                if isinstance(value, str) and ('http' in value and ('mp3' in value or 'm4a' in value or 'mp4' in value)):
+                    logger.info(f"✅ 发现可能包含音频URL的字段: {key} = {value}")
+
             # 提取音频 URL（从多个可能的字段中查找）
             audio_url = (
                 episode.get('enclosure', {}).get('url') or  # 新的数据结构
@@ -403,6 +439,21 @@ class XiaoyuzhouCrawler:
             )
             if not audio_url:
                 raise ValueError("无法找到音频 URL")
+
+            # 🔍 检测是否是播放页面而非音频文件
+            if self._is_playback_page(audio_url):
+                logger.warning(f"⚠️ audio_url 指向播放页面而非音频文件: {audio_url}")
+                logger.info(f"🔄 尝试从播放页面提取真实音频URL...")
+
+                # 尝试从当前页面中直接提取音频URL
+                real_audio_url = await self._extract_audio_url_from_scripts()
+                if real_audio_url and not self._is_playback_page(real_audio_url):
+                    logger.info(f"✅ 成功提取真实音频URL: {real_audio_url}")
+                    audio_url = real_audio_url
+                else:
+                    logger.warning(f"❌ 无法从页面提取音频URL，使用原URL（可能导致转录失败）")
+            else:
+                logger.info(f"✅ audio_url 是有效的音频文件URL: {audio_url}")
 
             # 提取其他信息
             title = episode.get('title') or episode.get('episode_title', '')

@@ -15,6 +15,7 @@ class EngineType(Enum):
     """ASR 引擎类型"""
     DOUBAO = "doubao"
     QWEN = "qwen"
+    FUNASR = "funasr"
     SENSEVOICE = "sensevoice"
 
 

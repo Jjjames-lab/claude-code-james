@@ -65,7 +65,7 @@ export const ExportDropdown = ({
     setIsExporting(format);
 
     try {
-      const { ExportService } = await import('../utils/exportService');
+      const { ExportService } = await import('../../utils/exportService');
       const data = {
         ...episodeData,
         utterances,

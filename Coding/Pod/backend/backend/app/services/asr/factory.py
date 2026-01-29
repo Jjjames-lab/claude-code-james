@@ -8,6 +8,7 @@ from .base import ASREngine
 from .doubao_engine import DoubaoASREngine
 from .doubao_standard_engine import DoubaoASRStandardEngine
 from .qwen_engine import QwenASREngine
+from .funasr_engine import FunASREngine
 from .multi_engine_service import MultiEngineASRService
 
 
@@ -64,6 +65,23 @@ class ASREngineFactory:
             timeout=timeout,
             max_retries=max_retries,
             retry_delay=retry_delay,
+            hotwords=hotwords or []
+        )
+
+    @staticmethod
+    def create_funasr(
+        api_key: str,
+        model: str = "fun-asr",
+        poll_interval: float = 3.0,
+        max_poll_time: float = 600.0,
+        hotwords = None
+    ) -> FunASREngine:
+        """创建阿里云 FunASR 引擎"""
+        return FunASREngine(
+            api_key=api_key,
+            model=model,
+            poll_interval=poll_interval,
+            max_poll_time=max_poll_time,
             hotwords=hotwords or []
         )
 

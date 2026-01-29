@@ -39,6 +39,15 @@ doubao_standard_engine = EngineFactory.create_doubao_standard(
     hotwords=asr_config.hotwords
 )
 
+# 创建 FunASR 引擎（便宜且快速）
+funasr_engine = EngineFactory.create_funasr(
+    api_key=asr_config.funasr_api_key,
+    model=asr_config.funasr_model,
+    poll_interval=3.0,
+    max_poll_time=600.0,
+    hotwords=asr_config.hotwords
+)
+
 
 @router.post("/api/v1/asr/transcribe")
 async def transcribe_audio(
@@ -108,7 +117,8 @@ async def transcribe_audio(
 async def transcribe_from_url(
     url: str = Form(...),
     strategy: Literal["fallback", "race", "mixed"] = Form("fallback"),
-    use_standard: bool = Form(False)
+    use_standard: bool = Form(False),
+    use_funasr: bool = Form(False)
 ):
     """
     从 URL 转录音频
@@ -117,6 +127,7 @@ async def transcribe_from_url(
         url: 音频文件的公网 URL
         strategy: 竞速策略（fallback/race/mixed）
         use_standard: 是否使用标准版（用于额度切换）
+        use_funasr: 是否使用 FunASR（推荐，便宜且快速）
 
     Returns:
         转录结果
@@ -125,7 +136,30 @@ async def transcribe_from_url(
         HTTPException: 转录失败
     """
     try:
-        logger.info(f"URL 转录请求: URL={url}, 策略={strategy}, 使用标准版={use_standard}")
+        logger.info(f"URL 转录请求: URL={url}, 策略={strategy}, 使用标准版={use_standard}, 使用FunASR={use_funasr}")
+
+        # 如果指定使用 FunASR
+        if use_funasr:
+            logger.info(f"使用阿里云 FunASR 转录")
+            try:
+                result = await funasr_engine.transcribe_from_url(url)
+                logger.info(f"FunASR 转录成功，使用引擎: {result.engine.value}")
+                return {
+                    "success": True,
+                    "data": {
+                        "text": result.text,
+                        "duration": result.duration,
+                        "engine": result.engine.value,
+                        "words": [w.to_dict() for w in result.words],
+                        "utterances": [u.to_dict() for u in result.utterances],
+                        "word_count": len(result.words),
+                        "log_id": result.log_id,
+                        "timestamp": result.timestamp.isoformat()
+                    }
+                }
+            except Exception as e:
+                logger.warning(f"FunASR 失败: {e}")
+                raise HTTPException(status_code=500, detail=f"FunASR 转录失败: {str(e)}")
 
         # 如果指定使用标准版，先尝试标准版，失败时 fallback 到极速版或 Qwen
         if use_standard:
@@ -150,7 +184,12 @@ async def transcribe_from_url(
                 logger.warning(f"豆包标准版失败: {e}，切换到极速版（带 fallback）")
                 # 标准版失败，下载音频并使用极速版（会自动 fallback 到 Qwen）
                 import httpx
-                async with httpx.AsyncClient(timeout=30.0, follow_redirects=True) as client:
+                headers = {
+                    'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+                    'Referer': 'https://www.xiaoyuzhoufm.com/',
+                    'Accept': '*/*',
+                }
+                async with httpx.AsyncClient(timeout=30.0, follow_redirects=True, headers=headers) as client:
                     response = await client.get(url)
                     response.raise_for_status()
                     audio_data = response.content
@@ -174,11 +213,33 @@ async def transcribe_from_url(
         # 否则使用极速版（下载音频）
         import httpx
 
-        # 下载音频（跟随重定向）
-        async with httpx.AsyncClient(timeout=30.0, follow_redirects=True) as client:
+        # 下载音频（跟随重定向，添加防盗链绕过）
+        headers = {
+            'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+            'Referer': 'https://www.xiaoyuzhoufm.com/',
+            'Accept': '*/*',
+            'Accept-Language': 'zh-CN,zh;q=0.9,en;q=0.8',
+            'Accept-Encoding': 'gzip, deflate, br',
+            'Connection': 'keep-alive',
+        }
+
+        async with httpx.AsyncClient(timeout=30.0, follow_redirects=True, headers=headers) as client:
             response = await client.get(url)
             response.raise_for_status()
             audio_data = response.content
+
+            # 调试：检查下载的内容类型
+            content_type = response.headers.get('content-type', '')
+            content_length = len(audio_data)
+            logger.info(f"音频下载完成: Content-Type={content_type}, 大小={content_length} bytes")
+
+            # 检查是否是HTML（重定向错误页面）
+            if b'<!DOCTYPE html>' in audio_data[:100] or b'<html' in audio_data[:100]:
+                logger.error(f"下载到HTML页面而非音频文件！前100字节: {audio_data[:100]}")
+                raise HTTPException(
+                    status_code=400,
+                    detail=f"下载到HTML页面而非音频文件。Content-Type={content_type}。请检查URL是否正确。"
+                )
 
         # 转录
         if strategy == "fallback":

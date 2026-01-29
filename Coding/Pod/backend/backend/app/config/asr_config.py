@@ -34,6 +34,12 @@ class ASRConfig(BaseSettings):
     qwen_retries: int = Field(default=2, description="Qwen 重试次数")
     qwen_retry_delay: float = Field(default=0.5, description="Qwen 重试间隔（秒）")
 
+    # ==================== 阿里云 FunASR 配置 ====================
+    funasr_api_key: str = Field(default="", description="阿里云 FunASR API Key")
+    funasr_model: str = Field(default="fun-asr", description="FunASR 模型（fun-asr/paraformer-v2）")
+    funasr_poll_interval: float = Field(default=3.0, description="FunASR 轮询间隔（秒）")
+    funasr_max_poll_time: float = Field(default=600.0, description="FunASR 最大轮询时间（秒）")
+
     # ==================== 阿里云 OSS 配置 ====================
     oss_access_key_id: str = Field(default="", description="OSS Access Key ID")
     oss_access_key_secret: str = Field(default="", description="OSS Access Key Secret")
@@ -48,7 +54,7 @@ class ASRConfig(BaseSettings):
 
     # ==================== 智能分流配置 ====================
     enable_smart_routing: bool = Field(default=True, description="是否启用智能分流")
-    primary_engine: str = Field(default="doubao", description="主引擎（doubao/qwen）")
+    primary_engine: str = Field(default="funasr", description="主引擎（funasr/doubao/qwen）")
     fallback_engine: str = Field(default="qwen", description="备用引擎")
 
     # ==================== 任务配置 ====================
@@ -89,6 +95,17 @@ def get_qwen_config() -> dict:
         "timeout": asr_config.qwen_timeout,
         "retries": asr_config.qwen_retries,
         "retry_delay": asr_config.qwen_retry_delay,
+        "hotwords": asr_config.hotwords
+    }
+
+
+def get_funasr_config() -> dict:
+    """获取阿里云 FunASR 配置"""
+    return {
+        "api_key": asr_config.funasr_api_key,
+        "model": asr_config.funasr_model,
+        "poll_interval": asr_config.funasr_poll_interval,
+        "max_poll_time": asr_config.funasr_max_poll_time,
         "hotwords": asr_config.hotwords
     }
 

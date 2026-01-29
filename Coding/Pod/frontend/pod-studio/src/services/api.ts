@@ -257,6 +257,7 @@ export async function parsePodcast(
  * @param episodeId 节目 ID（不使用，仅保留接口兼容）
  * @param engine ASR 引擎选择（可选）
  * @param useStandard 是否使用豆包标准版（默认 false，使用极速版）
+ * @param useFunasr 是否使用阿里云 FunASR（默认 false，推荐：便宜且快速）
  * @param timeout 超时时间（毫秒），默认 300 秒（5 分钟）
  */
 export async function startTranscription(
@@ -264,12 +265,14 @@ export async function startTranscription(
   _episodeId: string,
   _engine?: 'doubao' | 'qwen',
   useStandard: boolean = false,
+  useFunasr: boolean = false,
   timeout: number = 300000
 ): Promise<TranscriptResult> {
   const formData = new FormData();
   formData.append('url', audioUrl);
   formData.append('strategy', 'fallback');
-  formData.append('use_standard', useStandard.toString());  // 添加标准版标志
+  formData.append('use_standard', useStandard.toString());
+  formData.append('use_funasr', useFunasr.toString());  // 添加 FunASR 标志
 
   const url = `${PYTHON_API_BASE_URL}/asr/transcribe-url`;
 
