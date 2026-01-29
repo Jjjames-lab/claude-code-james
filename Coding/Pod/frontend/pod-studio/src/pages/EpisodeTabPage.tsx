@@ -6,13 +6,14 @@ import { parseEpisode, startTranscription, generateChapters } from '../services/
 import { AudioPlayerEnhanced } from '../components/audio/AudioPlayerEnhanced';
 import { usePlayerStore } from '../stores/playerStore';
 import { useTranslationStore } from '../stores/translationStore';
+import { useChapterTranslationStore } from '../stores/chapterTranslationStore';
 import { UrlInputEnhanced } from '../components/url/UrlInputEnhanced';
 import { TranscriptViewer } from '../components/transcript/TranscriptViewer';
 import { ChaptersSectionEnhanced } from '../components/chapters/ChaptersSectionEnhanced';
 import { TranslationButton } from '../components/translation/TranslationButton';
 import { ViewModeToggle } from '../components/translation/ViewModeToggle';
 import type { ChapterData } from '../services/api';
-import { Clock, Mic } from 'lucide-react';
+import { Clock, Mic, Languages } from 'lucide-react';
 
 // type TabKey = 'transcript' | 'chapters' | 'notes';
 
@@ -54,7 +55,8 @@ export const EpisodeTabPage = () => {
   const [chatMessages, setChatMessages] = useState<any[]>([]);
 
   const { setCurrentPodcast } = usePlayerStore();
-  const { translateSegments, setViewMode } = useTranslationStore();
+  const { translateSegments, setViewMode, targetLang } = useTranslationStore();
+  const { translateAllChapters, translations: chapterTranslations, isTranslating: isTranslatingChapters } = useChapterTranslationStore();
 
   // 加载单集数据
   useEffect(() => {
@@ -327,6 +329,37 @@ export const EpisodeTabPage = () => {
     }
   };
 
+  // 处理章节翻译请求
+  const handleTranslateChapters = async () => {
+    if (!chapters?.chapters || chapters.chapters.length === 0) {
+      alert('没有可翻译的章节');
+      return;
+    }
+
+    if (!targetLang) {
+      alert('请先在逐字稿翻译中选择目标语言');
+      return;
+    }
+
+    try {
+      console.log('[EpisodeTabPage] 开始翻译章节，数量:', chapters.chapters.length);
+
+      await translateAllChapters(
+        chapters.chapters.map(ch => ({
+          title: ch.title,
+          points: ch.points
+        })),
+        targetLang
+      );
+
+      alert(`成功翻译 ${chapters.chapters.length} 个章节`);
+    } catch (error) {
+      console.error('[EpisodeTabPage] 章节翻译失败:', error);
+      const errorMessage = error instanceof Error ? error.message : '章节翻译失败，请重试';
+      alert(errorMessage);
+    }
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -453,74 +486,117 @@ export const EpisodeTabPage = () => {
                 )}
 
                 {isProcessed && savedData && chapters && (
-                  <div className="space-y-2">
-                    {chapters.chapters.map((chapter, idx) => (
-                      <div
-                        key={idx}
-                        className="p-3 rounded-lg cursor-pointer transition-all duration-200 hover:scale-[1.01] bg-white/5 hover:bg-white/8"
+                  <>
+                    {/* 章节翻译按钮 */}
+                    <div className="mb-3">
+                      <button
+                        onClick={handleTranslateChapters}
+                        disabled={isTranslatingChapters || !targetLang}
+                        className="w-full px-3 py-2 rounded-lg text-sm flex items-center justify-center gap-2 transition-all duration-200 hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed"
                         style={{
-                          border: '1px solid rgba(255, 255, 255, 0.05)',
-                        }}
-                        onClick={() => {
-                          const utterance = savedData.utterances[chapter.segment_index];
-                          if (utterance) {
-                            const { seek } = usePlayerStore.getState();
-                            seek(utterance.start);
-                          }
+                          backgroundColor: isTranslatingChapters
+                            ? 'rgba(212, 197, 185, 0.1)'
+                            : 'rgba(212, 197, 185, 0.15)',
+                          border: '1px solid rgba(212, 197, 185, 0.25)',
+                          color: 'rgba(212, 197, 185, 1)',
                         }}
                       >
-                        <div className="flex items-center gap-2 mb-1.5">
+                        <Languages className="w-4 h-4" />
+                        <span>
+                          {isTranslatingChapters ? '翻译中...' : targetLang ? `翻译所有章节 (${chapters.chapters.length})` : '请先选择翻译语言'}
+                        </span>
+                      </button>
+                    </div>
+
+                    {/* 章节列表 */}
+                    <div className="space-y-2">
+                      {chapters.chapters.map((chapter, idx) => {
+                        const translation = chapterTranslations.get(idx);
+
+                        return (
                           <div
-                            className="w-6 h-6 rounded-md flex items-center justify-center text-xs font-medium flex-shrink-0"
+                            key={idx}
+                            className="p-3 rounded-lg cursor-pointer transition-all duration-200 hover:scale-[1.01] bg-white/5 hover:bg-white/8"
                             style={{
-                              backgroundColor: 'rgba(212, 197, 185, 0.15)',
-                              color: 'rgba(212, 197, 185, 0.8)',
+                              border: '1px solid rgba(255, 255, 255, 0.05)',
+                            }}
+                            onClick={() => {
+                              const utterance = savedData.utterances[chapter.segment_index];
+                              if (utterance) {
+                                const { seek } = usePlayerStore.getState();
+                                seek(utterance.start);
+                              }
                             }}
                           >
-                            {idx + 1}
-                          </div>
-                          {(() => {
-                            const utterance = savedData.utterances[chapter.segment_index];
-                            return utterance ? (
-                              <div className="flex items-center gap-1 px-2 py-0.5 rounded text-xs" style={{
-                                backgroundColor: 'rgba(255, 255, 255, 0.03)',
-                                fontFamily: 'monospace',
-                                color: 'rgba(255, 255, 255, 0.35)',
-                              }}>
-                                <Clock className="w-3 h-3" />
-                                {Math.floor(utterance.start / 1000 / 60)}:{(Math.floor(utterance.start / 1000) % 60).toString().padStart(2, '0')}
-                              </div>
-                            ) : null;
-                          })()}
-                        </div>
-
-                        <h3 className="text-sm font-medium text-white mb-1 leading-snug">
-                          {chapter.title}
-                        </h3>
-
-                        {chapter.points && chapter.points.length > 0 && (
-                          <ul className="space-y-0.5">
-                            {chapter.points.slice(0, 2).map((point, pointIdx) => (
-                              <li
-                                key={pointIdx}
-                                className="text-xs flex items-start gap-1.5 text-white/50 leading-relaxed"
+                            <div className="flex items-center gap-2 mb-1.5">
+                              <div
+                                className="w-6 h-6 rounded-md flex items-center justify-center text-xs font-medium flex-shrink-0"
+                                style={{
+                                  backgroundColor: 'rgba(212, 197, 185, 0.15)',
+                                  color: 'rgba(212, 197, 185, 0.8)',
+                                }}
                               >
-                                <span className="flex-shrink-0 text-[10px]" style={{ color: 'rgba(212, 197, 185, 0.5)' }}>
-                                  •
-                                </span>
-                                <span className="flex-1 line-clamp-1">{point}</span>
-                              </li>
-                            ))}
-                            {chapter.points.length > 2 && (
-                              <li className="text-xs text-white/30 pl-3.5">
-                                +{chapter.points.length - 2} 更多
-                              </li>
+                                {idx + 1}
+                              </div>
+                              {(() => {
+                                const utterance = savedData.utterances[chapter.segment_index];
+                                return utterance ? (
+                                  <div className="flex items-center gap-1 px-2 py-0.5 rounded text-xs" style={{
+                                    backgroundColor: 'rgba(255, 255, 255, 0.03)',
+                                    fontFamily: 'monospace',
+                                    color: 'rgba(255, 255, 255, 0.35)',
+                                  }}>
+                                    <Clock className="w-3 h-3" />
+                                    {Math.floor(utterance.start / 1000 / 60)}:{(Math.floor(utterance.start / 1000) % 60).toString().padStart(2, '0')}
+                                  </div>
+                                ) : null;
+                              })()}
+                            </div>
+
+                            {/* 章节标题 */}
+                            <h3 className="text-sm font-medium text-white mb-1 leading-snug">
+                              {chapter.title}
+                            </h3>
+
+                            {/* 翻译的标题 */}
+                            {translation && (
+                              <h4 className="text-xs text-white/60 mb-1 leading-snug" style={{ fontStyle: 'italic' }}>
+                                {translation.title}
+                              </h4>
                             )}
-                          </ul>
-                        )}
-                      </div>
-                    ))}
-                  </div>
+
+                            {/* 要点列表 */}
+                            {chapter.points && chapter.points.length > 0 && (
+                              <ul className="space-y-0.5">
+                                {chapter.points.slice(0, 2).map((point, pointIdx) => (
+                                  <li
+                                    key={pointIdx}
+                                    className="text-xs flex items-start gap-1.5 text-white/50 leading-relaxed"
+                                  >
+                                    <span className="flex-shrink-0 text-[10px]" style={{ color: 'rgba(212, 197, 185, 0.5)' }}>
+                                      •
+                                    </span>
+                                    <span className="flex-1 line-clamp-1">{point}</span>
+                                    {/* 翻译的要点 */}
+                                    {translation && translation.points[pointIdx] && (
+                                      <span className="text-white/35 text-xs ml-1">
+                                        ({translation.points[pointIdx]})
+                                      </span>
+                                    )}
+                                  </li>
+                                ))}
+                                {chapter.points.length > 2 && (
+                                  <li className="text-xs text-white/30 pl-3.5">
+                                    +{chapter.points.length - 2} 更多
+                                  </li>
+                                )}
+                              </ul>
+                            )}
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </>
                 )}
               </div>
             </div>
