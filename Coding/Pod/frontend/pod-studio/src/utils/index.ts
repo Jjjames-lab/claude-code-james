@@ -11,7 +11,12 @@ export function cn(...inputs: ClassValue[]) {
 /**
  * 格式化时间（毫秒 -> MM:SS 或 HH:MM:SS）
  */
-export function formatTime(ms: number): string {
+export function formatTime(ms: number | undefined | null): string {
+  // 处理边界情况
+  if (ms === undefined || ms === null || isNaN(ms) || ms < 0) {
+    return '0:00';
+  }
+
   const totalSeconds = Math.floor(ms / 1000);
   const hours = Math.floor(totalSeconds / 3600);
   const minutes = Math.floor((totalSeconds % 3600) / 60);
