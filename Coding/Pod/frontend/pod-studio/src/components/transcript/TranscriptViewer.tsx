@@ -71,6 +71,16 @@ export const TranscriptViewer = ({ segments, highlightedSegmentId, podcastId }: 
 
   // 合并段落：每 3-5 个 segment 合并为一个段落（约 100-200 字）
   const mergedParagraphs = useMemo(() => {
+    console.log('[TranscriptViewer] Raw segments:', {
+      count: segments.length,
+      firstSegment: segments[0] ? {
+        id: segments[0].id,
+        startTime: segments[0].startTime,
+        endTime: segments[0].endTime,
+        text: segments[0].text?.substring(0, 50),
+      } : 'NO SEGMENTS',
+    });
+
     const paragraphs: MergedParagraph[] = [];
     let currentParagraph: TranscriptSegment[] = [];
     let currentLength = 0;
@@ -105,6 +115,15 @@ export const TranscriptViewer = ({ segments, highlightedSegmentId, podcastId }: 
         id: currentParagraph[0].id,
       });
     }
+
+    console.log('[TranscriptViewer] Merged paragraphs:', {
+      count: paragraphs.length,
+      first: {
+        startTime: paragraphs[0]?.startTime,
+        endTime: paragraphs[0]?.endTime,
+        text: paragraphs[0]?.text?.substring(0, 50),
+      },
+    });
 
     return paragraphs;
   }, [segments]);

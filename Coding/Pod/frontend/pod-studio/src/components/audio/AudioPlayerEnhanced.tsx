@@ -63,9 +63,9 @@ export const AudioPlayerEnhanced = ({ mode = 'compact' }: AudioPlayerEnhancedPro
       const now = Date.now();
       const currentTimeMs = audio.currentTime * 1000;
 
-      // 节流：平衡流畅性和性能
-      // 150ms 更新一次，既保证跟随流畅，又不会过度重渲染
-      if (now - lastUpdateTime.current > 150) {
+      // 节流：首次更新或超过 150ms 才更新
+      // 修复：lastUpdateTime.current === 0 确保首次更新不会被阻止
+      if (lastUpdateTime.current === 0 || now - lastUpdateTime.current > 150) {
         setCurrentTime(currentTimeMs);
         lastUpdateTime.current = now;
       }
