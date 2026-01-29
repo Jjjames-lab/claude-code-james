@@ -208,19 +208,18 @@ export const TranscriptViewer = ({ segments, highlightedSegmentId, podcastId }: 
   }, [clearSelection]);
 
   return (
-    <div className="w-full" onMouseUp={handleMouseUp}>
-      {/* 文字稿容器 - 左对齐，自然阅读 */}
-      <div>
-        <div
-          ref={containerRef}
-          className="overflow-y-auto pr-2"
-          style={{
-            fontSize: '16px',
-            lineHeight: 1.8,
-            maxHeight: 'calc(100vh - 200px)',
-          }}
-        >
-          {segmentSentences.map(({ segment, sentences }, segIndex) => {
+    <div className="w-full h-full" onMouseUp={handleMouseUp}>
+      {/* 文字稿容器 - 直接使用父容器高度 */}
+      <div
+        ref={containerRef}
+        className="overflow-y-auto pr-2"
+        style={{
+          fontSize: '16px',
+          lineHeight: 1.8,
+          height: '100%',
+        }}
+      >
+        {segmentSentences.map(({ segment, sentences }, segIndex) => {
             const isActive = segIndex === activeIndex;
             const isHighlighted = highlightedSegmentId === segment.id;
 
@@ -306,7 +305,6 @@ export const TranscriptViewer = ({ segments, highlightedSegmentId, podcastId }: 
               </div>
             );
           })}
-        </div>
 
         {/* 底部留白 */}
         <div style={{ height: '128px' }} />
