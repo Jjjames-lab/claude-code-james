@@ -6,14 +6,13 @@ import { parseEpisode, startTranscription, generateChapters } from '../services/
 import { AudioPlayerEnhanced } from '../components/audio/AudioPlayerEnhanced';
 import { usePlayerStore } from '../stores/playerStore';
 import { useTranslationStore } from '../stores/translationStore';
-import { useChapterTranslationStore } from '../stores/chapterTranslationStore';
 import { UrlInputEnhanced } from '../components/url/UrlInputEnhanced';
 import { TranscriptViewer } from '../components/transcript/TranscriptViewer';
 import { ChaptersSectionEnhanced } from '../components/chapters/ChaptersSectionEnhanced';
 import { TranslationButton } from '../components/translation/TranslationButton';
 import { ViewModeToggle } from '../components/translation/ViewModeToggle';
 import type { ChapterData } from '../services/api';
-import { Clock, Mic, Languages } from 'lucide-react';
+import { Clock, Mic } from 'lucide-react';
 
 // type TabKey = 'transcript' | 'chapters' | 'notes';
 
@@ -55,8 +54,7 @@ export const EpisodeTabPage = () => {
   const [chatMessages, setChatMessages] = useState<any[]>([]);
 
   const { setCurrentPodcast } = usePlayerStore();
-  const { translateSegments, setViewMode, targetLang } = useTranslationStore();
-  const { translateAllChapters, translations: chapterTranslations, isTranslating: isTranslatingChapters } = useChapterTranslationStore();
+  const { translateSegments, setViewMode, targetLang, isTranslatingChapters, chapterTranslations } = useTranslationStore();
 
   // 加载单集数据
   useEffect(() => {
@@ -301,7 +299,7 @@ export const EpisodeTabPage = () => {
     }
   };
 
-  // 处理翻译请求
+  // 处理翻译请求（同时翻译逐字稿和章节）
   const handleTranslate = async (targetLang: string) => {
     if (!savedData?.utterances) {
       alert('请先完成转录处理');
@@ -318,44 +316,22 @@ export const EpisodeTabPage = () => {
         text: utt.text,
       }));
 
-      // 调用翻译
-      await translateSegments(segments);
+      // 准备章节数据
+      const chaptersData = chapters?.chapters || [];
 
-      console.log('[EpisodeTabPage] 翻译完成');
+      console.log('[EpisodeTabPage] 开始翻译:', {
+        segmentsCount: segments.length,
+        chaptersCount: chaptersData.length,
+        total: segments.length + chaptersData.length
+      });
+
+      // 调用翻译（同时翻译逐字稿和章节）
+      await translateSegments(segments, chaptersData);
+
+      alert(`翻译完成！\n- 逐字稿：${segments.length} 个段落\n- 章节：${chaptersData.length} 个章节`);
     } catch (error) {
       console.error('[EpisodeTabPage] 翻译失败:', error);
       const errorMessage = error instanceof Error ? error.message : '翻译失败，请重试';
-      alert(errorMessage);
-    }
-  };
-
-  // 处理章节翻译请求
-  const handleTranslateChapters = async () => {
-    if (!chapters?.chapters || chapters.chapters.length === 0) {
-      alert('没有可翻译的章节');
-      return;
-    }
-
-    if (!targetLang) {
-      alert('请先在逐字稿翻译中选择目标语言');
-      return;
-    }
-
-    try {
-      console.log('[EpisodeTabPage] 开始翻译章节，数量:', chapters.chapters.length);
-
-      await translateAllChapters(
-        chapters.chapters.map(ch => ({
-          title: ch.title,
-          points: ch.points
-        })),
-        targetLang
-      );
-
-      alert(`成功翻译 ${chapters.chapters.length} 个章节`);
-    } catch (error) {
-      console.error('[EpisodeTabPage] 章节翻译失败:', error);
-      const errorMessage = error instanceof Error ? error.message : '章节翻译失败，请重试';
       alert(errorMessage);
     }
   };
@@ -487,27 +463,6 @@ export const EpisodeTabPage = () => {
 
                 {isProcessed && savedData && chapters && (
                   <>
-                    {/* 章节翻译按钮 */}
-                    <div className="mb-3">
-                      <button
-                        onClick={handleTranslateChapters}
-                        disabled={isTranslatingChapters || !targetLang}
-                        className="w-full px-3 py-2 rounded-lg text-sm flex items-center justify-center gap-2 transition-all duration-200 hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed"
-                        style={{
-                          backgroundColor: isTranslatingChapters
-                            ? 'rgba(212, 197, 185, 0.1)'
-                            : 'rgba(212, 197, 185, 0.15)',
-                          border: '1px solid rgba(212, 197, 185, 0.25)',
-                          color: 'rgba(212, 197, 185, 1)',
-                        }}
-                      >
-                        <Languages className="w-4 h-4" />
-                        <span>
-                          {isTranslatingChapters ? '翻译中...' : targetLang ? `翻译所有章节 (${chapters.chapters.length})` : '请先选择翻译语言'}
-                        </span>
-                      </button>
-                    </div>
-
                     {/* 章节列表 */}
                     <div className="space-y-2">
                       {chapters.chapters.map((chapter, idx) => {

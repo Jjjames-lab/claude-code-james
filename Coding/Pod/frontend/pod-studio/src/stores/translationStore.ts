@@ -15,9 +15,11 @@ interface TranslationState {
   // 翻译状态
   isTranslating: boolean;
   translatingProgress: { current: number; total: number } | null;
+  isTranslatingChapters: boolean;
 
   // 翻译数据
   translations: Map<string, string>; // segmentId → 翻译文本
+  chapterTranslations: Map<number, { title: string; points: string[] }>; // chapterIndex → {title, points}
 
   // 当前选择的语言
   sourceLang: 'zh' | 'en' | 'other';
@@ -29,8 +31,10 @@ interface TranslationState {
   setIsTranslating: (isTranslating: boolean) => void;
   setTranslatingProgress: (progress: { current: number; total: number } | null) => void;
   setTranslations: (translations: Map<string, string>) => void;
+  setChapterTranslations: (translations: Map<number, { title: string; points: string[] }>) => void;
   clearTranslations: () => void;
   translateSegments: (segments: TranslateSegment[]) => Promise<void>;
+  translateChapters: (chapters: Array<{ title: string; points: string[] }>) => Promise<void>;
 }
 
 export const useTranslationStore = create<TranslationState>()(
@@ -44,7 +48,9 @@ export const useTranslationStore = create<TranslationState>()(
       // 翻译状态
       isTranslating: false,
       translatingProgress: null,
+      isTranslatingChapters: false,
       translations: new Map<string, string>(),
+      chapterTranslations: new Map<number, { title: string; points: string[] }>(),
 
       // Actions
       setViewMode: (mode) => set({ viewMode: mode }),
@@ -57,9 +63,11 @@ export const useTranslationStore = create<TranslationState>()(
 
       setTranslations: (translations) => set({ translations }),
 
-      clearTranslations: () => set({ translations: new Map() }),
+      setChapterTranslations: (chapterTranslations) => set({ chapterTranslations }),
 
-      translateSegments: async (segments) => {
+      clearTranslations: () => set({ translations: new Map(), chapterTranslations: new Map() }),
+
+      translateSegments: async (segments, chapters?: Array<{ title: string; points: string[] }>) => {
         const { targetLang } = get();
 
         if (!targetLang) {
@@ -67,7 +75,8 @@ export const useTranslationStore = create<TranslationState>()(
           return;
         }
 
-        set({ isTranslating: true, translatingProgress: { current: 0, total: segments.length } });
+        const totalItems = segments.length + (chapters?.length || 0);
+        set({ isTranslating: true, translatingProgress: { current: 0, total: totalItems } });
 
         try {
           // 分批翻译：每批10个段落（保守配置，确保稳定性）
@@ -129,11 +138,13 @@ export const useTranslationStore = create<TranslationState>()(
         sourceLang: state.sourceLang,
         targetLang: state.targetLang,
         translations: Object.fromEntries(state.translations),
+        chapterTranslations: Object.fromEntries(state.chapterTranslations),
       }),
       merge: (persistedState: any, currentState) => ({
         ...currentState,
         ...persistedState,
         translations: new Map(Object.entries(persistedState.translations || {})),
+        chapterTranslations: new Map(Object.entries(persistedState.chapterTranslations || {}).map(([k, v]: [Number(k), v])),
       }),
     }
   )
