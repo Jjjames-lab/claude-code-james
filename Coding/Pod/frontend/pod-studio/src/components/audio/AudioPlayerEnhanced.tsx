@@ -258,7 +258,7 @@ export const AudioPlayerEnhanced = ({ mode = 'compact' }: AudioPlayerEnhancedPro
                     border: '1px solid rgba(212, 197, 185, 0.15)',
                   }}
                 >
-                  📊 {formatTime(duration)}
+                  {formatTime(duration)}
                 </div>
 
                 <button
