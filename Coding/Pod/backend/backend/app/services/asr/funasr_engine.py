@@ -38,7 +38,8 @@ class FunASREngine(ASREngine):
         model: str = "fun-asr",
         poll_interval: float = 3.0,
         max_poll_time: float = 600.0,
-        hotwords: Optional[List[str]] = None
+        hotwords: Optional[List[str]] = None,
+        enable_speaker_diarization: bool = True
     ):
         """
         初始化 FunASR 引擎
@@ -51,12 +52,14 @@ class FunASREngine(ASREngine):
             poll_interval: 轮询间隔（秒）
             max_poll_time: 最大轮询时间（秒）
             hotwords: 热词列表，提升识别准确率
+            enable_speaker_diarization: 是否启用说话人分离（默认 True）
         """
         self.api_key = api_key
         self.model = model
         self.poll_interval = poll_interval
         self.max_poll_time = max_poll_time
         self.hotwords = hotwords or []
+        self.enable_speaker_diarization = enable_speaker_diarization
 
         # 设置 DashScope API Key
         dashscope.api_key = api_key
@@ -64,7 +67,7 @@ class FunASREngine(ASREngine):
         # 设置北京地域 endpoint
         dashscope.base_http_api_url = 'https://dashscope.aliyuncs.com/api/v1'
 
-        logger.info(f"[FunASR] 初始化完成, model={model}")
+        logger.info(f"[FunASR] 初始化完成, model={model}, speaker_diarization={enable_speaker_diarization}")
 
     def get_engine_type(self) -> EngineType:
         return EngineType.FUNASR
@@ -91,11 +94,17 @@ class FunASREngine(ASREngine):
         logger.info(f"[FunASR] 开始转录: {audio_url}")
 
         try:
+            # 构建参数
+            parameters = {}
+            if self.enable_speaker_diarization:
+                parameters['speaker_diarization'] = True
+
             # 提交转录任务
             task_response = Transcription.async_call(
                 model=self.model,
                 file_urls=[audio_url],
-                language_hints=['zh', 'en']  # 支持中英文
+                language_hints=['zh', 'en'],  # 支持中英文
+                parameter=parameters if parameters else None
             )
 
             if task_response.status_code != HTTPStatus.OK:
@@ -202,6 +211,7 @@ class FunASREngine(ASREngine):
             sentence_start = sentence.get('begin_time', 0)
             sentence_end = sentence.get('end_time', 0)
             sentence_text = sentence.get('text', '')
+            speaker_id = sentence.get('speaker', 'spk_0')  # 提取说话人ID
 
             # 提取词语级时间戳
             sentence_words = sentence.get('words', [])
@@ -223,7 +233,8 @@ class FunASREngine(ASREngine):
                     word_obj = TranscriptWord(
                         text=full_text,
                         start_time=word_start,
-                        end_time=word_end
+                        end_time=word_end,
+                        speaker=speaker_id  # 添加说话人信息
                     )
                     words.append(word_obj)
                     sentence_word_objects.append(word_obj)
@@ -233,7 +244,8 @@ class FunASREngine(ASREngine):
                 text=sentence_text.strip(),
                 start_time=sentence_start,
                 end_time=sentence_end,
-                words=sentence_word_objects
+                words=sentence_word_objects,
+                speaker=speaker_id  # 添加说话人信息
             ))
 
         # 生成 log_id

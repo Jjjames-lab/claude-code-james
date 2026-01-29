@@ -52,6 +52,7 @@ export const EpisodeTabPage = () => {
     duration: number;
     elapsedTime: number;
     wordCount: number;
+    speakerCount?: number;
   } | null>(null);
   const [transcribingProgress, setTranscribingProgress] = useState<{
     stage: string;
@@ -302,6 +303,7 @@ export const EpisodeTabPage = () => {
         duration: transcriptResult.total_duration,
         elapsedTime: elapsedTime,
         wordCount: transcriptResult.word_count,
+        speakerCount: transcriptResult.speaker_count,
       };
       setTranscriptionStats(stats);
       setShowTranscriptionStats(true);

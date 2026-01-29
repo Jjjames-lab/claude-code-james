@@ -4,13 +4,14 @@
  * 显示转录完成后的性能统计
  */
 
-import { Clock, DollarSign, Zap, TrendingUp, X } from 'lucide-react';
+import { Clock, DollarSign, Zap, TrendingUp, Users, X } from 'lucide-react';
 
 interface TranscriptionStatsProps {
   engine: string;
   duration: number; // 音频时长（毫秒）
   elapsedTime: number; // 转录耗时（毫秒）
   wordCount: number;
+  speakerCount?: number; // 说话人数量
   onClose?: () => void;
 }
 
@@ -19,6 +20,7 @@ export const TranscriptionStats = ({
   duration,
   elapsedTime,
   wordCount,
+  speakerCount,
   onClose,
 }: TranscriptionStatsProps) => {
   // 计算统计数据
@@ -148,6 +150,24 @@ export const TranscriptionStats = ({
             </div>
           </div>
         </div>
+
+        {/* 说话人数量 */}
+        {speakerCount !== undefined && speakerCount > 0 && (
+          <div className="flex items-start gap-2">
+            <Users className="w-4 h-4 mt-0.5 flex-shrink-0" style={{ color: 'rgba(212, 197, 185, 0.7)' }} />
+            <div>
+              <div className="text-xs mb-0.5" style={{ color: 'rgba(255, 255, 255, 0.5)' }}>
+                说话人数
+              </div>
+              <div className="text-base font-semibold" style={{ color: 'rgba(212, 197, 185, 0.95)' }}>
+                {speakerCount} 位
+              </div>
+              <div className="text-xs" style={{ color: 'rgba(255, 255, 255, 0.4)' }}>
+                已识别说话人
+              </div>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* 优势提示（仅 FunASR） */}

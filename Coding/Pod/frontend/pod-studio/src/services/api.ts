@@ -109,6 +109,7 @@ export interface TranscriptResult {
   total_duration: number;
   asr_engine: string;
   word_count: number;
+  speaker_count?: number;  // 说话人数量
 }
 
 // 句子级分段类型
@@ -310,6 +311,7 @@ export async function startTranscription(
       total_duration: result.data.duration,
       asr_engine: result.data.engine,
       word_count: result.data.word_count,
+      speaker_count: result.data.speaker_count,
     };
 
     console.log('[API] 最终转换结果:', JSON.stringify(finalResult, null, 2));

@@ -19,6 +19,16 @@ logger = logging.getLogger(__name__)
 
 router = APIRouter()
 
+# 辅助函数：计算说话人数量
+def count_speakers(words: list) -> int:
+    """从词语列表中提取说话人数量"""
+    speakers = set()
+    for word in words:
+        speaker = word.get('speaker', 'unknown')
+        if speaker != 'unknown':
+            speakers.add(speaker)
+    return len(speakers)
+
 # 创建多引擎服务实例（单例）
 asr_service = ASREngineFactory.create_from_config({
     "doubao_app_id": asr_config.doubao_app_id,
@@ -39,13 +49,14 @@ doubao_standard_engine = EngineFactory.create_doubao_standard(
     hotwords=asr_config.hotwords
 )
 
-# 创建 FunASR 引擎（便宜且快速）
+# 创建 FunASR 引擎（便宜且快速，支持说话人识别）
 funasr_engine = EngineFactory.create_funasr(
     api_key=asr_config.funasr_api_key,
     model=asr_config.funasr_model,
     poll_interval=3.0,
     max_poll_time=600.0,
-    hotwords=asr_config.hotwords
+    hotwords=asr_config.hotwords,
+    enable_speaker_diarization=True  # 启用说话人分离
 )
 
 
@@ -140,19 +151,23 @@ async def transcribe_from_url(
 
         # 如果指定使用 FunASR
         if use_funasr:
-            logger.info(f"使用阿里云 FunASR 转录")
+            logger.info(f"使用阿里云 FunASR 转录（支持说话人识别）")
             try:
                 result = await funasr_engine.transcribe_from_url(url)
-                logger.info(f"FunASR 转录成功，使用引擎: {result.engine.value}")
+                words_dict = [w.to_dict() for w in result.words]
+                speaker_count = count_speakers(words_dict)
+
+                logger.info(f"FunASR 转录成功，使用引擎: {result.engine.value}, 说话人: {speaker_count}位")
                 return {
                     "success": True,
                     "data": {
                         "text": result.text,
                         "duration": result.duration,
                         "engine": result.engine.value,
-                        "words": [w.to_dict() for w in result.words],
+                        "words": words_dict,
                         "utterances": [u.to_dict() for u in result.utterances],
                         "word_count": len(result.words),
+                        "speaker_count": speaker_count,
                         "log_id": result.log_id,
                         "timestamp": result.timestamp.isoformat()
                     }
@@ -163,19 +178,23 @@ async def transcribe_from_url(
 
         # 如果指定使用标准版，先尝试标准版，失败时 fallback 到极速版或 Qwen
         if use_standard:
-            logger.info(f"使用豆包标准版转录（带 fallback）")
+            logger.info(f"使用豆包标准版转录（带 fallback，支持说话人识别）")
             try:
                 result = await doubao_standard_engine.transcribe_from_url(url)
-                logger.info(f"豆包标准版转录成功")
+                words_dict = [w.to_dict() for w in result.words]
+                speaker_count = count_speakers(words_dict)
+
+                logger.info(f"豆包标准版转录成功，说话人: {speaker_count}位")
                 return {
                     "success": True,
                     "data": {
                         "text": result.text,
                         "duration": result.duration,
                         "engine": result.engine.value,
-                        "words": [w.to_dict() for w in result.words],
+                        "words": words_dict,
                         "utterances": [u.to_dict() for u in result.utterances],
                         "word_count": len(result.words),
+                        "speaker_count": speaker_count,
                         "log_id": result.log_id,
                         "timestamp": result.timestamp.isoformat()
                     }
@@ -251,15 +270,19 @@ async def transcribe_from_url(
         else:
             raise HTTPException(status_code=400, detail=f"未知策略: {strategy}")
 
+        words_dict = [w.to_dict() for w in result.words]
+        speaker_count = count_speakers(words_dict)
+
         return {
             "success": True,
             "data": {
                 "text": result.text,
                 "duration": result.duration,
                 "engine": result.engine.value,
-                "words": [w.to_dict() for w in result.words],
+                "words": words_dict,
                 "utterances": [u.to_dict() for u in result.utterances],  # 添加句子级分段
-                "word_count": len(result.words)
+                "word_count": len(result.words),
+                "speaker_count": speaker_count
             }
         }
 

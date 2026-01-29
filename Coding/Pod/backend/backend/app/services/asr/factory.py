@@ -74,7 +74,8 @@ class ASREngineFactory:
         model: str = "fun-asr",
         poll_interval: float = 3.0,
         max_poll_time: float = 600.0,
-        hotwords = None
+        hotwords = None,
+        enable_speaker_diarization: bool = True
     ) -> FunASREngine:
         """创建阿里云 FunASR 引擎"""
         return FunASREngine(
@@ -82,7 +83,8 @@ class ASREngineFactory:
             model=model,
             poll_interval=poll_interval,
             max_poll_time=max_poll_time,
-            hotwords=hotwords or []
+            hotwords=hotwords or [],
+            enable_speaker_diarization=enable_speaker_diarization
         )
 
     @staticmethod

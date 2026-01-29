@@ -72,7 +72,7 @@ class DoubaoASREngine(ASREngine):
             "show_utterances": True,         # 启用句子级输出（带时间戳）
             "enable_ddc": True,              # 语义顺滑：删除语气词、重复内容，提升可读性
             "enable_itn": True,              # 文本规范化（默认已是true，显式声明）
-            # "enable_speaker_info": True,   # 说话人分离（需要时再开启）
+            "enable_speaker_info": True,     # 说话人分离（已开启）
         }
 
         if self.hotwords:
