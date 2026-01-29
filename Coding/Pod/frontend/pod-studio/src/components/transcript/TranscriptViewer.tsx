@@ -111,13 +111,33 @@ export const TranscriptViewer = ({ segments, highlightedSegmentId, podcastId }: 
 
   // 计算当前应该高亮的段落索引
   const activeParagraphIndex = useMemo(() => {
+    // 调试：打印基础信息
+    console.log('[TranscriptViewer Debug]', {
+      currentTime,
+      currentTimeFormatted: formatTime(currentTime),
+      paragraphsCount: mergedParagraphs.length,
+      firstParagraphStart: mergedParagraphs[0]?.startTime,
+      firstParagraphStartFormatted: mergedParagraphs[0] ? formatTime(mergedParagraphs[0].startTime) : 'N/A',
+      lastParagraphEnd: mergedParagraphs[mergedParagraphs.length - 1]?.endTime,
+      lastParagraphEndFormatted: mergedParagraphs[mergedParagraphs.length - 1] ? formatTime(mergedParagraphs[mergedParagraphs.length - 1].endTime) : 'N/A',
+    });
+
     const index = mergedParagraphs.findIndex(
-      (para) => currentTime >= para.startTime && currentTime <= para.endTime
+      (para) => {
+        const match = currentTime >= para.startTime && currentTime <= para.endTime;
+        if (match) {
+          console.log('[TranscriptViewer] MATCH FOUND:', {
+            currentTime: formatTime(currentTime),
+            paraStart: formatTime(para.startTime),
+            paraEnd: formatTime(para.endTime),
+            text: para.text?.substring(0, 30),
+          });
+        }
+        return match;
+      }
     );
-    // 调试日志
-    if (index >= 0) {
-      console.log('[TranscriptViewer] Current:', formatTime(currentTime), 'Active paragraph:', index, mergedParagraphs[index]?.text?.substring(0, 20));
-    }
+
+    console.log('[TranscriptViewer] Final activeParagraphIndex:', index);
     return index;
   }, [mergedParagraphs, currentTime]);
 
