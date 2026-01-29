@@ -74,8 +74,8 @@ export const useTranslationStore = create<TranslationState>()(
           const newTranslations = new Map<string, string>();
           console.log('[TranslationStore] 清除旧翻译缓存');
 
-          // 分批翻译：每批10个段落，避免超过LLM输入限制
-          const BATCH_SIZE = 10;
+          // 分批翻译：每批30个段落，平衡速度和稳定性
+          const BATCH_SIZE = 30;
           const batches = [];
           for (let i = 0; i < segments.length; i += BATCH_SIZE) {
             batches.push(segments.slice(i, i + BATCH_SIZE));
@@ -83,36 +83,42 @@ export const useTranslationStore = create<TranslationState>()(
 
           console.log(`[TranslationStore] 分 ${batches.length} 批翻译，每批最多 ${BATCH_SIZE} 个段落`);
 
-          // 逐批翻译
-          for (let batchIndex = 0; batchIndex < batches.length; batchIndex++) {
-            const batch = batches[batchIndex];
-            console.log(`[TranslationStore] 正在翻译第 ${batchIndex + 1}/${batches.length} 批`);
+          // 并发翻译：同时发送3批请求
+          const CONCURRENT_BATCHES = 3;
 
-            const result = await translationService.translate(
-              batch,
-              targetLang,
-              (current, total) => {
-                // 更新总体进度
-                const completedCount = batchIndex * BATCH_SIZE + current;
-                set({ translatingProgress: { current: completedCount, total: segments.length } });
-              }
+          for (let batchStart = 0; batchStart < batches.length; batchStart += CONCURRENT_BATCHES) {
+            const concurrentBatches = batches.slice(batchStart, batchStart + CONCURRENT_BATCHES);
+
+            // 并发执行多个批次
+            const results = await Promise.all(
+              concurrentBatches.map(async (batch, idx) => {
+                const batchIndex = batchStart + idx;
+                console.log(`[TranslationStore] 正在翻译第 ${batchIndex + 1}/${batches.length} 批`);
+
+                const result = await translationService.translate(
+                  batch,
+                  targetLang,
+                  (current, total) => {
+                    // 更新总体进度
+                    const completedCount = batchIndex * BATCH_SIZE + current;
+                    set({ translatingProgress: { current: completedCount, total: segments.length } });
+                  }
+                );
+
+                return { result, batchIndex };
+              })
             );
 
-            // 合并到现有翻译中
-            for (const [id, text] of result) {
-              newTranslations.set(id, text);
+            // 合并所有并发批次的翻译结果
+            for (const { result, batchIndex } of results) {
+              for (const [id, text] of result) {
+                newTranslations.set(id, text);
+              }
+              console.log(`[TranslationStore] 第 ${batchIndex + 1} 批完成，新增 ${result.size} 条`);
             }
-
-            console.log(`[TranslationStore] 第 ${batchIndex + 1} 批翻译完成，新增 ${result.size} 条`);
-            console.log(`[TranslationStore] 翻译示例 ID:`, Array.from(result.keys())[0]);
 
             // 更新翻译结果（实时显示）
             set({ translations: newTranslations });
-
-            // 批次之间暂停1秒，避免API限流
-            if (batchIndex < batches.length - 1) {
-              await new Promise(resolve => setTimeout(resolve, 1000));
-            }
           }
 
           console.log('[TranslationStore] 所有批次翻译完成');
