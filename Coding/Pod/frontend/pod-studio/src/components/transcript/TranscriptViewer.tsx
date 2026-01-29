@@ -44,28 +44,6 @@ export const TranscriptViewer = ({ segments, highlightedSegmentId, podcastId }: 
   const lastActiveIndexRef = useRef<number>(-1);
   const lastScrollTimeRef = useRef<number>(0);
 
-  // 🔍 调试：打印原始 segments 数据
-  useEffect(() => {
-    console.log('[TranscriptViewer] === RAW SEGMENTS DATA ===');
-    console.log('Segments count:', segments.length);
-    if (segments.length > 0) {
-      console.log('First segment:', {
-        id: segments[0].id,
-        start: segments[0].start,  // 使用正确的字段名
-        end: segments[0].end,      // 使用正确的字段名
-        speaker: segments[0].speaker,
-        textPreview: segments[0].text?.substring(0, 50),
-        wordsCount: segments[0].words?.length,
-      });
-      console.log('Second segment:', {
-        start: segments[1]?.start,
-        end: segments[1]?.end,
-        textPreview: segments[1]?.text?.substring(0, 50),
-      });
-      console.log('Full first segment:', segments[0]);
-    }
-  }, [segments]);
-
   // 获取当前播客的笔记
   const podcastNotes = useMemo(() => {
     if (!podcastId) return [];
@@ -93,16 +71,6 @@ export const TranscriptViewer = ({ segments, highlightedSegmentId, podcastId }: 
 
   // 合并段落：每 3-5 个 segment 合并为一个段落（约 100-200 字）
   const mergedParagraphs = useMemo(() => {
-    console.log('[TranscriptViewer] Raw segments:', {
-      count: segments.length,
-      firstSegment: segments[0] ? {
-        id: segments[0].id,
-        start: segments[0].start,  // 使用正确的字段名
-        end: segments[0].end,      // 使用正确的字段名
-        text: segments[0].text?.substring(0, 50),
-      } : 'NO SEGMENTS',
-    });
-
     const paragraphs: MergedParagraph[] = [];
     let currentParagraph: TranscriptSegment[] = [];
     let currentLength = 0;
@@ -114,8 +82,8 @@ export const TranscriptViewer = ({ segments, highlightedSegmentId, podcastId }: 
       if (currentLength > 0 && (currentLength > 150 || segment.text.startsWith('\n'))) {
         paragraphs.push({
           segments: currentParagraph,
-          startTime: currentParagraph[0].start,  // 使用 start
-          endTime: currentParagraph[currentParagraph.length - 1].end,  // 使用 end
+          startTime: currentParagraph[0].start,
+          endTime: currentParagraph[currentParagraph.length - 1].end,
           text: currentParagraph.map(s => s.text).join(''),
           id: currentParagraph[0].id,
         });
@@ -131,55 +99,21 @@ export const TranscriptViewer = ({ segments, highlightedSegmentId, podcastId }: 
     if (currentParagraph.length > 0) {
       paragraphs.push({
         segments: currentParagraph,
-        startTime: currentParagraph[0].start,  // 使用 start
-        endTime: currentParagraph[currentParagraph.length - 1].end,  // 使用 end
+        startTime: currentParagraph[0].start,
+        endTime: currentParagraph[currentParagraph.length - 1].end,
         text: currentParagraph.map(s => s.text).join(''),
         id: currentParagraph[0].id,
       });
     }
-
-    console.log('[TranscriptViewer] Merged paragraphs:', {
-      count: paragraphs.length,
-      first: {
-        startTime: paragraphs[0]?.startTime,
-        endTime: paragraphs[0]?.endTime,
-        text: paragraphs[0]?.text?.substring(0, 50),
-      },
-    });
 
     return paragraphs;
   }, [segments]);
 
   // 计算当前应该高亮的段落索引
   const activeParagraphIndex = useMemo(() => {
-    // 调试：打印基础信息
-    console.log('[TranscriptViewer Debug]', {
-      currentTime,
-      currentTimeFormatted: formatTime(currentTime),
-      paragraphsCount: mergedParagraphs.length,
-      firstParagraphStart: mergedParagraphs[0]?.startTime,
-      firstParagraphStartFormatted: mergedParagraphs[0] ? formatTime(mergedParagraphs[0].startTime) : 'N/A',
-      lastParagraphEnd: mergedParagraphs[mergedParagraphs.length - 1]?.endTime,
-      lastParagraphEndFormatted: mergedParagraphs[mergedParagraphs.length - 1] ? formatTime(mergedParagraphs[mergedParagraphs.length - 1].endTime) : 'N/A',
-    });
-
-    const index = mergedParagraphs.findIndex(
-      (para) => {
-        const match = currentTime >= para.startTime && currentTime <= para.endTime;
-        if (match) {
-          console.log('[TranscriptViewer] MATCH FOUND:', {
-            currentTime: formatTime(currentTime),
-            paraStart: formatTime(para.startTime),
-            paraEnd: formatTime(para.endTime),
-            text: para.text?.substring(0, 30),
-          });
-        }
-        return match;
-      }
+    return mergedParagraphs.findIndex(
+      (para) => currentTime >= para.startTime && currentTime <= para.endTime
     );
-
-    console.log('[TranscriptViewer] Final activeParagraphIndex:', index);
-    return index;
   }, [mergedParagraphs, currentTime]);
 
   // 滚动到高亮段落（手动跳转时）
@@ -205,16 +139,11 @@ export const TranscriptViewer = ({ segments, highlightedSegmentId, podcastId }: 
     lastActiveIndexRef.current = activeParagraphIndex;
     lastScrollTimeRef.current = now;
 
-    console.log('[TranscriptViewer] Scrolling to paragraph:', activeParagraphIndex);
-
     const container = containerRef.current;
     if (!container) return;
 
     const activeElement = container.querySelector(`[data-paragraph-index="${activeParagraphIndex}"]`);
-    if (!activeElement) {
-      console.error('[TranscriptViewer] Element not found for index:', activeParagraphIndex);
-      return;
-    }
+    if (!activeElement) return;
 
     // 平滑滚动到视口中心
     activeElement.scrollIntoView({
