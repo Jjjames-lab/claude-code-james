@@ -6,7 +6,7 @@
  */
 
 import { useState, useEffect } from 'react';
-import { Clock, Book, Bookmark, TrendingUp, Award, Calendar } from 'lucide-react';
+import { Clock, Book, Bookmark, TrendingUp, Award, Calendar, BarChart3, Mic, Star, Headphones, FileText, BookmarkCheck } from 'lucide-react';
 import { statsService } from '../../utils/statsService';
 import type { LearningStats, Achievement } from '../../utils/statsService';
 
@@ -51,7 +51,7 @@ export const StatsPanel = () => {
   if (!stats) {
     return (
       <div className="flex flex-col items-center justify-center py-20">
-        <div className="text-6xl mb-6">📊</div>
+        <BarChart3 className="w-16 h-16 mb-6" style={{ color: 'rgba(212, 197, 185, 0.3)' }} />
         <h3
           className="text-xl font-medium mb-3"
           style={{ color: 'rgba(232, 232, 232, 0.7)' }}
@@ -73,22 +73,22 @@ export const StatsPanel = () => {
       {/* 核心指标 */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         <StatCard
-          icon="🎧"
+          icon={Headphones}
           label="总收听时长"
           value={statsService.formatDuration(stats.totalListeningTime)}
         />
         <StatCard
-          icon="🎙️"
+          icon={Mic}
           label="收听播客"
           value={`${stats.podcastsListened} 个`}
         />
         <StatCard
-          icon="📝"
+          icon={FileText}
           label="创建笔记"
           value={`${stats.totalNotes} 条`}
         />
         <StatCard
-          icon="🔖"
+          icon={BookmarkCheck}
           label="添加书签"
           value={`${stats.totalBookmarks} 个`}
         />
@@ -312,12 +312,12 @@ export const StatsPanel = () => {
 
 // 统计卡片组件
 interface StatCardProps {
-  icon: string;
+  icon: any; // lucide-react icon component
   label: string;
   value: string;
 }
 
-function StatCard({ icon, label, value }: StatCardProps) {
+function StatCard({ icon: Icon, label, value }: StatCardProps) {
   return (
     <div
       className="p-5 rounded-xl text-center"
@@ -336,7 +336,9 @@ function StatCard({ icon, label, value }: StatCardProps) {
         e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.06)';
       }}
     >
-      <div className="text-4xl mb-2">{icon}</div>
+      <div className="mb-2 flex justify-center">
+        <Icon className="w-10 h-10" style={{ color: 'rgba(212, 197, 185, 0.6)' }} />
+      </div>
       <div
         className="text-2xl font-bold mb-1"
         style={{ color: 'rgba(212, 197, 185, 0.8)' }}

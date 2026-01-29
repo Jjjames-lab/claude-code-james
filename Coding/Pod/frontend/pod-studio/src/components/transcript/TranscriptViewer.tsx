@@ -6,7 +6,7 @@
  */
 
 import { useMemo, useState, useCallback, useEffect, useRef } from 'react';
-import { MessageSquare } from 'lucide-react';
+import { MessageSquare, PenTool } from 'lucide-react';
 import { usePlayerStore } from '../../stores/playerStore';
 import { useNoteStore } from '../../stores/noteStore';
 import { formatTime } from '../../utils';
@@ -330,7 +330,7 @@ export const TranscriptViewer = ({ segments, highlightedSegmentId, podcastId }: 
             e.currentTarget.style.transform = 'translateX(-50%) scale(1)';
           }}
         >
-          <span className="text-sm">💭</span>
+          <PenTool className="w-4 h-4" />
           <span className="text-sm font-medium">添加笔记</span>
         </div>
       )}

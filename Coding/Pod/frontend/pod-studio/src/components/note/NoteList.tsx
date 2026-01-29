@@ -6,7 +6,7 @@
  */
 
 import { useEffect, useState } from 'react';
-import { Clock, Trash2, Edit3, ExternalLink } from 'lucide-react';
+import { Clock, Trash2, Edit3, ExternalLink, Lightbulb, Help, CheckCircle, MessageSquare, Inbox } from 'lucide-react';
 import { useNoteStore } from '../../stores/noteStore';
 import { usePlayerStore } from '../../stores/playerStore';
 import { formatTime } from '../../utils';
@@ -58,12 +58,12 @@ export const NoteList = ({ podcastId, onJumpToTranscript }: NoteListProps) => {
   // 格式化分类标签
   const getCategoryLabel = (category: Note['category']) => {
     const labels = {
-      thought: '💭 想法',
-      question: '❓ 疑问',
-      action: '✅ 行动',
-      quote: '💬 引用',
+      thought: { icon: Lightbulb, label: '想法' },
+      question: { icon: Help, label: '疑问' },
+      action: { icon: CheckCircle, label: '行动' },
+      quote: { icon: MessageSquare, label: '引用' },
     };
-    return labels[category] || category;
+    return labels[category] || { icon: Lightbulb, label: category };
   };
 
   // 格式化日期
@@ -111,16 +111,16 @@ export const NoteList = ({ podcastId, onJumpToTranscript }: NoteListProps) => {
       {currentPodcastNotes.length > 0 && (
         <div className="flex gap-2 mb-6">
           {[
-            { value: 'all', label: '全部' },
-            { value: 'thought', label: '💭 想法' },
-            { value: 'question', label: '❓ 疑问' },
-            { value: 'action', label: '✅ 行动' },
-            { value: 'quote', label: '💬 引用' },
+            { value: 'all', label: '全部', icon: null },
+            { value: 'thought', label: '想法', icon: Lightbulb },
+            { value: 'question', label: '疑问', icon: Help },
+            { value: 'action', label: '行动', icon: CheckCircle },
+            { value: 'quote', label: '引用', icon: MessageSquare },
           ].map((f) => (
             <button
               key={f.value}
               onClick={() => setFilter(f.value as any)}
-              className="px-4 py-2 rounded-lg text-sm font-medium transition-all duration-250"
+              className="px-4 py-2 rounded-lg text-sm font-medium transition-all duration-250 flex items-center gap-2"
               style={{
                 backgroundColor:
                   filter === f.value
@@ -136,7 +136,9 @@ export const NoteList = ({ podcastId, onJumpToTranscript }: NoteListProps) => {
                     : 'rgba(255, 255, 255, 0.5)',
               }}
             >
-              {f.label} ({f.value === 'all' ? currentPodcastNotes.length : currentPodcastNotes.filter(n => n.category === f.value).length})
+              {f.icon && <f.icon className="w-4 h-4" />}
+              <span>{f.label}</span>
+              <span className="text-xs opacity-60">({f.value === 'all' ? currentPodcastNotes.length : currentPodcastNotes.filter(n => n.category === f.value).length})</span>
             </button>
           ))}
         </div>
@@ -145,7 +147,7 @@ export const NoteList = ({ podcastId, onJumpToTranscript }: NoteListProps) => {
       {/* 笔记列表 */}
       {filteredNotes.length === 0 && filter !== 'all' ? (
         <div className="flex flex-col items-center justify-center py-20 text-center">
-          <div className="text-4xl mb-4">📭</div>
+          <Inbox className="w-16 h-16 mb-4" style={{ color: 'rgba(255, 255, 255, 0.2)' }} />
           <p style={{ color: 'rgba(255, 255, 255, 0.4)' }}>
             这个分类下还没有笔记
           </p>
@@ -220,7 +222,16 @@ export const NoteList = ({ podcastId, onJumpToTranscript }: NoteListProps) => {
                       color: 'rgba(212, 197, 185, 0.7)',
                     }}
                   >
-                    {getCategoryLabel(note.category)}
+                    {(() => {
+                      const categoryInfo = getCategoryLabel(note.category);
+                      const Icon = categoryInfo.icon;
+                      return (
+                        <>
+                          <Icon className="w-3 h-3" />
+                          <span>{categoryInfo.label}</span>
+                        </>
+                      );
+                    })()}
                   </span>
                 </div>
 

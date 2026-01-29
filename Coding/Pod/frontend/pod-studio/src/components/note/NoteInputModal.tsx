@@ -6,7 +6,7 @@
  */
 
 import { useState, useEffect, useRef } from 'react';
-import { X } from 'lucide-react';
+import { X, Lightbulb, Help, CheckCircle, MessageSquare } from 'lucide-react';
 import { useNoteStore } from '../../stores/noteStore';
 
 interface NoteInputModalProps {
@@ -223,15 +223,15 @@ export const NoteInputModal = ({ podcastId }: NoteInputModalProps) => {
           </div>
           <div className="flex gap-2">
             {[
-              { value: 'thought', label: '💭 想法' },
-              { value: 'question', label: '❓ 疑问' },
-              { value: 'action', label: '✅ 行动' },
-              { value: 'quote', label: '💬 引用' },
+              { value: 'thought', label: '想法', icon: Lightbulb },
+              { value: 'question', label: '疑问', icon: Help },
+              { value: 'action', label: '行动', icon: CheckCircle },
+              { value: 'quote', label: '引用', icon: MessageSquare },
             ].map((cat) => (
               <button
                 key={cat.value}
                 onClick={() => setCategory(cat.value as any)}
-                className="px-4 py-2 rounded-lg text-sm"
+                className="px-4 py-2 rounded-lg text-sm flex items-center gap-2"
                 style={{
                   backgroundColor:
                     category === cat.value
@@ -258,7 +258,8 @@ export const NoteInputModal = ({ podcastId }: NoteInputModalProps) => {
                   }
                 }}
               >
-                {cat.label}
+                <cat.icon className="w-4 h-4" />
+                <span>{cat.label}</span>
               </button>
             ))}
           </div>
