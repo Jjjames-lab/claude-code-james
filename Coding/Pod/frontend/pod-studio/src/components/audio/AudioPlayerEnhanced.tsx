@@ -112,6 +112,23 @@ export const AudioPlayerEnhanced = ({ mode = 'compact' }: AudioPlayerEnhancedPro
     }
   }, [playbackSpeed]);
 
+  // 同步音量变化到 audio 元素
+  useEffect(() => {
+    const audio = audioRef.current;
+    if (audio) {
+      audio.volume = isMuted ? 0 : volume;
+    }
+  }, [volume, isMuted]);
+
+  // 同步时间跳转到 audio 元素
+  useEffect(() => {
+    const audio = audioRef.current;
+    if (audio && Math.abs(audio.currentTime * 1000 - currentTime) > 100) {
+      // 只有当时间差超过100ms时才跳转，避免死循环
+      audio.currentTime = currentTime / 1000;
+    }
+  }, [currentTime]);
+
   // 处理进度条点击
   const handleProgressClick = (e: React.MouseEvent<HTMLDivElement>) => {
     const audio = audioRef.current;
