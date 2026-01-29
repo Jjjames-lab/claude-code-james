@@ -42,7 +42,6 @@ export const TranscriptViewer = ({ segments, highlightedSegmentId, podcastId }: 
   const [selection, setSelection] = useState<SelectionState | null>(null);
   const [hoveredSegmentId, setHoveredSegmentId] = useState<string | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
-  const previousIndexRef = useRef<number>(-1);
 
   // 获取当前播客的笔记
   const podcastNotes = useMemo(() => {
@@ -109,12 +108,15 @@ export const TranscriptViewer = ({ segments, highlightedSegmentId, podcastId }: 
     return paragraphs;
   }, [segments]);
 
-  // 计算当前应该高亮的段落索引
+  // 计算当前应该高亮的段落索引（使用 ref 缓存，减少重复计算）
   const activeParagraphIndex = useMemo(() => {
     return mergedParagraphs.findIndex(
       (para) => currentTime >= para.startTime && currentTime <= para.endTime
     );
   }, [mergedParagraphs, currentTime]);
+
+  // 缓存段落索引变化，避免频繁滚动
+  const lastActiveIndexRef = useRef<number>(-1);
 
   // 滚动到高亮段落（手动跳转时）
   useEffect(() => {
@@ -129,10 +131,11 @@ export const TranscriptViewer = ({ segments, highlightedSegmentId, podcastId }: 
   // 自动滚动到当前播放的段落（仅在播放时）
   useEffect(() => {
     if (!isPlaying) return;
-    if (activeParagraphIndex === previousIndexRef.current) return;
+    if (activeParagraphIndex === lastActiveIndexRef.current) return;
     if (activeParagraphIndex < 0) return;
 
-    previousIndexRef.current = activeParagraphIndex;
+    // 只在段落真正切换时才滚动
+    lastActiveIndexRef.current = activeParagraphIndex;
 
     const container = containerRef.current;
     if (!container) return;
@@ -140,9 +143,12 @@ export const TranscriptViewer = ({ segments, highlightedSegmentId, podcastId }: 
     const activeElement = container.querySelector(`[data-paragraph-index="${activeParagraphIndex}"]`);
     if (!activeElement) return;
 
-    activeElement.scrollIntoView({
-      behavior: 'smooth',
-      block: 'center',
+    // 使用 requestAnimationFrame 优化滚动性能
+    requestAnimationFrame(() => {
+      activeElement.scrollIntoView({
+        behavior: 'smooth',
+        block: 'center',
+      });
     });
   }, [activeParagraphIndex, isPlaying]);
 
@@ -233,7 +239,7 @@ export const TranscriptViewer = ({ segments, highlightedSegmentId, podcastId }: 
               id={`paragraph-${paragraph.id}`}
               data-paragraph-index={paraIndex}
               data-start-time={paragraph.startTime}
-              className="group relative transition-all duration-300"
+              className="group relative"
               style={{
                 padding: '12px 16px',
                 margin: '8px 0',
@@ -247,6 +253,7 @@ export const TranscriptViewer = ({ segments, highlightedSegmentId, podcastId }: 
                   paddingLeft: '13px',
                 }),
                 borderRadius: '2px',
+                // 移除 transition，避免闪烁
               }}
               onMouseEnter={() => setHoveredSegmentId(paragraph.id)}
               onMouseLeave={() => setHoveredSegmentId(null)}

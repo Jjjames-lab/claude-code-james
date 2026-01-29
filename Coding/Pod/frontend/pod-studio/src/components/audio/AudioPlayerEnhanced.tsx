@@ -33,6 +33,7 @@ interface AudioPlayerEnhancedProps {
 
 export const AudioPlayerEnhanced = ({ mode = 'compact' }: AudioPlayerEnhancedProps) => {
   const audioRef = useRef<HTMLAudioElement>(null);
+  const lastUpdateTime = useRef<number>(0); // 节流：记录上次更新时间
   const [playbackSpeed, setPlaybackSpeed] = useState(1);
   const [showSpeedControl, setShowSpeedControl] = useState(false);
 
@@ -59,7 +60,16 @@ export const AudioPlayerEnhanced = ({ mode = 'compact' }: AudioPlayerEnhancedPro
     if (!audio || !currentPodcast) return;
 
     const handleTimeUpdate = () => {
-      setCurrentTime(audio.currentTime * 1000);
+      const now = Date.now();
+      const currentTimeMs = audio.currentTime * 1000;
+
+      // 节流：只在变化超过 250ms 或距离上次更新超过 500ms 时才更新 store
+      // 避免频繁更新导致组件重渲染闪烁
+      if (now - lastUpdateTime.current > 500 ||
+          Math.abs(currentTimeMs - currentTime) > 250) {
+        setCurrentTime(currentTimeMs);
+        lastUpdateTime.current = now;
+      }
 
       // 保存播放位置到 LocalStorage（每5秒保存一次）
       if (Math.floor(audio.currentTime) % 5 === 0) {
