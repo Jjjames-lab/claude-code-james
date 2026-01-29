@@ -120,13 +120,25 @@ export const AudioPlayerEnhanced = ({ mode = 'compact' }: AudioPlayerEnhancedPro
     }
   }, [volume, isMuted]);
 
-  // 同步时间跳转到 audio 元素
+  // 同步时间跳转到 audio 元素（外部跳转，非播放进度）
+  const previousTimeRef = useRef<number>(0);
   useEffect(() => {
     const audio = audioRef.current;
-    if (audio && Math.abs(audio.currentTime * 1000 - currentTime) > 100) {
-      // 只有当时间差超过100ms时才跳转，避免死循环
-      audio.currentTime = currentTime / 1000;
+    if (!audio) return;
+
+    // 检测是否是外部跳转（通过差值判断）
+    const timeDiff = Math.abs(currentTime - previousTimeRef.current);
+    const isExternalSeek = timeDiff > 200; // 超过200ms认为是外部跳转
+
+    if (isExternalSeek) {
+      const targetTime = currentTime / 1000;
+      // 只有当差值较大时才跳转，避免干扰正常播放
+      if (Math.abs(audio.currentTime - targetTime) > 0.2) {
+        audio.currentTime = targetTime;
+      }
     }
+
+    previousTimeRef.current = currentTime;
   }, [currentTime]);
 
   // 处理进度条点击

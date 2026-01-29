@@ -80,7 +80,8 @@ export const usePlayerStore = create<PlayerStore>((set, get) => ({
 
   skip: (seconds) => {
     const { currentTime, duration } = get();
-    const newTime = Math.max(0, currentTime + seconds);
+    // seconds 是秒，currentTime 是毫秒，需要转换
+    const newTime = Math.max(0, currentTime + seconds * 1000);
     // 只有在 duration 已加载时才进行边界限制
     if (duration > 0) {
       set({ currentTime: Math.min(duration, newTime) });
