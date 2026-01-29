@@ -105,7 +105,16 @@ export class ExportService {
     if (data.showNotes) {
       lines.push('## 节目简介');
       lines.push('');
-      lines.push(data.showNotes);
+      // 清理 HTML 标签
+      const cleanText = data.showNotes
+        .replace(/<[^>]+>/g, '') // 移除所有 HTML 标签
+        .replace(/&nbsp;/g, ' ') // 替换空格实体
+        .replace(/&amp;/g, '&') // 替换 & 实体
+        .replace(/&lt;/g, '<') // 替换 < 实体
+        .replace(/&gt;/g, '>') // 替换 > 实体
+        .replace(/\n\s*\n/g, '\n\n') // 清理多余空行
+        .trim();
+      lines.push(cleanText);
       lines.push('');
       lines.push('---');
       lines.push('');
@@ -117,21 +126,21 @@ export class ExportService {
       lines.push('');
 
       data.chapters.chapters.forEach((chapter, idx) => {
-        const translation = data.chapterTranslations?.get(idx);
+        const translation = data.viewMode === 'bilingual' ? data.chapterTranslations?.get(idx) : null;
         const utterance = data.utterances[chapter.segment_index];
         const timestamp = utterance ? this.formatTimestamp(utterance.start) : '';
 
         lines.push(`### ${idx + 1}. ${chapter.title} ${timestamp}`);
 
-        // 翻译的标题
-        if (translation?.title) {
+        // 翻译的标题（只在双语模式）
+        if (data.viewMode === 'bilingual' && translation?.title) {
           lines.push(`*${translation.title}*`);
         }
 
         // 要点
         if (chapter.points && chapter.points.length > 0) {
           chapter.points.forEach((point, pointIdx) => {
-            const translatedPoint = translation?.points[pointIdx];
+            const translatedPoint = data.viewMode === 'bilingual' ? translation?.points[pointIdx] : null;
             if (translatedPoint) {
               lines.push(`- ${point} / ${translatedPoint}`);
             } else {
