@@ -13,6 +13,7 @@ import { ChaptersSectionEnhanced } from '../components/chapters/ChaptersSectionE
 import { TranslationButton } from '../components/translation/TranslationButton';
 import { ViewModeToggle } from '../components/translation/ViewModeToggle';
 import { ExportDropdown } from '../components/export/ExportDropdown';
+import { TranscriptionStats } from '../components/transcript/TranscriptionStats';
 import type { ChapterData } from '../services/api';
 import { Clock, Mic, ChevronRight, ChevronDown } from 'lucide-react';
 
@@ -44,6 +45,14 @@ export const EpisodeTabPage = () => {
   const [isProcessed, setIsProcessed] = useState(false);
   const [isTranscribing, setIsTranscribing] = useState(false);
   const [useFunasr, setUseFunasr] = useState(true); // 默认使用 FunASR（更便宜更快）
+  const [transcriptionStartTime, setTranscriptionStartTime] = useState<number>(0); // 转录开始时间
+  const [showTranscriptionStats, setShowTranscriptionStats] = useState(false); // 显示统计信息
+  const [transcriptionStats, setTranscriptionStats] = useState<{
+    engine: string;
+    duration: number;
+    elapsedTime: number;
+    wordCount: number;
+  } | null>(null);
   const [transcribingProgress, setTranscribingProgress] = useState<{
     stage: string;
     message: string;
@@ -227,6 +236,7 @@ export const EpisodeTabPage = () => {
 
     try {
       setIsTranscribing(true);
+      setTranscriptionStartTime(Date.now()); // 记录开始时间
       setTranscribingProgress({
         stage: 'downloading',
         message: '正在获取音频',
@@ -285,6 +295,17 @@ export const EpisodeTabPage = () => {
 
       console.log('[EpisodeTabPage] 保存完成');
 
+      // 计算转录统计
+      const elapsedTime = Date.now() - transcriptionStartTime;
+      const stats = {
+        engine: transcriptResult.asr_engine,
+        duration: transcriptResult.total_duration,
+        elapsedTime: elapsedTime,
+        wordCount: transcriptResult.word_count,
+      };
+      setTranscriptionStats(stats);
+      setShowTranscriptionStats(true);
+
       setTranscribingProgress({
         stage: 'completed',
         message: '处理完成',
@@ -298,12 +319,43 @@ export const EpisodeTabPage = () => {
       }, 500);
     } catch (error) {
       console.error('Transcription error:', error);
-      const errorMessage = error instanceof Error ? error.message : '转录失败，请重试';
+
+      // 解析错误信息
+      let errorMessage = '转录失败，请重试';
+      let suggestion = '请检查网络连接后重试';
+
+      if (error instanceof Error) {
+        const errorLower = error.message.toLowerCase();
+
+        if (errorLower.includes('timeout') || errorLower.includes('超时')) {
+          errorMessage = '转录超时';
+          suggestion = useFunasr
+            ? 'FunASR 处理时间较长，请稍后重试或切换到豆包标准版'
+            : '音频文件较长，请稍后重试或尝试使用 FunASR';
+        } else if (errorLower.includes('audio') || errorLower.includes('音频')) {
+          errorMessage = '音频处理失败';
+          suggestion = '音频文件可能损坏或格式不支持，请尝试其他音频';
+        } else if (errorLower.includes('network') || errorLower.includes('网络') || errorLower.includes('fetch')) {
+          errorMessage = '网络连接失败';
+          suggestion = '请检查网络连接，确保可以访问服务器';
+        } else if (errorLower.includes('401') || errorLower.includes('403') || errorLower.includes('unauthorized')) {
+          errorMessage = 'API 认证失败';
+          suggestion = 'API 密钥可能已过期，请联系管理员更新配置';
+        } else if (errorLower.includes('quota') || errorLower.includes('额度') || errorLower.includes('limit')) {
+          errorMessage = 'API 额度不足';
+          suggestion = '当前引擎额度已用完，请尝试切换到其他引擎';
+        } else {
+          errorMessage = error.message || '转录失败，请重试';
+        }
+      }
+
       addToast({
         type: 'error',
-        title: '转录失败',
-        message: errorMessage,
+        title: errorMessage,
+        message: suggestion,
+        duration: 8000, // 显示更长时间
       });
+
       setIsTranscribing(false);
       setTranscribingProgress(null);
     }
@@ -461,10 +513,10 @@ export const EpisodeTabPage = () => {
                       <p className="text-white/60 text-lg mb-4">该单集尚未处理</p>
 
                       {/* FunASR 开关 */}
-                      <div className="mb-4 flex items-center justify-center gap-3">
+                      <div className="mb-3 text-center">
                         <label
                           htmlFor="funasr-toggle"
-                          className="text-sm cursor-pointer flex items-center gap-2 px-4 py-2 rounded-lg transition-colors"
+                          className="text-sm cursor-pointer flex items-center gap-2 px-4 py-2 rounded-lg transition-colors inline-flex"
                           style={{
                             backgroundColor: useFunasr ? 'rgba(212, 197, 185, 0.15)' : 'rgba(255, 255, 255, 0.05)',
                             border: '1px solid rgba(255, 255, 255, 0.1)',
@@ -481,9 +533,14 @@ export const EpisodeTabPage = () => {
                             }}
                           />
                           <span className="text-white/80 text-sm">
-                            {useFunasr ? '⚡ FunASR (推荐：便宜+快速)' : '豆包标准版'}
+                            {useFunasr ? '⚡ FunASR (推荐)' : '豆包标准版'}
                           </span>
                         </label>
+                        <div className="text-xs mt-2" style={{ color: 'rgba(255, 255, 255, 0.4)' }}>
+                          {useFunasr
+                            ? '速度快 5 倍 · 费用省 78%'
+                            : '稳定可靠 · 备用方案'}
+                        </div>
                       </div>
 
                       <button
@@ -525,6 +582,17 @@ export const EpisodeTabPage = () => {
 
                 {isProcessed && savedData && chapters && (
                   <>
+                    {/* 转录统计卡片 */}
+                    {showTranscriptionStats && transcriptionStats && (
+                      <TranscriptionStats
+                        engine={transcriptionStats.engine}
+                        duration={transcriptionStats.duration}
+                        elapsedTime={transcriptionStats.elapsedTime}
+                        wordCount={transcriptionStats.wordCount}
+                        onClose={() => setShowTranscriptionStats(false)}
+                      />
+                    )}
+
                     {/* 章节列表 - 极简折叠版 */}
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                       {chapters.chapters.map((chapter, idx) => {
