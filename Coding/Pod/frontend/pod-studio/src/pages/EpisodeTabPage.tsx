@@ -5,9 +5,12 @@ import { checkProcessedStatus, loadEpisodeData, saveEpisodeData } from '../utils
 import { parseEpisode, startTranscription, generateChapters } from '../services/api';
 import { AudioPlayerEnhanced } from '../components/audio/AudioPlayerEnhanced';
 import { usePlayerStore } from '../stores/playerStore';
+import { useTranslationStore } from '../stores/translationStore';
 import { UrlInputEnhanced } from '../components/url/UrlInputEnhanced';
 import { TranscriptViewer } from '../components/transcript/TranscriptViewer';
 import { ChaptersSectionEnhanced } from '../components/chapters/ChaptersSectionEnhanced';
+import { TranslationButton } from '../components/translation/TranslationButton';
+import { ViewModeToggle } from '../components/translation/ViewModeToggle';
 import type { ChapterData } from '../services/api';
 import { Clock, Mic } from 'lucide-react';
 
@@ -51,6 +54,7 @@ export const EpisodeTabPage = () => {
   const [chatMessages, setChatMessages] = useState<any[]>([]);
 
   const { setCurrentPodcast } = usePlayerStore();
+  const { translateSegments, setViewMode } = useTranslationStore();
 
   // 加载单集数据
   useEffect(() => {
@@ -295,6 +299,34 @@ export const EpisodeTabPage = () => {
     }
   };
 
+  // 处理翻译请求
+  const handleTranslate = async (targetLang: string) => {
+    if (!savedData?.utterances) {
+      alert('请先完成转录处理');
+      return;
+    }
+
+    try {
+      // 切换到双语模式
+      setViewMode('bilingual');
+
+      // 构造待翻译的段落
+      const segments = savedData.utterances.map((utt: any) => ({
+        id: utt.id,
+        text: utt.text,
+      }));
+
+      // 调用翻译
+      await translateSegments(segments);
+
+      console.log('[EpisodeTabPage] 翻译完成');
+    } catch (error) {
+      console.error('[EpisodeTabPage] 翻译失败:', error);
+      const errorMessage = error instanceof Error ? error.message : '翻译失败，请重试';
+      alert(errorMessage);
+    }
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -497,9 +529,8 @@ export const EpisodeTabPage = () => {
             <div className="w-[60%] flex flex-col">
               {/* 功能栏 */}
               <div className="px-4 py-3 border-b border-white/10 flex gap-3 flex-wrap">
-                <button className="text-sm text-white/60 hover:text-white transition-colors px-3 py-1.5 rounded-lg hover:bg-white/5">
-                  翻译
-                </button>
+                <TranslationButton onTranslate={handleTranslate} />
+                <ViewModeToggle />
                 <button className="text-sm text-white/60 hover:text-white transition-colors px-3 py-1.5 rounded-lg hover:bg-white/5 flex items-center gap-2">
                   Chat
                   {chatMessages.length > 0 && (

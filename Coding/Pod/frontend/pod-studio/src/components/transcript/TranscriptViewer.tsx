@@ -9,6 +9,7 @@ import { useMemo, useState, useCallback, useEffect, useRef } from 'react';
 import { MessageSquare, PenTool } from 'lucide-react';
 import { usePlayerStore } from '../../stores/playerStore';
 import { useNoteStore } from '../../stores/noteStore';
+import { useTranslationStore } from '../../stores/translationStore';
 import { formatTime } from '../../utils';
 import type { TranscriptSegment } from '../../types';
 
@@ -39,6 +40,7 @@ interface SelectionState {
 export const TranscriptViewer = ({ segments, highlightedSegmentId, podcastId }: TranscriptViewerProps) => {
   const { currentTime, seek, isPlaying } = usePlayerStore();
   const { selectedText, setSelectedText, openNoteInput, notes, filterNotes } = useNoteStore();
+  const { viewMode, translations } = useTranslationStore();
   const [selection, setSelection] = useState<SelectionState | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const lastActiveIndexRef = useRef<number>(-1);
@@ -303,6 +305,34 @@ export const TranscriptViewer = ({ segments, highlightedSegmentId, podcastId }: 
                   </span>
                 ))}
               </div>
+
+              {/* 翻译文字（双语模式） */}
+              {viewMode === 'bilingual' && paragraph.segments.some(seg => translations.has(seg.id)) && (
+                <div
+                  className="mt-3 pt-3"
+                  style={{
+                    borderTop: '1px solid rgba(255, 255, 255, 0.06)',
+                    color: 'rgba(232, 232, 232, 0.65)',
+                    fontSize: '15px',
+                    lineHeight: 1.8,
+                  }}
+                >
+                  {paragraph.segments.map((segment, segIndex) => {
+                    const translation = translations.get(segment.id);
+                    if (!translation) return null;
+                    return (
+                      <span
+                        key={`translation-${paragraph.id || paraIndex}-${segIndex}`}
+                        data-start-time={segment.start}
+                        onClick={() => seek(segment.start)}
+                        title={`跳转到 ${formatTime(segment.start)}`}
+                      >
+                        {translation}
+                      </span>
+                    );
+                  })}
+                </div>
+              )}
             </div>
           );
         })}

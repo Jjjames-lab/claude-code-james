@@ -456,7 +456,7 @@ class TranslateSegment(BaseModel):
 class TranslateRequest(BaseModel):
     """翻译请求"""
     segments: List[TranslateSegment] = Field(..., description="待翻译的段落列表")
-    target_lang: str = Field(..., description="目标语言: 'zh' 或 'en'")
+    target_lang: str = Field(..., description="目标语言: 'zh', 'en', 'ko', 'ja'")
     source_lang: Optional[str] = Field(None, description="源语言（可选，系统会自动检测）")
 
 
@@ -479,7 +479,7 @@ async def translate_text(request: TranslateRequest):
     """
     批量翻译文本（逐字稿/章节）
 
-    使用 LLM 进行高质量翻译，支持中英文互译
+    使用 LLM 进行高质量翻译，支持中文、英文、韩语、日语互译
 
     Args:
         request: 包含段落列表、目标语言的请求
@@ -538,9 +538,17 @@ def _build_translate_prompt(segments: List[TranslateSegment], target_lang: str) 
         for idx, seg in enumerate(segments)
     ])
 
-    target_lang_name = "中文" if target_lang == "zh" else "英文"
+    # 语言映射
+    lang_names = {
+        "zh": "中文",
+        "en": "英文",
+        "ko": "韩语",
+        "ja": "日语"
+    }
 
-    prompt = f"""你是一个专业的翻译专家。请将以下{target_lang_name}文本翻译为{'英文' if target_lang == 'zh' else '中文'}。
+    target_lang_name = lang_names.get(target_lang, target_lang)
+
+    prompt = f"""你是一个专业的翻译专家。请将以下文本翻译为{target_lang_name}。
 
 要求：
 1. 准确传达原意，不要遗漏信息
