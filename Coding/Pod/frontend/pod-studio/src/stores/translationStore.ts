@@ -113,7 +113,6 @@ export const useTranslationStore = create<TranslationState>()(
 
             // 更新翻译结果（实时显示）
             set({ translations: newTranslations });
-          }
 
           console.log('[TranslationStore] 所有批次翻译完成');
         } catch (error) {
