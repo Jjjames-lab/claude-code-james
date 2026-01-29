@@ -530,7 +530,7 @@ export const EpisodeTabPage = () => {
               </div>
 
               {/* 文字稿内容区 */}
-              <div className="flex-1 overflow-y-auto px-4 py-4">
+              <div className="flex-1 overflow-y-auto px-4 py-3">
                 {!isProcessed && !isTranscribing && (
                   <div className="flex items-center justify-center h-full">
                     <p className="text-white/60">处理完成后显示文字稿</p>
