@@ -1,0 +1,404 @@
+/* ===================================
+   设计系统 v3.0 - 宁静陪伴
+   ===================================
+
+   产品愿景：慢下来，深思考
+   设计原则：克制、温暖、宁静、尊重
+
+   =================================== */
+
+:root {
+  /* === 宁静配色系统 === */
+  /* 背景色 - 温暖的深色，不冰冷 */
+  --bg-primary: #0f0f11;        /* 微暖的黑色 */
+  --bg-secondary: #161618;      /* 稍亮的层次 */
+  --bg-elevated: #1a1a1d;       /* 卡片背景 */
+  --bg-hover: #1e1e21;          /* 悬停状态 */
+
+  /* 文字色 - 柔和的高对比度 */
+  --text-primary: #e8e8e8;      /* 不刺眼的白色 */
+  --text-secondary: #8a8a8a;    /* 宁静的灰色 */
+  --text-muted: #5a5a5a;        /* 退让的提示 */
+  --text-disabled: #3a3a3a;     /* 禁用状态 */
+
+  /* 强调色 - 克制的使用，温暖不刺眼 */
+  --accent-primary: #d4c5b9;    /* 米色，温暖 */
+  --accent-secondary: #a8988a;  /* 辅助强调色 */
+  --accent-subtle: rgba(212, 197, 185, 0.1);  /* 极淡的米色 */
+
+  /* 功能色 - 温和的表达，不刺眼 */
+  --color-success: #7a9f7a;     /* 柔和的绿色 */
+  --color-warning: #bfa87a;     /* 温暖的黄色 */
+  --color-error: #bf7a7a;       /* 柔和的红色 */
+  --color-info: #7a8fbf;        /* 柔和的蓝色 */
+
+  /* 玻璃态 - 更细腻 */
+  --glass-bg: rgba(26, 26, 29, 0.7);
+  --glass-border: rgba(255, 255, 255, 0.06);
+  --glass-shadow: rgba(0, 0, 0, 0.3);
+  --glass-blur: blur(20px);
+
+  /* === 间距系统（8px 基础网格）=== */
+  --space-xs: 4px;      /* 细微调整 */
+  --space-sm: 8px;      /* 紧密关联 */
+  --space-md: 16px;     /* 默认间距 */
+  --space-lg: 24px;     /* 增加呼吸感 */
+  --space-xl: 32px;     /* 区分区域 */
+  --space-2xl: 48px;    /* 主要分区 */
+  --space-3xl: 64px;    /* 大幅留白 */
+  --space-4xl: 96px;    /* 极致留白 */
+
+  /* === 字体系统 === */
+  --font-family-sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'SF Pro Display', 'Helvetica Neue', sans-serif;
+  --font-family-mono: 'SF Mono', Monaco, 'Cascadia Code', 'Courier New', monospace;
+
+  /* 字号 - 舒适阅读 */
+  --font-size-xs: 0.75rem;   /* 12px - 辅助信息 */
+  --font-size-sm: 0.875rem;  /* 14px - 次要内容 */
+  --font-size-base: 1rem;    /* 16px - 正文基础 */
+  --font-size-lg: 1.125rem;  /* 18px - 强调/逐字稿 */
+  --font-size-xl: 1.25rem;   /* 20px - 小标题 */
+  --font-size-2xl: 1.5rem;   /* 24px - 标题 */
+  --font-size-3xl: 2rem;     /* 32px - 大标题 */
+  --font-size-4xl: 2.5rem;   /* 40px - 超大标题 */
+
+  /* 字重 - 克制的使用 */
+  --font-weight-normal: 400;    /* 正文 */
+  --font-weight-medium: 500;    /* 轻微强调 */
+  --font-weight-semibold: 600;  /* 标题 */
+
+  /* 行高 - 增加可读性 */
+  --leading-tight: 1.4;    /* 标题 */
+  --leading-normal: 1.6;   /* 正文 */
+  --leading-relaxed: 1.8;  /* 长篇内容（逐字稿） */
+
+  /* === 圆角系统 === */
+  /* 柔和但不圆润 */
+  --radius-sm: 4px;   /* 小元素 */
+  --radius-md: 8px;   /* 按钮、输入框 */
+  --radius-lg: 12px;  /* 卡片 */
+  --radius-xl: 16px;  /* 大卡片 */
+  --radius-full: 9999px;  /* 圆形 */
+
+  /* === 阴影系统 === */
+  /* 克制的阴影 */
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.2);
+  --shadow-md: 0 4px 8px rgba(0, 0, 0, 0.25);
+  --shadow-lg: 0 8px 16px rgba(0, 0, 0, 0.3);
+  --shadow-xl: 0 16px 32px rgba(0, 0, 0, 0.35);
+
+  /* === 动效系统 === */
+  /* 所有动效都应该服务于内容，而非吸引注意力 */
+  --duration-fast: 150ms;    /* 即时反馈 */
+  --duration-base: 250ms;    /* 标准过渡 */
+  --duration-slow: 400ms;    /* 缓慢变化 */
+
+  /* 缓动函数 - 自然、不刺眼 */
+  --ease-out: cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+
+  /* 动效强度 - 极其微妙 */
+  --scale-hover: 1.02;       /* 微妙的放大 */
+  --scale-active: 0.98;      /* 微妙的按下 */
+
+  /* === 层级系统 === */
+  --z-base: 0;
+  --z-above: 10;
+  --z-dropdown: 100;
+  --z-sticky: 200;
+  --z-fixed: 300;
+  --z-modal: 400;
+  --z-popover: 500;
+  --z-tooltip: 600;
+}
+
+/* === 全局背景 === */
+body {
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  font-family: var(--font-family-sans);
+  font-size: var(--font-size-base);
+  line-height: var(--leading-normal);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  position: relative;
+  overflow-x: hidden;
+}
+
+/* === 极简背景纹理（可选）=== */
+/* 如果需要增加质感，可以取消注释 */
+/*
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='1.5' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+  opacity: 0.02;
+  pointer-events: none;
+  z-index: 0;
+}
+*/
+
+/* === 滚动条美化 === */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 3px;
+  transition: background var(--duration-fast) var(--ease-out);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.15);
+}
+
+/* === 焦点样式 === */
+:focus-visible {
+  outline: 2px solid var(--accent-primary);
+  outline-offset: 2px;
+  border-radius: var(--radius-sm);
+}
+
+/* === 文本选择 === */
+::selection {
+  background: var(--accent-subtle);
+  color: var(--text-primary);
+}
+
+/* === 链接样式 === */
+a {
+  color: var(--accent-primary);
+  text-decoration: none;
+  transition: color var(--duration-fast) var(--ease-out);
+}
+
+a:hover {
+  color: var(--accent-secondary);
+}
+
+/* === 玻璃态卡片 === */
+.glass-card {
+  background: var(--glass-bg);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
+  transition: all var(--duration-base) var(--ease-out);
+}
+
+.glass-card:hover {
+  border-color: rgba(255, 255, 255, 0.1);
+  box-shadow: var(--shadow-lg);
+}
+
+/* === 按钮组件 === */
+.button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-sm);
+  padding: var(--space-sm) var(--space-lg);
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-medium);
+  border-radius: var(--radius-md);
+  border: none;
+  cursor: pointer;
+  transition: all var(--duration-base) var(--ease-out);
+  user-select: none;
+}
+
+.button:hover {
+  transform: scale(var(--scale-hover));
+}
+
+.button:active {
+  transform: scale(var(--scale-active));
+}
+
+.button-primary {
+  background: var(--accent-primary);
+  color: var(--bg-primary);
+}
+
+.button-primary:hover {
+  background: var(--accent-secondary);
+}
+
+.button-secondary {
+  background: var(--bg-elevated);
+  color: var(--text-primary);
+  border: 1px solid var(--glass-border);
+}
+
+.button-secondary:hover {
+  background: var(--bg-hover);
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+.button-ghost {
+  background: transparent;
+  color: var(--text-secondary);
+}
+
+.button-ghost:hover {
+  background: var(--bg-elevated);
+  color: var(--text-primary);
+}
+
+/* === 输入框组件 === */
+.input {
+  width: 100%;
+  padding: var(--space-sm) var(--space-md);
+  font-size: var(--font-size-base);
+  font-family: inherit;
+  color: var(--text-primary);
+  background: var(--bg-elevated);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-md);
+  outline: none;
+  transition: all var(--duration-base) var(--ease-out);
+}
+
+.input::placeholder {
+  color: var(--text-muted);
+}
+
+.input:hover {
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+.input:focus {
+  border-color: var(--accent-primary);
+  box-shadow: 0 0 0 3px var(--accent-subtle);
+}
+
+/* === 文本样式 === */
+.text-display {
+  font-size: var(--font-size-4xl);
+  font-weight: var(--font-weight-semibold);
+  line-height: var(--leading-tight);
+  color: var(--text-primary);
+}
+
+.text-h1 {
+  font-size: var(--font-size-3xl);
+  font-weight: var(--font-weight-semibold);
+  line-height: var(--leading-tight);
+  color: var(--text-primary);
+}
+
+.text-h2 {
+  font-size: var(--font-size-2xl);
+  font-weight: var(--font-weight-semibold);
+  line-height: var(--leading-tight);
+  color: var(--text-primary);
+}
+
+.text-h3 {
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-medium);
+  line-height: var(--leading-normal);
+  color: var(--text-primary);
+}
+
+.text-body {
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-normal);
+  line-height: var(--leading-normal);
+  color: var(--text-primary);
+}
+
+.text-large {
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-normal);
+  line-height: var(--leading-relaxed);
+  color: var(--text-primary);
+}
+
+.text-small {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-normal);
+  line-height: var(--leading-normal);
+  color: var(--text-secondary);
+}
+
+.text-muted {
+  color: var(--text-muted);
+}
+
+/* === 加载动画 - 缓慢的呼吸灯 === */
+@keyframes breathe {
+  0%, 100% {
+    opacity: 0.4;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.05);
+  }
+}
+
+.loading-indicator {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: var(--accent-primary);
+  animation: breathe 3s ease-in-out infinite;
+}
+
+/* === 进场动画 === */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* === 工具类 === */
+.container {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 var(--space-lg);
+}
+
+.container-narrow {
+  width: 100%;
+  max-width: 680px;  /* 最佳阅读宽度 */
+  margin: 0 auto;
+  padding: 0 var(--space-lg);
+}
+
+.flex-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.flex-between {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.flex-col {
+  display: flex;
+  flex-direction: column;
+}
+
+.gap-sm { gap: var(--space-sm); }
+.gap-md { gap: var(--space-md); }
+.gap-lg { gap: var(--space-lg); }
+.gap-xl { gap: var(--space-xl); }

@@ -1,0 +1,11 @@
+/* 导入设计系统 */
+/* 新设计系统 v3.0 - 宁静陪伴 */
+@import './styles/design-system-v3.css';
+
+/* 基础样式（不包含旧视觉）*/
+@import './styles/globals-clean.css';
+
+/* Tailwind CSS */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;

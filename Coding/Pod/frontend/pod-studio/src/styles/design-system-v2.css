@@ -1,0 +1,329 @@
+/* ===================================
+   设计系统 v2.0 - 深邃有机
+   =================================== */
+
+:root {
+  /* === 背景系统 === */
+  --bg-deep: #0a0a0f;
+  --bg-surface: #12121a;
+  --bg-elevated: #1a1a25;
+
+  /* === 有机渐变 === */
+  --gradient-organic-1: radial-gradient(ellipse at 20% 30%, rgba(120, 80, 255, 0.15) 0%, transparent 50%);
+  --gradient-organic-2: radial-gradient(ellipse at 80% 70%, rgba(255, 100, 150, 0.12) 0%, transparent 50%);
+  --gradient-organic-3: radial-gradient(ellipse at 40% 80%, rgba(80, 200, 255, 0.1) 0%, transparent 40%);
+
+  /* === 主色调 === */
+  --primary: #a78bfa;
+  --primary-glow: rgba(167, 139, 250, 0.4);
+  --primary-subtle: rgba(167, 139, 250, 0.15);
+
+  /* === 辅助色 === */
+  --accent-warm: #fbbfce;
+  --accent-cool: #7dd3fc;
+  --accent-gold: #fbbf24;
+
+  /* === 文字层级 === */
+  --text-display: #ffffff;
+  --text-primary: #e5e5e5;
+  --text-secondary: #a3a3a3;
+  --text-tertiary: #737373;
+
+  /* === 玻璃态 === */
+  --glass-bg: rgba(255, 255, 255, 0.03);
+  --glass-border: rgba(255, 255, 255, 0.08);
+  --glass-shadow: rgba(0, 0, 0, 0.3);
+  --glass-blur: blur(20px);
+
+  /* === 间距系统 === */
+  --space-xs: 0.25rem;    /* 4px */
+  --space-sm: 0.5rem;     /* 8px */
+  --space-md: 1rem;       /* 16px */
+  --space-lg: 1.5rem;     /* 24px */
+  --space-xl: 2rem;       /* 32px */
+  --space-2xl: 3rem;      /* 48px */
+  --space-3xl: 4rem;      /* 64px */
+
+  /* === 字体 === */
+  --font-display: 'SF Pro Display', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --font-body: 'SF Pro Text', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --font-mono: 'SF Mono', Monaco, 'Cascadia Code', monospace;
+
+  /* === 动效 === */
+  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --duration-fast: 150ms;
+  --duration-base: 250ms;
+  --duration-slow: 400ms;
+}
+
+/* === 深色模式 === */
+.dark {
+  --bg-deep: #050508;
+  --bg-surface: #0a0a0f;
+  --bg-elevated: #12121a;
+}
+
+/* === 全局背景 === */
+body {
+  background-color: var(--bg-deep);
+  color: var(--text-primary);
+  font-family: var(--font-body);
+  position: relative;
+  overflow-x: hidden;
+}
+
+/* === 有机背景层 === */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background:
+    var(--gradient-organic-1),
+    var(--gradient-organic-2),
+    var(--gradient-organic-3);
+  animation: breathe 20s ease-in-out infinite;
+  pointer-events: none;
+  z-index: 0;
+}
+
+@keyframes breathe {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1) translate(0, 0);
+  }
+  50% {
+    opacity: 0.8;
+    transform: scale(1.05) translate(-10px, -10px);
+  }
+}
+
+/* === 噪点纹理 === */
+body::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='1.5' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+  opacity: 0.03;
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* === 玻璃态卡片基础 === */
+.glass-card {
+  background: var(--glass-bg);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  border: 1px solid var(--glass-border);
+  border-radius: 16px;
+  box-shadow:
+    0 4px 24px var(--glass-shadow),
+    inset 0 1px 0 rgba(255, 255, 255, 0.05);
+}
+
+.glass-card:hover {
+  border-color: rgba(255, 255, 255, 0.12);
+  box-shadow:
+    0 8px 32px var(--glass-shadow),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08);
+}
+
+/* === 自定义滚动条 === */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 4px;
+  transition: background var(--duration-fast) ease;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+/* === 焦点样式 === */
+:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* === 文本选择 === */
+::selection {
+  background: var(--primary-subtle);
+  color: var(--text-display);
+}
+
+/* === Shownote 节目单样式 === */
+.shownote-content {
+  /* 基础样式 */
+  line-height: 1.8;
+  word-wrap: break-word;
+}
+
+/* 段落 */
+.shownote-content p {
+  margin: 0.75em 0;
+  line-height: 1.8;
+}
+
+/* 标题 */
+.shownote-content h1,
+.shownote-content h2,
+.shownote-content h3,
+.shownote-content h4,
+.shownote-content h5,
+.shownote-content h6 {
+  margin: 1.2em 0 0.6em;
+  font-weight: 600;
+  color: var(--text-display);
+  line-height: 1.4;
+}
+
+.shownote-content h1 { font-size: 1.5em; }
+.shownote-content h2 { font-size: 1.3em; }
+.shownote-content h3 { font-size: 1.15em; }
+.shownote-content h4 { font-size: 1.05em; }
+
+/* 加粗 */
+.shownote-content strong,
+.shownote-content b {
+  font-weight: 600;
+  color: var(--text-display);
+}
+
+/* 斜体 */
+.shownote-content em,
+.shownote-content i {
+  font-style: italic;
+}
+
+/* 链接 */
+.shownote-content a {
+  color: var(--primary);
+  text-decoration: none;
+  border-bottom: 1px solid transparent;
+  transition: all var(--duration-fast) ease;
+}
+
+.shownote-content a:hover {
+  color: var(--primary-glow);
+  border-bottom-color: var(--primary);
+}
+
+/* 列表 */
+.shownote-content ul,
+.shownote-content ol {
+  margin: 0.75em 0;
+  padding-left: 1.5em;
+}
+
+.shownote-content li {
+  margin: 0.4em 0;
+  line-height: 1.7;
+}
+
+.shownote-content li::marker {
+  color: var(--text-tertiary);
+}
+
+/* 图片 */
+.shownote-content img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 8px;
+  margin: 1em 0;
+  border: 1px solid var(--glass-border);
+}
+
+/* 代码 */
+.shownote-content code {
+  background: rgba(255, 255, 255, 0.05);
+  padding: 0.2em 0.4em;
+  border-radius: 4px;
+  font-family: var(--font-mono);
+  font-size: 0.9em;
+  color: var(--accent-cool);
+}
+
+.shownote-content pre {
+  background: rgba(255, 255, 255, 0.05);
+  padding: 1em;
+  border-radius: 8px;
+  overflow-x: auto;
+  margin: 1em 0;
+}
+
+.shownote-content pre code {
+  background: none;
+  padding: 0;
+}
+
+/* 引用 */
+.shownote-content blockquote {
+  border-left: 3px solid var(--primary);
+  padding-left: 1em;
+  margin: 1em 0;
+  color: var(--text-secondary);
+  font-style: italic;
+}
+
+/* 分隔线 */
+.shownote-content hr {
+  border: none;
+  border-top: 1px solid var(--glass-border);
+  margin: 1.5em 0;
+}
+
+/* 表格 */
+.shownote-content table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 1em 0;
+}
+
+.shownote-content th,
+.shownote-content td {
+  padding: 0.6em 1em;
+  border: 1px solid var(--glass-border);
+  text-align: left;
+}
+
+.shownote-content th {
+  background: rgba(255, 255, 255, 0.05);
+  font-weight: 600;
+  color: var(--text-display);
+}
+
+/* === 转录进度条动画 === */
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+/* === 脉冲光环动画 === */
+@keyframes pulse-ring {
+  0% {
+    transform: scale(0.95);
+    opacity: 0.7;
+  }
+  50% {
+    transform: scale(1.05);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(0.95);
+    opacity: 0.7;
+  }
+}
