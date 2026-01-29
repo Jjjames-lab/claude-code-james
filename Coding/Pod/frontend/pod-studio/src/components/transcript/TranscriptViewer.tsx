@@ -234,8 +234,8 @@ export const TranscriptViewer = ({ segments, highlightedSegmentId, podcastId }: 
 
           return (
             <div
-              key={paragraph.id}
-              id={`paragraph-${paragraph.id}`}
+              key={paragraph.id || `paragraph-${paraIndex}`}
+              id={`paragraph-${paragraph.id || paraIndex}`}
               data-paragraph-index={paraIndex}
               data-start-time={paragraph.startTime}
               className="group relative"
@@ -294,10 +294,10 @@ export const TranscriptViewer = ({ segments, highlightedSegmentId, podcastId }: 
               >
                 {paragraph.segments.map((segment, segIndex) => (
                   <span
-                    key={`${paragraph.id}-${segment.id}-${segIndex}`}
-                    data-start-time={segment.start}  // 使用 start 字段
-                    onClick={() => seek(segment.start)}  // 使用 start 字段
-                    title={`跳转到 ${formatTime(segment.start)}`}  // 使用 start 字段
+                    key={`${paragraph.id || paraIndex}-${segIndex}`}
+                    data-start-time={segment.start}
+                    onClick={() => seek(segment.start)}
+                    title={`跳转到 ${formatTime(segment.start)}`}
                   >
                     {segment.text}
                   </span>
