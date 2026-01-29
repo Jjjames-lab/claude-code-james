@@ -2,6 +2,7 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { InputPage } from './pages/InputPage';
 import { PodcastDetailPage } from './pages/PodcastDetailPage';
 import { EpisodeTabPage } from './pages/EpisodeTabPage';
+import { ToastContainer } from './components/ui/ToastContainer';
 
 function App() {
   return (
@@ -16,6 +17,9 @@ function App() {
         {/* 单集 Tab 功能页 */}
         <Route path="/episode/:id" element={<EpisodeTabPage />} />
       </Routes>
+
+      {/* 全局 Toast 通知容器 */}
+      <ToastContainer />
     </BrowserRouter>
   );
 }

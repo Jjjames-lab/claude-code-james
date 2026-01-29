@@ -185,7 +185,7 @@ export const useTranslationStore = create<TranslationState>()(
         ...currentState,
         ...persistedState,
         translations: new Map(Object.entries(persistedState.translations || {})),
-        chapterTranslations: new Map(Object.entries(persistedState.chapterTranslations || {}).map(([k, v]) => [Number(k), v]),
+        chapterTranslations: new Map(Object.entries(persistedState.chapterTranslations || {}).map(([k, v]) => [Number(k), v])),
       }),
     }
   )
