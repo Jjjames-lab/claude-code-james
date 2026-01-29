@@ -5,7 +5,7 @@
  * 设计原则：温暖的邀请，不让人感到空虚
  */
 
-import { LucideIcon } from 'lucide-react';
+import { LucideIcon, BookOpen, FileText, Bookmark, Sparkles, Search, Mic, Hourglass } from 'lucide-react';
 
 interface EmptyStateProps {
   /** 图标（emoji 或 LucideIcon） */
@@ -124,7 +124,7 @@ export const EmptyStates = {
   // 历史记录空状态
   noHistory: (
     <EmptyState
-      icon="📚"
+      icon={BookOpen}
       title="还没有记录"
       description="慢慢来，不着急"
     />
@@ -133,7 +133,7 @@ export const EmptyStates = {
   // 笔记空状态
   noNotes: (
     <EmptyState
-      icon="📝"
+      icon={FileText}
       title="还没有笔记"
       description="选中文字，记下想法"
     />
@@ -142,7 +142,7 @@ export const EmptyStates = {
   // 书签空状态
   noBookmarks: (
     <EmptyState
-      icon="🔖"
+      icon={Bookmark}
       title="还没有书签"
       description="标记重要的片段"
     />
@@ -151,7 +151,7 @@ export const EmptyStates = {
   // Highlights 空状态（加载中）
   loadingHighlights: (
     <EmptyState
-      icon="✨"
+      icon={Sparkles}
       title="正在提取金句"
       description="需要一点时间，请耐心等待"
     />
@@ -160,7 +160,7 @@ export const EmptyStates = {
   // 搜索空状态
   noSearchResults: (
     <EmptyState
-      icon="🔍"
+      icon={Search}
       title="没有找到匹配"
       description="试试其他关键词"
     />
@@ -169,7 +169,7 @@ export const EmptyStates = {
   // 搜索框空状态
   searchEmpty: (
     <EmptyState
-      icon="🔍"
+      icon={Search}
       title="搜索逐字稿"
       description="输入关键词，快速找到你想听的内容"
       size="small"
@@ -179,7 +179,7 @@ export const EmptyStates = {
   // 播客列表空状态
   noPodcasts: (
     <EmptyState
-      icon="🎙️"
+      icon={Mic}
       title="还没有播客"
       description="粘贴小宇宙节目链接开始使用"
       actionText="添加第一个播客"
@@ -189,7 +189,7 @@ export const EmptyStates = {
   // 转录中状态
   transcribing: (
     <EmptyState
-      icon="⏳"
+      icon={Hourglass}
       title="正在转录中"
       description="需要一点时间，请耐心等待"
       size="large"

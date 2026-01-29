@@ -8,6 +8,7 @@
 import { useState, useEffect } from 'react';
 import { storageManager } from '../../utils/storageManager';
 import { usePlayerStore } from '../../stores/playerStore';
+import { BookOpen, Calendar, Clock, MessageSquare } from 'lucide-react';
 
 // 历史记录项类型
 interface HistoryItem {
@@ -187,7 +188,7 @@ export const HistoryPanel = () => {
       {/* 历史记录列表 */}
       {filteredHistory.length === 0 ? (
         <div className="flex-1 flex flex-col items-center justify-center text-center py-20">
-          <div className="text-6xl mb-6">📚</div>
+          <BookOpen className="w-16 h-16 mb-6" style={{ color: 'rgba(255, 255, 255, 0.2)' }} />
           <h3 className="text-2xl font-semibold text-white mb-3">
             还没有记录
           </h3>
@@ -236,14 +237,17 @@ export const HistoryPanel = () => {
                   <div className="space-y-2">
                     <div className="flex items-center gap-4 text-xs text-slate-500">
                       <span className="flex items-center gap-1">
-                        📅 {formatDate(item.lastPlayedAt)}
+                        <Calendar className="w-3 h-3" />
+                        {formatDate(item.lastPlayedAt)}
                       </span>
                       <span className="flex items-center gap-1">
-                        ⏱️ {formatTime(item.duration)}
+                        <Clock className="w-3 h-3" />
+                        {formatTime(item.duration)}
                       </span>
                       {item.notes && item.notes.length > 0 && (
                         <span className="flex items-center gap-1">
-                          💬 {item.notes.length}条笔记
+                          <MessageSquare className="w-3 h-3" />
+                          {item.notes.length}条笔记
                         </span>
                       )}
                     </div>

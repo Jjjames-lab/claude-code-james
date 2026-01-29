@@ -361,6 +361,8 @@ interface AchievementCardProps {
 }
 
 function AchievementCard({ achievement }: AchievementCardProps) {
+  const Icon = achievement.icon;
+
   return (
     <div
       className="p-4 rounded-lg"
@@ -376,12 +378,22 @@ function AchievementCard({ achievement }: AchievementCardProps) {
     >
       <div className="flex items-start gap-3">
         <div
-          className="text-3xl"
+          className="w-12 h-12 rounded-lg flex items-center justify-center flex-shrink-0"
           style={{
+            backgroundColor: achievement.unlocked
+              ? 'rgba(212, 197, 185, 0.1)'
+              : 'rgba(255, 255, 255, 0.03)',
             filter: achievement.unlocked ? 'none' : 'grayscale(1) opacity(0.3)',
           }}
         >
-          {achievement.icon}
+          <Icon
+            className="w-6 h-6"
+            style={{
+              color: achievement.unlocked
+                ? 'rgba(212, 197, 185, 0.8)'
+                : 'rgba(255, 255, 255, 0.4)',
+            }}
+          />
         </div>
         <div className="flex-1 min-w-0">
           <div

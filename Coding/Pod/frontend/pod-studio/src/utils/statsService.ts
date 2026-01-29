@@ -5,6 +5,7 @@
  */
 
 import { storageManager } from './storageManager';
+import { Trophy, BookOpen, GraduationCap, Pencil, FileText, Flame, Star, Award } from 'lucide-react';
 
 export interface LearningStats {
   totalListeningTime: number;  // 总收听时长（毫秒）
@@ -27,7 +28,7 @@ export interface Achievement {
   id: string;
   title: string;
   description: string;
-  icon: string;
+  icon: any; // React component (lucide-react icon)
   unlocked: boolean;
   progress?: number;  // 0-100
   target?: number;
@@ -185,14 +186,14 @@ export class StatsService {
         id: 'first_podcast',
         title: '初次相遇',
         description: '收听第一个播客',
-        icon: '🎉',
+        icon: Trophy,
         unlocked: history.length > 0,
       },
       {
         id: 'five_podcasts',
         title: '学海无涯',
         description: '收听5个播客',
-        icon: '📚',
+        icon: BookOpen,
         unlocked: history.length >= 5,
         progress: Math.min(100, (history.length / 5) * 100),
         target: 5,
@@ -201,7 +202,7 @@ export class StatsService {
         id: 'ten_podcasts',
         title: '博学多才',
         description: '收听10个播客',
-        icon: '🎓',
+        icon: GraduationCap,
         unlocked: history.length >= 10,
         progress: Math.min(100, (history.length / 10) * 100),
         target: 10,
@@ -210,14 +211,14 @@ export class StatsService {
         id: 'first_note',
         title: '勤学善思',
         description: '创建第一条笔记',
-        icon: '✏️',
+        icon: Pencil,
         unlocked: history.some(h => h.notes && h.notes.length > 0),
       },
       {
         id: 'ten_notes',
         title: '笔记达人',
         description: '创建10条笔记',
-        icon: '📝',
+        icon: FileText,
         unlocked: false,  // 动态计算
         progress: 0,
         target: 10,
@@ -226,7 +227,7 @@ export class StatsService {
         id: 'three_day_streak',
         title: '持之以恒',
         description: '连续学习3天',
-        icon: '🔥',
+        icon: Flame,
         unlocked: false,  // 动态计算
         progress: 0,
         target: 3,
@@ -235,7 +236,7 @@ export class StatsService {
         id: 'seven_day_streak',
         title: '一周不辍',
         description: '连续学习7天',
-        icon: '⭐',
+        icon: Star,
         unlocked: false,  // 动态计算
         progress: 0,
         target: 7,
@@ -244,7 +245,7 @@ export class StatsService {
         id: 'thirty_day_streak',
         title: '月度冠军',
         description: '连续学习30天',
-        icon: '🏆',
+        icon: Award,
         unlocked: false,  // 动态计算
         progress: 0,
         target: 30,

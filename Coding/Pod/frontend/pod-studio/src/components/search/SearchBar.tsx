@@ -6,7 +6,7 @@
  */
 
 import { useState, useEffect, useRef } from 'react';
-import { Search, X, Command } from 'lucide-react';
+import { Search, X, Command, Lightbulb, Help, CheckCircle, MessageSquare } from 'lucide-react';
 import { useNoteStore } from '../../stores/noteStore';
 import type { NoteFilter } from '../../stores/noteStore';
 import { usePlayerStore } from '../../stores/playerStore';
@@ -290,16 +290,16 @@ export const SearchBar = ({ podcastId }: SearchBarProps) => {
                         {formatTime(result.note.timestamp)}
                       </span>
                       <span
-                        className="text-xs px-2 py-0.5 rounded"
+                        className="text-xs px-2 py-0.5 rounded flex items-center gap-1"
                         style={{
                           backgroundColor: 'rgba(255, 255, 255, 0.05)',
                           color: 'rgba(255, 255, 255, 0.4)',
                         }}
                       >
-                        {result.note.category === 'thought' && '💭'}
-                        {result.note.category === 'question' && '❓'}
-                        {result.note.category === 'action' && '✅'}
-                        {result.note.category === 'quote' && '💬'}
+                        {result.note.category === 'thought' && <Lightbulb className="w-3 h-3" />}
+                        {result.note.category === 'question' && <Help className="w-3 h-3" />}
+                        {result.note.category === 'action' && <CheckCircle className="w-3 h-3" />}
+                        {result.note.category === 'quote' && <MessageSquare className="w-3 h-3" />}
                       </span>
                     </div>
 

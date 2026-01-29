@@ -6,7 +6,7 @@
  */
 
 import { useState, useEffect } from 'react';
-import { Sparkles, Copy, Trash2, ExternalLink } from 'lucide-react';
+import { Sparkles, Copy, Trash2, ExternalLink, Clock, MessageSquare, Lightbulb, BarChart3, CheckCircle } from 'lucide-react';
 import { usePlayerStore } from '../../stores/playerStore';
 import { formatTime } from '../../utils';
 
@@ -90,12 +90,12 @@ export const HighlightsPanel = ({ transcript, podcastId }: HighlightsPanelProps)
   // 获取分类标签
   const getCategoryLabel = (category: Highlight['category']) => {
     const labels = {
-      quote: '💬 金句',
-      insight: '💡 洞察',
-      data: '📊 数据',
-      conclusion: '✅ 结论',
+      quote: { icon: MessageSquare, label: '金句' },
+      insight: { icon: Lightbulb, label: '洞察' },
+      data: { icon: BarChart3, label: '数据' },
+      conclusion: { icon: CheckCircle, label: '结论' },
     };
-    return labels[category] || category;
+    return labels[category] || { icon: MessageSquare, label: category };
   };
 
   return (
@@ -119,7 +119,7 @@ export const HighlightsPanel = ({ transcript, podcastId }: HighlightsPanelProps)
           }}
         >
           <div className="flex items-center justify-center gap-3 mb-2">
-            <span className="text-2xl">✨</span>
+            <Sparkles className="w-6 h-6" style={{ color: 'rgba(212, 197, 185, 0.7)' }} />
             <span
               className="text-lg font-medium"
               style={{ color: 'rgba(232, 232, 232, 0.9)' }}
@@ -224,13 +224,22 @@ export const HighlightsPanel = ({ transcript, podcastId }: HighlightsPanelProps)
                 <div className="flex items-center gap-3">
                   {/* 分类标签 */}
                   <span
-                    className="px-2.5 py-1 rounded-lg text-xs"
+                    className="px-2.5 py-1 rounded-lg text-xs flex items-center gap-1"
                     style={{
                       backgroundColor: 'rgba(212, 197, 185, 0.1)',
                       color: 'rgba(212, 197, 185, 0.7)',
                     }}
                   >
-                    {getCategoryLabel(highlight.category)}
+                    {(() => {
+                      const categoryInfo = getCategoryLabel(highlight.category);
+                      const Icon = categoryInfo.icon;
+                      return (
+                        <>
+                          <Icon className="w-3 h-3" />
+                          <span>{categoryInfo.label}</span>
+                        </>
+                      );
+                    })()}
                   </span>
 
                   {/* 时间戳 */}
@@ -282,8 +291,9 @@ export const HighlightsPanel = ({ transcript, podcastId }: HighlightsPanelProps)
 
               {/* 重要性理由 */}
               {highlight.reason && (
-                <div className="text-sm mb-2" style={{ color: 'rgba(255, 255, 255, 0.5)' }}>
-                  💡 {highlight.reason}
+                <div className="text-sm mb-2 flex items-start gap-2" style={{ color: 'rgba(255, 255, 255, 0.5)' }}>
+                  <Lightbulb className="w-4 h-4 mt-0.5 flex-shrink-0" style={{ color: 'rgba(212, 197, 185, 0.6)' }} />
+                  <span>{highlight.reason}</span>
                 </div>
               )}
             </div>
