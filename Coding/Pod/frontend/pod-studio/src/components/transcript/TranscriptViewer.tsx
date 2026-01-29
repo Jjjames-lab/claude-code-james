@@ -42,6 +42,8 @@ export const TranscriptViewer = ({ segments, highlightedSegmentId, podcastId }: 
   const [selection, setSelection] = useState<SelectionState | null>(null);
   const [hoveredSegmentId, setHoveredSegmentId] = useState<string | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
+  const lastActiveIndexRef = useRef<number>(-1);
+  const lastScrollTimeRef = useRef<number>(0);
 
   // 获取当前播客的笔记
   const podcastNotes = useMemo(() => {
@@ -108,15 +110,12 @@ export const TranscriptViewer = ({ segments, highlightedSegmentId, podcastId }: 
     return paragraphs;
   }, [segments]);
 
-  // 计算当前应该高亮的段落索引（使用 ref 缓存，减少重复计算）
+  // 计算当前应该高亮的段落索引
   const activeParagraphIndex = useMemo(() => {
     return mergedParagraphs.findIndex(
       (para) => currentTime >= para.startTime && currentTime <= para.endTime
     );
   }, [mergedParagraphs, currentTime]);
-
-  // 缓存段落索引变化，避免频繁滚动
-  const lastActiveIndexRef = useRef<number>(-1);
 
   // 滚动到高亮段落（手动跳转时）
   useEffect(() => {
@@ -128,14 +127,18 @@ export const TranscriptViewer = ({ segments, highlightedSegmentId, podcastId }: 
     }
   }, [highlightedSegmentId]);
 
-  // 自动滚动到当前播放的段落（仅在播放时）
+  // 自动滚动到当前播放的段落
   useEffect(() => {
-    if (!isPlaying) return;
-    if (activeParagraphIndex === lastActiveIndexRef.current) return;
-    if (activeParagraphIndex < 0) return;
+    // 防抖：避免频繁滚动
+    const now = Date.now();
+    if (now - lastScrollTimeRef.current < 500) return;
 
-    // 只在段落真正切换时才滚动
+    if (activeParagraphIndex < 0) return;
+    if (activeParagraphIndex === lastActiveIndexRef.current) return;
+
+    // 更新缓存和时间
     lastActiveIndexRef.current = activeParagraphIndex;
+    lastScrollTimeRef.current = now;
 
     const container = containerRef.current;
     if (!container) return;
@@ -143,14 +146,12 @@ export const TranscriptViewer = ({ segments, highlightedSegmentId, podcastId }: 
     const activeElement = container.querySelector(`[data-paragraph-index="${activeParagraphIndex}"]`);
     if (!activeElement) return;
 
-    // 使用 requestAnimationFrame 优化滚动性能
-    requestAnimationFrame(() => {
-      activeElement.scrollIntoView({
-        behavior: 'smooth',
-        block: 'center',
-      });
+    // 平滑滚动到视口中心
+    activeElement.scrollIntoView({
+      behavior: 'smooth',
+      block: 'center',
     });
-  }, [activeParagraphIndex, isPlaying]);
+  }, [activeParagraphIndex]);
 
   // 检测文字选择
   const handleMouseUp = useCallback(() => {
@@ -243,28 +244,27 @@ export const TranscriptViewer = ({ segments, highlightedSegmentId, podcastId }: 
               style={{
                 padding: '12px 16px',
                 margin: '8px 0',
-                // 阅读器风格：当前段落极淡背景 + 左侧金色细线
+                // 当前段落：明显的视觉提示
                 ...(isActive ? {
-                  backgroundColor: 'rgba(212, 197, 185, 0.03)',
-                  borderLeft: '3px solid rgba(212, 197, 185, 0.6)',
-                  paddingLeft: '13px', // 补偿边框宽度
+                  backgroundColor: 'rgba(212, 197, 185, 0.08)', // 增强到 8%
+                  borderLeft: '4px solid rgba(212, 197, 185, 0.8)', // 加粗到 4px，不透明度 80%
+                  paddingLeft: '12px',
+                  borderRadius: '4px',
                 } : {
-                  borderLeft: '3px solid transparent',
-                  paddingLeft: '13px',
+                  borderLeft: '4px solid transparent',
+                  paddingLeft: '12px',
                 }),
-                borderRadius: '2px',
-                // 移除 transition，避免闪烁
               }}
               onMouseEnter={() => setHoveredSegmentId(paragraph.id)}
               onMouseLeave={() => setHoveredSegmentId(null)}
             >
               {/* 时间戳和笔记标识 - 仅悬停时显示 */}
-              {(isHovered || isActive) && (
-                <div className="flex items-center gap-2 mb-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+              {isHovered && (
+                <div className="flex items-center gap-2 mb-2">
                   <span
                     className="text-xs font-mono cursor-pointer hover:underline"
                     style={{
-                      color: 'rgba(212, 197, 185, 0.6)',
+                      color: 'rgba(212, 197, 185, 0.7)',
                     }}
                     onClick={() => seek(paragraph.startTime)}
                     title={`跳转到 ${formatTime(paragraph.startTime)}`}
@@ -277,8 +277,8 @@ export const TranscriptViewer = ({ segments, highlightedSegmentId, podcastId }: 
                     <div
                       className="flex items-center gap-1 px-1.5 py-0.5 rounded cursor-pointer text-xs"
                       style={{
-                        backgroundColor: 'rgba(212, 197, 185, 0.08)',
-                        color: 'rgba(212, 197, 185, 0.7)',
+                        backgroundColor: 'rgba(212, 197, 185, 0.1)',
+                        color: 'rgba(212, 197, 185, 0.8)',
                       }}
                       title={`该段落有笔记`}
                     >
@@ -291,8 +291,8 @@ export const TranscriptViewer = ({ segments, highlightedSegmentId, podcastId }: 
               {/* 转录文字 */}
               <div
                 style={{
-                  color: 'rgba(232, 232, 232, 0.92)',
-                  fontWeight: 400,
+                  color: isActive ? 'rgba(232, 232, 232, 1)' : 'rgba(232, 232, 232, 0.85)',
+                  fontWeight: isActive ? 500 : 400,
                 }}
               >
                 {paragraph.segments.map((segment, segIndex) => (
@@ -300,9 +300,6 @@ export const TranscriptViewer = ({ segments, highlightedSegmentId, podcastId }: 
                     key={segment.id}
                     data-start-time={segment.startTime}
                     className="transition-colors duration-200"
-                    style={{
-                      // 已读过的句子稍微变淡（可选）
-                    }}
                     onClick={() => seek(segment.startTime)}
                     title={`跳转到 ${formatTime(segment.startTime)}`}
                   >
