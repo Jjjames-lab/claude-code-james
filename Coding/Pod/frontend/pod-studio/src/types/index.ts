@@ -11,8 +11,8 @@ export interface TranscriptSegment {
   speaker: string;
   text: string;
   words: TranscriptWord[];
-  startTime: number; // 段落开始时间（毫秒）
-  endTime: number; // 段落结束时间（毫秒）
+  start: number; // 段落开始时间（毫秒）
+  end: number; // 段落结束时间（毫秒）
 }
 
 // 播客信息类型
