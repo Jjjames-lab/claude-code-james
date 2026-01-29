@@ -89,7 +89,7 @@ export const PodcastDetailPage = () => {
 
   // 处理单集点击
   const handleEpisodeClick = (episodeId: string) => {
-    navigate(`/episode/${episodeId}`);
+    navigate(`/episode/${episodeId}?view=tabs`);
   };
 
   // 返回上一页
