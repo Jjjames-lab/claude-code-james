@@ -6,7 +6,7 @@
 
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import { translationService, TranslateSegment } from '../utils/translationService';
+import { translationService, type TranslateSegment } from '../utils/translationService';
 
 interface TranslationState {
   // 当前显示模式

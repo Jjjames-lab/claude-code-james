@@ -1,0 +1,41 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+venv/
+env/
+ENV/
+*.egg-info/
+dist/
+build/
+
+# 环境变量
+.env
+
+# 日志
+logs/
+*.log
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Playwright
+.playwright/
+
+# macOS
+.DS_Store
+
+# 测试
+.pytest_cache/
+.coverage
+htmlcov/
+
+# 临时文件
+*.tmp
+*.bak

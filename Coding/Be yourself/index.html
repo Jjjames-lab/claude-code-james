@@ -1,0 +1,1371 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PRISM - 你的多维视角助手</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700&family=Noto+Serif+SC:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg-primary: #0a0a0a;
+            --bg-secondary: #141414;
+            --bg-tertiary: #1a1a1a;
+            --text-primary: #f5f5f5;
+            --text-secondary: #888;
+            --text-muted: #555;
+            --accent-calm: #7b8cde;
+            --accent-pm: #de7b7b;
+            --accent-time: #7bdec4;
+            --accent-cross: #c87bde;
+            --accent-critique: #dede7b;
+            --accent-match: #deb87b;
+            --border: #2a2a2a;
+            --glow-calm: rgba(123, 140, 222, 0.3);
+            --glow-pm: rgba(222, 123, 123, 0.3);
+            --glow-time: rgba(123, 222, 196, 0.3);
+            --glow-cross: rgba(200, 123, 222, 0.3);
+            --glow-critique: rgba(222, 222, 123, 0.3);
+            --glow-match: rgba(222, 184, 123, 0.3);
+        }
+
+        body {
+            font-family: 'Noto Sans SC', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* Ambient background */
+        .ambient-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: -1;
+            background:
+                radial-gradient(ellipse at 20% 20%, rgba(123, 140, 222, 0.08) 0%, transparent 50%),
+                radial-gradient(ellipse at 80% 80%, rgba(200, 123, 222, 0.08) 0%, transparent 50%),
+                radial-gradient(ellipse at 50% 50%, rgba(123, 222, 196, 0.05) 0%, transparent 70%);
+            pointer-events: none;
+        }
+
+        /* Header */
+        .header {
+            padding: 24px 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .prism-icon {
+            width: 36px;
+            height: 36px;
+            position: relative;
+        }
+
+        .prism-icon svg {
+            width: 100%;
+            height: 100%;
+        }
+
+        .logo-text {
+            font-family: 'Noto Serif SC', serif;
+            font-size: 24px;
+            font-weight: 700;
+            letter-spacing: 0.5em;
+            background: linear-gradient(135deg, var(--text-primary) 0%, var(--text-secondary) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .tagline {
+            font-size: 11px;
+            color: var(--text-muted);
+            letter-spacing: 0.3em;
+            text-transform: uppercase;
+        }
+
+        /* Main layout */
+        .main-container {
+            display: grid;
+            grid-template-columns: 1fr 380px;
+            min-height: calc(100vh - 85px);
+        }
+
+        /* Left panel - Input & Response */
+        .content-panel {
+            padding: 40px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Capture input area */
+        .capture-area {
+            margin-bottom: 32px;
+        }
+
+        .input-label {
+            font-size: 11px;
+            color: var(--text-muted);
+            letter-spacing: 0.2em;
+            text-transform: uppercase;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .input-label::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: linear-gradient(90deg, var(--border), transparent);
+        }
+
+        .capture-input {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 24px;
+            min-height: 120px;
+            color: var(--text-primary);
+            font-size: 15px;
+            line-height: 1.7;
+            resize: none;
+            transition: all 0.3s ease;
+            font-family: inherit;
+        }
+
+        .capture-input:focus {
+            outline: none;
+            border-color: var(--text-muted);
+            box-shadow: 0 0 40px rgba(255,255,255,0.02);
+        }
+
+        .capture-input::placeholder {
+            color: var(--text-muted);
+        }
+
+        .input-actions {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 16px;
+        }
+
+        .platform-tags {
+            display: flex;
+            gap: 8px;
+        }
+
+        .platform-tag {
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 11px;
+            background: var(--bg-tertiary);
+            color: var(--text-secondary);
+            border: 1px solid var(--border);
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .platform-tag:hover, .platform-tag.active {
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            border-color: var(--text-muted);
+        }
+
+        .submit-btn {
+            padding: 12px 32px;
+            background: var(--text-primary);
+            color: var(--bg-primary);
+            border: none;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            letter-spacing: 0.1em;
+        }
+
+        .submit-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 8px 24px rgba(255,255,255,0.15);
+        }
+
+        .submit-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        /* Perspective Selector */
+        .perspective-selector {
+            margin-bottom: 40px;
+        }
+
+        .perspective-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+        }
+
+        .perspective-card {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 20px;
+            cursor: pointer;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .perspective-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .perspective-card:hover {
+            transform: translateY(-2px);
+            border-color: var(--text-muted);
+        }
+
+        .perspective-card.active {
+            border-color: transparent;
+        }
+
+        .perspective-card.active::before {
+            opacity: 1;
+        }
+
+        .perspective-card[data-perspective="calm"].active::before {
+            background: var(--accent-calm);
+        }
+        .perspective-card[data-perspective="pm"].active::before {
+            background: var(--accent-pm);
+        }
+        .perspective-card[data-perspective="time"].active::before {
+            background: var(--accent-time);
+        }
+        .perspective-card[data-perspective="cross"].active::before {
+            background: var(--accent-cross);
+        }
+        .perspective-card[data-perspective="critique"].active::before {
+            background: var(--accent-critique);
+        }
+        .perspective-card[data-perspective="match"].active::before {
+            background: var(--accent-match);
+        }
+
+        .perspective-card[data-perspective="calm"].active {
+            box-shadow: 0 0 30px var(--glow-calm);
+        }
+        .perspective-card[data-perspective="pm"].active {
+            box-shadow: 0 0 30px var(--glow-pm);
+        }
+        .perspective-card[data-perspective="time"].active {
+            box-shadow: 0 0 30px var(--glow-time);
+        }
+        .perspective-card[data-perspective="cross"].active {
+            box-shadow: 0 0 30px var(--glow-cross);
+        }
+        .perspective-card[data-perspective="critique"].active {
+            box-shadow: 0 0 30px var(--glow-critique);
+        }
+        .perspective-card[data-perspective="match"].active {
+            box-shadow: 0 0 30px var(--glow-match);
+        }
+
+        .perspective-icon {
+            width: 32px;
+            height: 32px;
+            margin-bottom: 12px;
+            opacity: 0.7;
+        }
+
+        .perspective-card.active .perspective-icon svg {
+            transform: scale(1.1);
+        }
+
+        .perspective-icon svg {
+            transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .perspective-name {
+            font-size: 14px;
+            font-weight: 500;
+            margin-bottom: 4px;
+            transition: color 0.3s ease;
+        }
+
+        .perspective-desc {
+            font-size: 11px;
+            color: var(--text-secondary);
+            line-height: 1.5;
+            transition: color 0.3s ease;
+        }
+
+        .perspective-card[data-perspective="calm"] .perspective-name { color: #7b8cde; }
+        .perspective-card[data-perspective="pm"] .perspective-name { color: #de7b7b; }
+        .perspective-card[data-perspective="time"] .perspective-name { color: #7bdec4; }
+        .perspective-card[data-perspective="cross"] .perspective-name { color: #c87bde; }
+        .perspective-card[data-perspective="critique"] .perspective-name { color: #dede7b; }
+        .perspective-card[data-perspective="match"] .perspective-name { color: #deb87b; }
+
+        /* Response Area */
+        .response-area {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .response-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .response-title {
+            font-size: 13px;
+            color: var(--text-secondary);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .response-title span {
+            color: var(--text-muted);
+        }
+
+        .response-active-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .response-active-badge.calm { background: rgba(123, 140, 222, 0.15); color: #7b8cde; }
+        .response-active-badge.pm { background: rgba(222, 123, 123, 0.15); color: #de7b7b; }
+        .response-active-badge.time { background: rgba(123, 222, 196, 0.15); color: #7bdec4; }
+        .response-active-badge.cross { background: rgba(200, 123, 222, 0.15); color: #c87bde; }
+        .response-active-badge.critique { background: rgba(222, 222, 123, 0.15); color: #dede7b; }
+        .response-active-badge.match { background: rgba(222, 184, 123, 0.15); color: #deb87b; }
+
+        .response-content {
+            flex: 1;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 32px;
+            line-height: 1.8;
+            font-size: 15px;
+            color: var(--text-secondary);
+            overflow-y: auto;
+            transition: all 0.3s ease;
+        }
+
+        .response-content.empty {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-muted);
+            font-size: 13px;
+            letter-spacing: 0.1em;
+        }
+
+        .response-content.highlight {
+            animation: highlightPulse 0.6s ease;
+        }
+
+        @keyframes highlightPulse {
+            0% { box-shadow: 0 0 0 0 rgba(123, 140, 222, 0.4); }
+            50% { box-shadow: 0 0 40px 10px rgba(123, 140, 222, 0.2); }
+            100% { box-shadow: 0 0 0 0 rgba(123, 140, 222, 0); }
+        }
+
+        /* Right panel - Profile & Collections */
+        .side-panel {
+            background: var(--bg-secondary);
+            border-left: 1px solid var(--border);
+            padding: 32px;
+            overflow-y: auto;
+        }
+
+        .profile-section {
+            margin-bottom: 40px;
+        }
+
+        .section-title {
+            font-size: 11px;
+            color: var(--text-muted);
+            letter-spacing: 0.2em;
+            text-transform: uppercase;
+            margin-bottom: 20px;
+        }
+
+        /* User Portrait */
+        .user-portrait {
+            text-align: center;
+            padding: 24px;
+            background: var(--bg-tertiary);
+            border-radius: 16px;
+            margin-bottom: 20px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .user-portrait::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(123, 140, 222, 0.08) 0%, transparent 50%);
+            animation: rotate 20s linear infinite;
+        }
+
+        @keyframes rotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        .portrait-avatar {
+            width: 64px;
+            height: 64px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--accent-calm), var(--accent-cross));
+            margin: 0 auto 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            position: relative;
+            z-index: 1;
+            box-shadow: 0 8px 32px rgba(123, 140, 222, 0.3);
+        }
+
+        .portrait-name {
+            font-size: 16px;
+            font-weight: 500;
+            margin-bottom: 4px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .portrait-role {
+            font-size: 12px;
+            color: var(--text-secondary);
+            position: relative;
+            z-index: 1;
+        }
+
+        .portrait-avatar {
+            width: 64px;
+            height: 64px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--accent-calm), var(--accent-cross));
+            margin: 0 auto 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+        }
+
+        .portrait-name {
+            font-size: 16px;
+            font-weight: 500;
+            margin-bottom: 4px;
+        }
+
+        .portrait-role {
+            font-size: 12px;
+            color: var(--text-secondary);
+        }
+
+        /* User Traits */
+        .traits-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 16px;
+        }
+
+        .trait-tag {
+            padding: 6px 12px;
+            background: var(--bg-primary);
+            border-radius: 20px;
+            font-size: 11px;
+            color: var(--text-secondary);
+            border: 1px solid var(--border);
+        }
+
+        /* Collection Stats */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            margin-bottom: 24px;
+        }
+
+        .stat-card {
+            background: var(--bg-tertiary);
+            border-radius: 12px;
+            padding: 16px;
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 24px;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .stat-label {
+            font-size: 11px;
+            color: var(--text-secondary);
+        }
+
+        /* Recent Collections */
+        .collections-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .collection-item {
+            background: var(--bg-tertiary);
+            border-radius: 12px;
+            padding: 16px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            border: 1px solid transparent;
+        }
+
+        .collection-item:hover {
+            border-color: var(--border);
+            transform: translateX(4px);
+        }
+
+        .collection-item.related {
+            border-left: 2px solid var(--accent-match);
+        }
+
+        .collection-source {
+            font-size: 10px;
+            color: var(--text-muted);
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .collection-title {
+            font-size: 13px;
+            line-height: 1.5;
+            color: var(--text-secondary);
+            margin-bottom: 8px;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .collection-tags {
+            display: flex;
+            gap: 6px;
+        }
+
+        .collection-tag {
+            font-size: 10px;
+            padding: 3px 8px;
+            background: var(--bg-primary);
+            border-radius: 10px;
+            color: var(--text-muted);
+        }
+
+        /* Goal Section */
+        .goal-section {
+            margin-top: 32px;
+            padding: 20px;
+            background: var(--bg-tertiary);
+            border-radius: 12px;
+            border-left: 2px solid var(--accent-time);
+        }
+
+        .goal-label {
+            font-size: 10px;
+            color: var(--text-muted);
+            letter-spacing: 0.2em;
+            text-transform: uppercase;
+            margin-bottom: 8px;
+        }
+
+        .goal-text {
+            font-size: 13px;
+            line-height: 1.6;
+            color: var(--text-secondary);
+        }
+
+        /* Animations */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .fade-in {
+            animation: fadeIn 0.4s ease forwards;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 0.5; }
+            50% { opacity: 1; }
+        }
+
+        .thinking {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .thinking-dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: var(--text-muted);
+            animation: pulse 1.4s infinite ease-in-out;
+        }
+
+        .thinking-dot:nth-child(2) { animation-delay: 0.2s; }
+        .thinking-dot:nth-child(3) { animation-delay: 0.4s; }
+
+        /* Responsive */
+        @media (max-width: 1024px) {
+            .main-container {
+                grid-template-columns: 1fr;
+            }
+
+            .side-panel {
+                border-left: none;
+                border-top: 1px solid var(--border);
+            }
+        }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--border);
+            border-radius: 3px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--text-muted);
+        }
+    </style>
+</head>
+<body>
+    <div class="ambient-bg"></div>
+
+    <header class="header">
+        <div class="logo">
+            <div class="prism-icon">
+                <svg viewBox="0 0 36 36" fill="none">
+                    <defs>
+                        <linearGradient id="prismGrad" x1="0%" y1="0%" x2="36%" y2="36%">
+                            <stop offset="0%" stop-color="#7b8cde"/>
+                            <stop offset="50%" stop-color="#c87bde"/>
+                            <stop offset="100%" stop-color="#7bdec4"/>
+                        </linearGradient>
+                    </defs>
+                    <path d="M18 2L2 12v12l16 10 16-10V12L18 2z" fill="url(#prismGrad)" opacity="0.9"/>
+                    <path d="M18 2v20L2 12M18 2v20l16-8M18 22l-16-10M18 22l16-10" stroke="rgba(255,255,255,0.3)" stroke-width="0.5"/>
+                </svg>
+            </div>
+            <div>
+                <div class="logo-text">PRISM</div>
+                <div class="tagline">Your Perspective Assistant</div>
+            </div>
+        </div>
+    </header>
+
+    <div class="main-container">
+        <div class="content-panel">
+            <!-- Capture Area -->
+            <div class="capture-area">
+                <div class="input-label">Capture Anything</div>
+                <textarea
+                    class="capture-input"
+                    id="captureInput"
+                    placeholder="分享任何内容：链接、文字、想法、困惑...&#10;&#10;我会用多重视角帮你分析、连接、规划"
+                ></textarea>
+                <div class="input-actions">
+                    <div class="platform-tags">
+                        <span class="platform-tag active" data-platform="all">全部</span>
+                        <span class="platform-tag" data-platform="x">X / Twitter</span>
+                        <span class="platform-tag" data-platform="redbook">小红书</span>
+                        <span class="platform-tag" data-platform="wechat">微信公众号</span>
+                        <span class="platform-tag" data-platform="youtube">YouTube</span>
+                    </div>
+                    <button class="submit-btn" id="submitBtn">发送</button>
+                </div>
+            </div>
+
+            <!-- Perspective Selector -->
+            <div class="perspective-selector">
+                <div class="input-label">Perspective</div>
+                <div class="perspective-grid" id="perspectiveGrid">
+                    <div class="perspective-card active" data-perspective="calm">
+                        <div class="perspective-icon">
+                            <svg viewBox="0 0 32 32" fill="none">
+                                <circle cx="16" cy="16" r="12" stroke="#7b8cde" stroke-width="1.5"/>
+                                <path d="M16 8v8l5 3" stroke="#7b8cde" stroke-width="1.5" stroke-linecap="round"/>
+                            </svg>
+                        </div>
+                        <div class="perspective-name">冷静的你</div>
+                        <div class="perspective-desc">客观、温和，不评判你的情绪</div>
+                    </div>
+                    <div class="perspective-card" data-perspective="pm">
+                        <div class="perspective-icon">
+                            <svg viewBox="0 0 32 32" fill="none">
+                                <rect x="4" y="8" width="24" height="18" rx="2" stroke="#de7b7b" stroke-width="1.5"/>
+                                <path d="M4 14h24M10 20h4" stroke="#de7b7b" stroke-width="1.5"/>
+                            </svg>
+                        </div>
+                        <div class="perspective-name">产品经理 James</div>
+                        <div class="perspective-desc">用户价值、场景、核心问题</div>
+                    </div>
+                    <div class="perspective-card" data-perspective="time">
+                        <div class="perspective-icon">
+                            <svg viewBox="0 0 32 32" fill="none">
+                                <circle cx="16" cy="16" r="12" stroke="#7bdec4" stroke-width="1.5"/>
+                                <path d="M16 6v10l7 7" stroke="#7bdec4" stroke-width="1.5" stroke-linecap="round"/>
+                                <circle cx="16" cy="16" r="3" fill="#7bdec4"/>
+                            </svg>
+                        </div>
+                        <div class="perspective-name">时间旅者</div>
+                        <div class="perspective-desc">5年后的你会怎么看这件事？</div>
+                    </div>
+                    <div class="perspective-card" data-perspective="cross">
+                        <div class="perspective-icon">
+                            <svg viewBox="0 0 32 32" fill="none">
+                                <path d="M4 16h24M16 4v24" stroke="#c87bde" stroke-width="1.5"/>
+                                <circle cx="16" cy="16" r="6" stroke="#c87bde" stroke-width="1.5"/>
+                                <circle cx="16" cy="16" r="10" stroke="#c87bde" stroke-width="1.5" stroke-dasharray="2 4"/>
+                            </svg>
+                        </div>
+                        <div class="perspective-name">跨学科连接者</div>
+                        <div class="perspective-desc">发现不同领域的隐藏关联</div>
+                    </div>
+                    <div class="perspective-card" data-perspective="critique">
+                        <div class="perspective-icon">
+                            <svg viewBox="0 0 32 32" fill="none">
+                                <path d="M4 4l24 24M12 12l4 4M8 16l8 8" stroke="#dede7b" stroke-width="1.5" stroke-linecap="round"/>
+                                <circle cx="20" cy="8" r="4" stroke="#dede7b" stroke-width="1.5"/>
+                            </svg>
+                        </div>
+                        <div class="perspective-name">红队批判者</div>
+                        <div class="perspective-desc">寻找盲点，预见风险</div>
+                    </div>
+                    <div class="perspective-card" data-perspective="match">
+                        <div class="perspective-icon">
+                            <svg viewBox="0 0 32 32" fill="none">
+                                <polygon points="16,4 20,12 28,12 22,18 24,26 16,22 8,26 10,18 4,12 12,12" stroke="#deb87b" stroke-width="1.5"/>
+                                <circle cx="16" cy="16" r="4" stroke="#deb87b" stroke-width="1.5"/>
+                            </svg>
+                        </div>
+                        <div class="perspective-name">收藏匹配器</div>
+                        <div class="perspective-desc">连接你的过去与现在</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Response Area -->
+            <div class="response-area">
+                <div class="response-header">
+                    <div class="response-title">
+                        <span id="activePerspectiveLabel">冷静的你</span>
+                        <span>的分析</span>
+                    </div>
+                </div>
+                <div class="response-content empty" id="responseContent">
+                    <span>分享一些内容，选择视角，开始对话</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="side-panel">
+            <!-- User Profile -->
+            <div class="profile-section">
+                <div class="section-title">你的画像</div>
+                <div class="user-portrait">
+                    <div class="portrait-avatar">J</div>
+                    <div class="portrait-name">James</div>
+                    <div class="portrait-role">产品经理</div>
+                    <div class="traits-list" id="traitsList">
+                        <span class="trait-tag">视觉敏感</span>
+                        <span class="trait-tag">碎片学习者</span>
+                        <span class="trait-tag">内省型</span>
+                        <span class="trait-tag">连接型思维</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Stats -->
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-number" id="collectionCount">12</div>
+                    <div class="stat-label">已收藏</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="perspectiveCount">6</div>
+                    <div class="stat-label">视角</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="connectionCount">8</div>
+                    <div class="stat-label">关联发现</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="streakCount">5</div>
+                    <div class="stat-label">连续天数</div>
+                </div>
+            </div>
+
+            <!-- Goals -->
+            <div class="section-title">当前目标</div>
+            <div class="goal-section">
+                <div class="goal-label">长期目标</div>
+                <div class="goal-text">成为顶尖产品经理，打造有影响力的产品，影响千万用户</div>
+            </div>
+            <div class="goal-section" style="margin-top: 16px; border-left-color: var(--accent-pm);">
+                <div class="goal-label">短期目标</div>
+                <div class="goal-text">Q1完成PRISM MVP，学习AI产品设计方法论</div>
+            </div>
+
+            <!-- Recent Collections -->
+            <div style="margin-top: 32px;">
+                <div class="section-title">最近收藏</div>
+                <div class="collections-list" id="collectionsList">
+                    <div class="collection-item">
+                        <div class="collection-source">
+                            <span>📱</span> X / Twitter · 2小时前
+                        </div>
+                        <div class="collection-title">Sam Altman：AI产品设计的五个核心原则</div>
+                        <div class="collection-tags">
+                            <span class="collection-tag">AI产品</span>
+                            <span class="collection-tag">设计思维</span>
+                        </div>
+                    </div>
+                    <div class="collection-item">
+                        <div class="collection-source">
+                            <span>📕</span> 小红书 · 1天前
+                        </div>
+                        <div class="collection-title">极简UI设计指南：留白的艺术</div>
+                        <div class="collection-tags">
+                            <span class="collection-tag">UI设计</span>
+                            <span class="collection-tag">美学</span>
+                        </div>
+                    </div>
+                    <div class="collection-item">
+                        <div class="collection-source">
+                            <span>📄</span> 公众号 · 3天前
+                        </div>
+                        <div class="collection-title">产品经理的自我修养：从执行到战略</div>
+                        <div class="collection-tags">
+                            <span class="collection-tag">PM成长</span>
+                            <span class="collection-tag">战略思维</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Related Collections -->
+            <div style="margin-top: 32px; display: none;" id="relatedSection">
+                <div class="section-title">相关推荐</div>
+                <div class="collections-list" id="relatedList">
+                    <!-- Dynamically populated -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // State
+        const state = {
+            currentPerspective: 'calm',
+            currentPlatform: 'all',
+            collections: [],
+            isThinking: false
+        };
+
+        // Perspective responses (mock AI responses)
+        const perspectiveResponses = {
+            calm: `我理解你分享这个内容时的心情。
+
+让我先说一件重要的事：**你的感受是合理的**。无论这个内容让你产生了什么样的情绪——兴奋、困惑、焦虑、还是怀疑——这些都是正常的反应。
+
+从我的观察来看：
+- 你的视觉敏感度让你特别容易被美学打动
+- 你的碎片学习习惯意味着你需要在多个平台间跳跃
+- 你对"关联"的渴望说明你在寻找意义
+
+**我的建议是**：
+不要急于"学会"所有东西。先问自己：这一刻的我，最需要哪个视角？
+
+如果你愿意，可以告诉我：
+1. 你现在最想解决什么问题？
+2. 你对哪个方向最感兴趣？
+
+我会在这里陪你梳理。`,
+
+            pm: `让我用产品经理的视角来拆解这个内容。
+
+**用户价值分析**：
+- 目标用户是谁？
+- 他们最痛的痛点是什么？
+- 这个内容解决的核心需求是？
+
+**场景还原**：
+- 用户在什么情境下会接触到这些信息？
+- 他们会花多少时间？
+- 期望获得什么回报？
+
+**核心问题提炼**：
+- 如果要用一句话总结，这个内容在回答什么问题？
+- 有没有更好的表达方式？
+
+**可执行的下一步**：
+1. 验证：先小范围测试你的理解
+2. 沉淀：找到3个最触动你的点
+3. 输出：用你自己的话复述一遍`,
+
+            time: `让我带你穿越到不同的时间节点...
+
+**现在（Present）**：
+你正在被这个内容吸引。很好，说明它触动了你某些东西。
+
+**5年后（Future）**：
+如果你持续在这个方向深耕，5年后的你会感谢今天的什么决定？
+- 可能是一个月后，你已经能自如运用这些概念
+- 可能是一年后，你已经建立了这个领域的知识体系
+- 可能是五年后，你已经成为这个领域的专家
+
+**回溯过去（Past）**：
+如果3年前的你知道这些，他会做什么？
+- 他会可惜自己为什么没早点看到
+- 他会立刻行动，不会等待"准备好"
+
+**行动建议**：
+如果只能做一件事，现在就做。是什么？`,
+
+            cross: `让我用跨学科的透镜来看看...
+
+**物理学视角**：
+这个概念遵循什么"定律"？有没有能量守恒、信息熵的隐喻？
+
+**生物学视角**：
+如果把它想象成一个有机体，它的"基因"是什么？"突变"在哪里？
+
+**经济学视角**：
+供需关系是什么？边际成本和边际收益如何？
+
+**心理学视角**：
+它触发了什么认知偏见？确认偏误？锚定效应？
+
+**美学视角**：
+它的"优雅"在哪里？复杂性中的简洁？
+
+**连接发现**：
+这和你1月15日收藏的"产品设计心理学"有关联——它们都在探讨认知如何影响决策。`,
+
+            critique: `让我扮演红队，来找找盲点...
+
+**潜在风险**：
+- 这个结论是否过于简化？
+- 有没有反例被忽略了？
+- 适用边界在哪里？
+
+**盲点检测**：
+- 你是否因为"听起来对"就接受了？
+- 是否有利益相关方的立场被掩盖了？
+- 这个视角是否只看到了一面？
+
+**预言性反驳**：
+- 如果错了，后果是什么？
+- 最坏情况能否承受？
+- 有没有"Plan B"？
+
+**批判性建议**：
+保持怀疑，但不要过度怀疑。**相信证据，但也要知道证据会更新**。`,
+
+            match: `我发现了一些有趣的连接...
+
+**历史匹配**：
+你在1月20日分享过"产品营销策略"，今天的这个内容实际上是它的**底层逻辑**。
+
+**关联强度**：⭐⭐⭐⭐⭐
+
+**推荐回顾**：
+→ "产品经理的第一性原理"（1月18日）
+→ "用户心理画像构建法"（1月15日）
+
+**为什么这个重要**：
+这些内容构成了一个知识模块：用户理解 → 需求洞察 → 价值创造 → 营销传达
+
+**建议行动**：
+可以把它们整理成一个"主题合集"，形成你的知识资产。`
+        };
+
+        const perspectiveNames = {
+            calm: '冷静的你',
+            pm: '产品经理 James',
+            time: '时间旅者',
+            cross: '跨学科连接者',
+            critique: '红队批判者',
+            match: '收藏匹配器'
+        };
+
+        // DOM Elements
+        const captureInput = document.getElementById('captureInput');
+        const submitBtn = document.getElementById('submitBtn');
+        const perspectiveGrid = document.getElementById('perspectiveGrid');
+        const responseContent = document.getElementById('responseContent');
+        const activePerspectiveLabel = document.getElementById('activePerspectiveLabel');
+        const platformTags = document.querySelectorAll('.platform-tag');
+        const relatedSection = document.getElementById('relatedSection');
+        const relatedList = document.getElementById('relatedList');
+
+        // Initialize
+        function init() {
+            loadFromStorage();
+            setupEventListeners();
+            renderCollections();
+        }
+
+        // Load from localStorage
+        function loadFromStorage() {
+            const saved = localStorage.getItem('prism_data');
+            if (saved) {
+                const data = JSON.parse(saved);
+                state.collections = data.collections || [];
+                updateStats();
+            }
+        }
+
+        // Save to localStorage
+        function saveToStorage() {
+            localStorage.setItem('prism_data', JSON.stringify({
+                collections: state.collections
+            }));
+        }
+
+        // Setup event listeners
+        function setupEventListeners() {
+            // Perspective selection
+            perspectiveGrid.addEventListener('click', (e) => {
+                const card = e.target.closest('.perspective-card');
+                if (card) {
+                    document.querySelectorAll('.perspective-card').forEach(c => c.classList.remove('active'));
+                    card.classList.add('active');
+                    state.currentPerspective = card.dataset.perspective;
+                    activePerspectiveLabel.textContent = perspectiveNames[state.currentPerspective];
+                    updateResponse();
+                }
+            });
+
+            // Platform tags
+            platformTags.forEach(tag => {
+                tag.addEventListener('click', () => {
+                    platformTags.forEach(t => t.classList.remove('active'));
+                    tag.classList.add('active');
+                    state.currentPlatform = tag.dataset.platform;
+                });
+            });
+
+            // Submit button
+            submitBtn.addEventListener('click', handleSubmit);
+
+            // Enter key to submit (with Cmd/Ctrl)
+            captureInput.addEventListener('keydown', (e) => {
+                if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') {
+                    handleSubmit();
+                }
+            });
+        }
+
+        // Handle submit
+        function handleSubmit() {
+            const content = captureInput.value.trim();
+            if (!content || state.isThinking) return;
+
+            // Save collection
+            const collection = {
+                id: Date.now(),
+                content: content,
+                platform: state.currentPlatform,
+                perspective: state.currentPerspective,
+                timestamp: new Date().toISOString(),
+                tags: extractTags(content)
+            };
+
+            state.collections.unshift(collection);
+            saveToStorage();
+
+            // Show thinking
+            showThinking();
+
+            // Simulate AI response delay
+            setTimeout(() => {
+                hideThinking();
+                updateResponse(collection);
+                renderCollections();
+                updateStats();
+                checkRelated(collection);
+            }, 1500 + Math.random() * 1000);
+        }
+
+        // Extract tags from content
+        function extractTags(content) {
+            const tagPatterns = [
+                /#(\w+)/g,
+                /【([^】]+)】/g,
+                /「([^」]+)」/g
+            ];
+
+            const tags = new Set();
+            tagPatterns.forEach(pattern => {
+                let match;
+                while ((match = pattern.exec(content)) !== null) {
+                    tags.add(match[1]);
+                }
+            });
+
+            // Add some default tags based on content
+            if (content.includes('产品')) tags.add('产品');
+            if (content.includes('AI') || content.includes('人工智能')) tags.add('AI');
+            if (content.includes('设计')) tags.add('设计');
+            if (content.includes('学习')) tags.add('学习');
+
+            return Array.from(tags).slice(0, 4);
+        }
+
+        // Show thinking animation
+        function showThinking() {
+            state.isThinking = true;
+            submitBtn.disabled = true;
+            responseContent.classList.remove('empty');
+            responseContent.innerHTML = `
+                <div class="thinking" style="justify-content: center; padding: 40px;">
+                    <div class="thinking-dot"></div>
+                    <div class="thinking-dot"></div>
+                    <div class="thinking-dot"></div>
+                </div>
+            `;
+        }
+
+        // Hide thinking
+        function hideThinking() {
+            state.isThinking = false;
+            submitBtn.disabled = false;
+        }
+
+        // Update response content
+        function updateResponse(collection = null) {
+            const perspective = state.currentPerspective;
+            let response = perspectiveResponses[perspective];
+
+            // If there's a real collection, personalize the response
+            if (collection) {
+                response = response.replace('这个内容', '你分享的内容');
+                if (collection.tags && collection.tags.length > 0) {
+                    response = response.replace('这些概念', `"${collection.tags.join('"、"')}"相关概念`);
+                }
+            }
+
+            responseContent.innerHTML = `<div class="fade-in">${formatResponse(response)}</div>`;
+        }
+
+        // Format response with rich content
+        function formatResponse(text) {
+            // Convert line breaks to paragraphs
+            let formatted = text.split('\n\n').map(p => `<p style="margin-bottom: 16px;">${p}</p>`).join('');
+
+            // Highlight key terms
+            formatted = formatted.replace(/\*\*(.+?)\*\*/g, '<strong style="color: var(--text-primary);">$1</strong>');
+
+            // Highlight questions
+            formatted = formatted.replace(/([^\。\？])\?/g, '$1?<br>');
+
+            return formatted;
+        }
+
+        // Render collections list
+        function renderCollections() {
+            const collectionsList = document.getElementById('collectionsList');
+            const recentCollections = state.collections.slice(0, 5);
+
+            if (recentCollections.length === 0) {
+                collectionsList.innerHTML = '<div style="text-align: center; color: var(--text-muted); padding: 20px; font-size: 12px;">还没有收藏，开始分享吧</div>';
+                return;
+            }
+
+            collectionsList.innerHTML = recentCollections.map(item => `
+                <div class="collection-item" onclick="loadCollection(${item.id})">
+                    <div class="collection-source">
+                        <span>${getPlatformIcon(item.platform)}</span>
+                        ${getPlatformName(item.platform)} · ${formatTime(item.timestamp)}
+                    </div>
+                    <div class="collection-title">${escapeHtml(item.content.substring(0, 80))}${item.content.length > 80 ? '...' : ''}</div>
+                    <div class="collection-tags">
+                        ${item.tags.slice(0, 3).map(tag => `<span class="collection-tag">${tag}</span>`).join('')}
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Load a specific collection
+        function loadCollection(id) {
+            const collection = state.collections.find(c => c.id === id);
+            if (collection) {
+                captureInput.value = collection.content;
+                // Switch to match perspective to show connections
+                document.querySelectorAll('.perspective-card').forEach(c => c.classList.remove('active'));
+                document.querySelector('[data-perspective="match"]').classList.add('active');
+                state.currentPerspective = 'match';
+                activePerspectiveLabel.textContent = perspectiveNames['match'];
+                updateResponse(collection);
+                checkRelated(collection);
+            }
+        }
+
+        // Check for related collections
+        function checkRelated(collection) {
+            const related = state.collections.filter(c =>
+                c.id !== collection.id && (
+                    c.tags.some(tag => collection.tags.includes(tag)) ||
+                    c.content.includes(collection.content.substring(0, 20))
+                )
+            ).slice(0, 3);
+
+            if (related.length > 0) {
+                relatedSection.style.display = 'block';
+                relatedList.innerHTML = related.map(item => `
+                    <div class="collection-item related" onclick="loadCollection(${item.id})">
+                        <div class="collection-source">
+                            <span>🔗</span> 关联发现 · ${formatTime(item.timestamp)}
+                        </div>
+                        <div class="collection-title">${escapeHtml(item.content.substring(0, 60))}...</div>
+                        <div class="collection-tags">
+                            ${item.tags.slice(0, 2).map(tag => `<span class="collection-tag">${tag}</span>`).join('')}
+                        </div>
+                    </div>
+                `).join('');
+            } else {
+                relatedSection.style.display = 'none';
+            }
+        }
+
+        // Update stats
+        function updateStats() {
+            document.getElementById('collectionCount').textContent = state.collections.length;
+
+            // Calculate connections
+            let connections = 0;
+            for (let i = 0; i < Math.min(state.collections.length, 10); i++) {
+                const item = state.collections[i];
+                if (state.collections.filter(c =>
+                    c.id !== item.id &&
+                    c.tags.some(tag => item.tags.includes(tag))
+                ).length > 0) {
+                    connections++;
+                }
+            }
+            document.getElementById('connectionCount').textContent = connections;
+        }
+
+        // Utility functions
+        function getPlatformIcon(platform) {
+            const icons = {
+                x: '𝕏',
+                redbook: '📕',
+                wechat: '📄',
+                youtube: '📺',
+                all: '🌐'
+            };
+            return icons[platform] || '📝';
+        }
+
+        function getPlatformName(platform) {
+            const names = {
+                x: 'X / Twitter',
+                redbook: '小红书',
+                wechat: '微信公众号',
+                youtube: 'YouTube',
+                all: '全部'
+            };
+            return names[platform] || '其他';
+        }
+
+        function formatTime(timestamp) {
+            const date = new Date(timestamp);
+            const now = new Date();
+            const diff = now - date;
+
+            if (diff < 60000) return '刚刚';
+            if (diff < 3600000) return `${Math.floor(diff / 60000)}分钟前`;
+            if (diff < 86400000) return `${Math.floor(diff / 3600000)}小时前`;
+            if (diff < 604800000) return `${Math.floor(diff / 86400000)}天前`;
+
+            return date.toLocaleDateString('zh-CN');
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        // Initialize on load
+        init();
+    </script>
+</body>
+</html>

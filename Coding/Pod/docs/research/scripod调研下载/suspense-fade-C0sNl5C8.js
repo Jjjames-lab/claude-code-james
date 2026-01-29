@@ -1,0 +1,1 @@
+import{r as a,j as e,c as p}from"./main-BC3yBi8Q.js";const l=({children:r,fallback:t,className:s,forceFade:n,placeholder:i})=>{const[d,c]=a.useState(!1);return e.jsx(a.Suspense,{fallback:e.jsx("div",{ref:o=>{c(!0)},className:s,children:t}),children:e.jsx("div",{className:p(s,(d||n)&&"animate-fade-in"),children:r})})};export{l as S};

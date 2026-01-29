@@ -1,0 +1,797 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>小宇宙深度学习助手 - 精英协作看板</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            color: #e4e4e7;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .header {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border-radius: 16px;
+            padding: 24px;
+            margin-bottom: 24px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .header h1 {
+            font-size: 28px;
+            font-weight: 700;
+            margin-bottom: 12px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .stats {
+            display: flex;
+            gap: 24px;
+            align-items: center;
+        }
+
+        .stat {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .progress-bar {
+            width: 200px;
+            height: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+            border-radius: 4px;
+            transition: width 0.3s ease;
+        }
+
+        .section {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border-radius: 16px;
+            padding: 24px;
+            margin-bottom: 24px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .section-title {
+            font-size: 20px;
+            font-weight: 600;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .roles-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+        }
+
+        .role-card {
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 12px;
+            padding: 20px;
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .role-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+        }
+
+        .role-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+
+        .role-avatar {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+        }
+
+        .role-info {
+            flex: 1;
+        }
+
+        .role-name {
+            font-weight: 600;
+            font-size: 16px;
+            margin-bottom: 4px;
+        }
+
+        .role-status {
+            font-size: 12px;
+            padding: 4px 8px;
+            border-radius: 12px;
+            display: inline-block;
+        }
+
+        .status-idle {
+            background: rgba(16, 185, 129, 0.2);
+            color: #10b981;
+        }
+
+        .status-working {
+            background: rgba(245, 158, 11, 0.2);
+            color: #f59e0b;
+        }
+
+        .status-blocked {
+            background: rgba(239, 68, 68, 0.2);
+            color: #ef4444;
+        }
+
+        .role-task {
+            margin: 12px 0;
+            padding: 12px;
+            background: rgba(255, 255, 255, 0.02);
+            border-radius: 8px;
+            border-left: 3px solid #667eea;
+        }
+
+        .task-name {
+            font-weight: 500;
+            margin-bottom: 8px;
+        }
+
+        .task-progress {
+            margin: 8px 0;
+        }
+
+        .task-meta {
+            display: flex;
+            justify-content: space-between;
+            font-size: 12px;
+            color: #a1a1aa;
+            margin-top: 8px;
+        }
+
+        .event-stream {
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .event-item {
+            padding: 12px;
+            margin-bottom: 8px;
+            background: rgba(255, 255, 255, 0.02);
+            border-radius: 8px;
+            border-left: 3px solid #667eea;
+            font-size: 14px;
+        }
+
+        .event-time {
+            color: #71717a;
+            font-size: 12px;
+            margin-bottom: 4px;
+        }
+
+        .event-icon {
+            display: inline-block;
+            margin-right: 8px;
+        }
+
+        .task-queue {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .queue-item {
+            padding: 16px;
+            background: rgba(255, 255, 255, 0.02);
+            border-radius: 8px;
+            border-left: 3px solid #f59e0b;
+        }
+
+        .queue-item.priority-high {
+            border-left-color: #ef4444;
+        }
+
+        .queue-item.priority-medium {
+            border-left-color: #f59e0b;
+        }
+
+        .queue-item.priority-low {
+            border-left-color: #10b981;
+        }
+
+        .queue-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+
+        .queue-role {
+            font-weight: 600;
+        }
+
+        .queue-priority {
+            font-size: 12px;
+            padding: 2px 8px;
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .queue-task {
+            color: #a1a1aa;
+            font-size: 14px;
+            margin-bottom: 4px;
+        }
+
+        .queue-dependency {
+            font-size: 12px;
+            color: #71717a;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .pulse {
+            animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+
+        .last-update {
+            text-align: center;
+            color: #71717a;
+            font-size: 12px;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <h1>🎯 小宇宙深度学习助手 - 精英协作看板</h1>
+            <div class="stats">
+                <div class="stat">
+                    <span>📊 项目进度:</span>
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width: 70%"></div>
+                    </div>
+                    <span>70%</span>
+                </div>
+                <div class="stat">
+                    <span>🎯 下个里程碑:</span>
+                    <span>后端ASR集成</span>
+                </div>
+                <div class="stat">
+                    <span>🚨 阻塞:</span>
+                    <span>0个</span>
+                </div>
+                <div class="stat">
+                    <span>⏰ 最后更新:</span>
+                    <span class="pulse">19:35</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Roles Section -->
+        <div class="section">
+            <div class="section-title">
+                👥 角色状态
+            </div>
+            <div class="roles-grid">
+                <!-- Architect -->
+                <div class="role-card">
+                    <div class="role-header">
+                        <div class="role-avatar" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                            🏗️
+                        </div>
+                        <div class="role-info">
+                            <div class="role-name">架构师</div>
+                            <div class="role-status status-working">🟡 工作中</div>
+                        </div>
+                    </div>
+                    <div class="role-task">
+                        <div class="task-name">多引擎架构设计</div>
+                        <div class="task-progress">
+                            <div class="progress-bar">
+                                <div class="progress-fill" style="width: 60%"></div>
+                            </div>
+                        </div>
+                        <div class="task-meta">
+                            <span>⏱️ 已用: 5分钟</span>
+                            <span>⏰ 预计: 35分钟</span>
+                        </div>
+                    </div>
+                    <div style="margin-top: 12px; font-size: 12px;">
+                        <div>🎯 目标: 架构设计文档</div>
+                        <div style="margin-top: 4px;">🔔 等待: 后端研究 ✅</div>
+                    </div>
+                </div>
+
+                <!-- Frontend -->
+                <div class="role-card">
+                    <div class="role-header">
+                        <div class="role-avatar" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">
+                            🎨
+                        </div>
+                        <div class="role-info">
+                            <div class="role-name">前端工程师</div>
+                            <div class="role-status status-idle">🟢 空闲</div>
+                        </div>
+                    </div>
+                    <div style="margin-top: 12px; font-size: 12px;">
+                        <div>💭 等待: 架构设计完成</div>
+                        <div style="margin-top: 4px;">📋 可立即分配任务</div>
+                    </div>
+                </div>
+
+                <!-- Backend -->
+                <div class="role-card">
+                    <div class="role-header">
+                        <div class="role-avatar" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);">
+                            ⚙️
+                        </div>
+                        <div class="role-info">
+                            <div class="role-name">后端工程师</div>
+                            <div class="role-status status-working">🟡 工作中</div>
+                        </div>
+                    </div>
+                    <div class="role-task">
+                        <div class="task-name">豆包 ASR 研究</div>
+                        <div class="task-progress">
+                            <div class="progress-bar">
+                                <div class="progress-fill" style="width: 90%"></div>
+                            </div>
+                        </div>
+                        <div class="task-meta">
+                            <span>⏱️ 已用: 25分钟</span>
+                            <span>⏰ 预计: 5分钟</span>
+                        </div>
+                    </div>
+                    <div style="margin-top: 12px; font-size: 12px;">
+                        <div>🎯 目标: 实现指南文档</div>
+                        <div style="margin-top: 4px;">💡 即将完成</div>
+                    </div>
+                </div>
+
+                <!-- Product Manager -->
+                <div class="role-card">
+                    <div class="role-header">
+                        <div class="role-avatar" style="background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);">
+                            📊
+                        </div>
+                        <div class="role-info">
+                            <div class="role-name">产品经理</div>
+                            <div class="role-status status-idle">🟢 空闲</div>
+                        </div>
+                    </div>
+                    <div style="margin-top: 12px; font-size: 12px;">
+                        <div>✅ 测试播客列表已完成</div>
+                        <div>✅ ASR配置已完成</div>
+                        <div style="margin-top: 4px;">📋 可立即分配任务</div>
+                    </div>
+                </div>
+
+                <!-- UI Designer -->
+                <div class="role-card">
+                    <div class="role-header">
+                        <div class="role-avatar" style="background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);">
+                            🎨
+                        </div>
+                        <div class="role-info">
+                            <div class="role-name">UI/UX 设计师</div>
+                            <div class="role-status status-idle">🟢 空闲</div>
+                        </div>
+                    </div>
+                    <div style="margin-top: 12px; font-size: 12px;">
+                        <div>✅ 设计系统已完成</div>
+                        <div style="margin-top: 4px;">📋 等待前端实现后审核</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Event Stream -->
+        <div class="section">
+            <div class="section-title">
+                📋 实时事件流
+            </div>
+            <div class="event-stream">
+                <div class="event-item">
+                    <div class="event-time">19:35</div>
+                    <div>
+                        <span class="event-icon">✅</span>
+                        <strong>后端工程师:</strong> 豆包ASR研究完成 (v2.0)
+                        <span style="color: #f59e0b; margin-left: 8px;">@架构师 @高级助手</span>
+                    </div>
+                </div>
+                <div class="event-item">
+                    <div class="event-time">19:25</div>
+                    <div>
+                        <span class="event-icon">🟡</span>
+                        <strong>架构师:</strong> 开始多引擎架构设计
+                    </div>
+                </div>
+                <div class="event-item">
+                    <div class="event-time">19:15</div>
+                    <div>
+                        <span class="event-icon">🚨</span>
+                        <strong>高级助手:</strong> 发现工作冲突，已协调
+                        <span style="color: #ef4444; margin-left: 8px;">@架构师 @后端</span>
+                    </div>
+                </div>
+                <div class="event-item">
+                    <div class="event-time">19:05</div>
+                    <div>
+                        <span class="event-icon">🔓</span>
+                        <strong>产品经理:</strong> ASR配置已就绪
+                        <span style="color: #10b981; margin-left: 8px;">@后端</span>
+                    </div>
+                </div>
+                <div class="event-item">
+                    <div class="event-time">18:00</div>
+                    <div>
+                        <span class="event-icon">🚀</span>
+                        <strong>高级助手:</strong> 系统启动，任务已分配
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Task Queue -->
+        <div class="section">
+            <div class="section-title">
+                🔄 任务队列
+            </div>
+            <div class="task-queue">
+                <div class="queue-item priority-high">
+                    <div class="queue-header">
+                        <span class="queue-role">架构师 - 多引擎架构设计</span>
+                        <span class="queue-priority">🔴 高优先级</span>
+                    </div>
+                    <div class="queue-task">状态: 🟡 进行中 (60%)</div>
+                    <div class="queue-dependency">依赖: 后端研究 ✅ 已完成</div>
+                </div>
+
+                <div class="queue-item priority-high">
+                    <div class="queue-header">
+                        <span class="queue-role">后端 - 审核架构设计</span>
+                        <span class="queue-priority">🔴 高优先级</span>
+                    </div>
+                    <div class="queue-task">状态: ⏸️ 等待中</div>
+                    <div class="queue-dependency">依赖: 架构师设计完成</div>
+                </div>
+
+                <div class="queue-item priority-medium">
+                    <div class="queue-header">
+                        <span class="queue-role">前端 - 点击跳转功能</span>
+                        <span class="queue-priority">🟡 中优先级</span>
+                    </div>
+                    <div class="queue-task">状态: ⏸️ 等待中</div>
+                    <div class="queue-dependency">依赖: 无障碍，可开始</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="last-update">
+            ⏰ 实时协作看板 MVP v0.1 | 最后更新: 19:35 | 下次刷新: 自动
+        </div>
+    </div>
+
+    <script>
+        // 从 JSON 文件加载状态
+        let currentState = null;
+
+        async function loadState() {
+            try {
+                const response = await fetch('state.json?t=' + Date.now());
+                currentState = await response.json();
+                renderDashboard(currentState);
+            } catch (error) {
+                console.error('加载状态失败:', error);
+                // 使用模拟数据
+                currentState = getMockState();
+                renderDashboard(currentState);
+            }
+        }
+
+        function getMockState() {
+            return {
+                roles: [
+                    { id: 'architect', name: '架构师', avatar: '🏗️', status: 'working', currentTask: { name: '多引擎架构设计', progress: 60, spentMinutes: 15, estimatedMinutes: 35 } },
+                    { id: 'frontend', name: '前端工程师', avatar: '🎨', status: 'idle', currentTask: null, queue: ['点击跳转', '自动滚动', '笔记功能'] },
+                    { id: 'backend', name: '后端工程师', avatar: '⚙️', status: 'working', currentTask: { name: '豆包 ASR 研究', progress: 90, spentMinutes: 27, estimatedMinutes: 3 } },
+                    { id: 'product', name: '产品经理', avatar: '📊', status: 'idle', currentTask: null },
+                    { id: 'ui', name: 'UI/UX 设计师', avatar: '🎨', status: 'idle', currentTask: null }
+                ],
+                events: [
+                    { time: '19:35', type: '✅', from: '后端', message: '豆包ASR研究完成', to: ['架构师'] },
+                    { time: '19:25', type: '🟡', from: '架构师', message: '开始多引擎架构设计' },
+                    { time: '19:15', type: '🚨', from: '高级助手', message: '工作冲突已协调', to: ['架构师', '后端'] }
+                ]
+            };
+        }
+
+        function renderDashboard(state) {
+            // 渲染项目进度
+            const progressEl = document.querySelector('.progress-fill');
+            if (progressEl && state.project) {
+                progressEl.style.width = state.project.progress + '%';
+            }
+
+            // 渲染项目信息
+            const statsElements = document.querySelectorAll('.stat');
+            if (statsElements.length >= 4 && state.project) {
+                // 更新进度百分比
+                const progressText = statsElements[0].querySelectorAll('span')[2];
+                if (progressText) {
+                    progressText.textContent = state.project.progress + '%';
+                }
+
+                // 更新下个里程碑
+                const milestoneText = statsElements[1].querySelectorAll('span')[1];
+                if (milestoneText && state.project.currentMilestone) {
+                    milestoneText.textContent = state.project.currentMilestone;
+                }
+
+                // 更新阻塞数量
+                const blocksText = statsElements[2].querySelectorAll('span')[1];
+                if (blocksText) {
+                    blocksText.textContent = (state.project.blocks || 0) + '个';
+                }
+            }
+
+            // 渲染角色卡片
+            if (state.roles) {
+                renderRoles(state.roles);
+            }
+
+            // 渲染事件流
+            if (state.events) {
+                renderEvents(state.events);
+            }
+        }
+
+        function renderRoles(roles) {
+            const rolesGrid = document.querySelector('.roles-grid');
+            rolesGrid.innerHTML = '';
+
+            roles.forEach(role => {
+                const card = createRoleCard(role);
+                rolesGrid.appendChild(card);
+            });
+        }
+
+        function createRoleCard(role) {
+            const div = document.createElement('div');
+            div.className = 'role-card';
+
+            const statusClass = role.status === 'idle' ? 'status-idle' :
+                                 role.status === 'working' ? 'status-working' :
+                                 'status-blocked';
+
+            const statusText = role.status === 'idle' ? '🟢 空闲' :
+                               role.status === 'working' ? '🟡 工作中' : '🔴 阻塞';
+
+            let taskHtml = '';
+            if (role.currentTask) {
+                taskHtml = `
+                    <div class="role-task">
+                        <div class="task-name">${role.currentTask.name}</div>
+                        <div class="task-progress">
+                            <div class="progress-bar">
+                                <div class="progress-fill" style="width: ${role.currentTask.progress}%"></div>
+                            </div>
+                        </div>
+                        <div class="task-meta">
+                            <span>⏱️ 已用: ${role.currentTask.spentMinutes}分钟</span>
+                            <span>⏰ 预计: ${role.currentTask.estimatedMinutes}分钟</span>
+                        </div>
+                    </div>
+                `;
+            }
+
+            let queueHtml = '';
+            if (role.queue && role.queue.length > 0) {
+                queueHtml = `<div style="margin-top: 8px; font-size: 12px;">📋 队列: ${role.queue.length}个任务</div>`;
+            }
+
+            // 需要的资源
+            let needsHtml = '';
+            if (role.needs && role.needs.length > 0) {
+                const needsList = role.needs.map(n => {
+                    const statusIcon = n.status === 'provided' ? '✅' : '⏳';
+                    return `${statusIcon} ${n.description || n.type}`;
+                }).join('<br>');
+                needsHtml = `<div style="margin-top: 8px; font-size: 12px;">🔔 等待: ${needsList}</div>`;
+            }
+
+            // 阻塞信息
+            let blockingHtml = '';
+            if (role.blocking && role.blocking.length > 0) {
+                blockingHtml = `<div style="margin-top: 8px; font-size: 12px; color: #ef4444;">🚨 阻塞: ${role.blocking.length}个</div>`;
+            }
+
+            // 反思（仅显示前50个字符）
+            let reflectionHtml = '';
+            if (role.reflection) {
+                const shortReflection = role.reflection.length > 50
+                    ? role.reflection.substring(0, 50) + '...'
+                    : role.reflection;
+                reflectionHtml = `<div style="margin-top: 8px; font-size: 11px; color: #71717a; font-style: italic;">💭 "${shortReflection}"</div>`;
+            }
+
+            div.innerHTML = `
+                <div class="role-header">
+                    <div class="role-avatar" style="background: linear-gradient(135deg, ${getGradient(role.id)} 0%, ${getGradient(role.id, true)} 100%);">
+                        ${role.avatar}
+                    </div>
+                    <div class="role-info">
+                        <div class="role-name">${role.name}</div>
+                        <div class="role-status ${statusClass}">${statusText}</div>
+                    </div>
+                </div>
+                ${taskHtml}
+                ${needsHtml}
+                ${blockingHtml}
+                ${queueHtml}
+                ${reflectionHtml}
+            `;
+
+            return div;
+        }
+
+        function getGradient(roleId, alternate = false) {
+            const gradients = {
+                'architect': ['#667eea', '#764ba2'],
+                'frontend': ['#f093fb', '#f5576c'],
+                'backend': ['#4facfe', '#00f2fe'],
+                'product': ['#fa709a', '#fee140'],
+                'ui': ['#a8edea', '#fed6e3']
+            };
+            return gradients[roleId][alternate ? 1 : 0];
+        }
+
+        function renderEvents(events) {
+            const eventStream = document.querySelector('.event-stream');
+            if (!eventStream) return;
+            eventStream.innerHTML = '';
+
+            events.slice(0, 10).forEach(event => {
+                const eventItem = document.createElement('div');
+                eventItem.className = 'event-item';
+
+                // 处理时间（兼容time和timestamp字段）
+                let timeStr = event.time;
+                if (!timeStr && event.timestamp) {
+                    const date = new Date(event.timestamp);
+                    timeStr = date.getHours().toString().padStart(2, '0') + ':' +
+                             date.getMinutes().toString().padStart(2, '0');
+                }
+
+                // 处理事件类型图标
+                let icon = event.type || '📋';
+                if (typeof icon === 'string' && !icon.startsWith('🟡') && !icon.startsWith('✅') && !icon.startsWith('🔴') && !icon.startsWith('🚨') && !icon.startsWith('🔓') && !icon.startsWith('🚀')) {
+                    // 如果是文字类型，转换为图标
+                    const typeIcons = {
+                        'task-completed': '✅',
+                        'task-started': '🟡',
+                        'warning': '🚨',
+                        'block-resolved': '🔓',
+                        'system-start': '🚀',
+                        'challenge-created': '💡'
+                    };
+                    icon = typeIcons[icon] || '📋';
+                }
+
+                // 处理@mentions
+                let toHtml = '';
+                if (event.to && event.to.length > 0) {
+                    toHtml = `<span style="color: #f59e0b; margin-left: 8px;">${event.to.map(t => '@' + t).join(' ')}</span>`;
+                }
+
+                // 处理优先级
+                let priorityHtml = '';
+                if (event.priority === 'critical' || event.priority === 'high') {
+                    priorityHtml = `<span style="color: #ef4444; margin-left: 4px;">🔴</span>`;
+                }
+
+                eventItem.innerHTML = `
+                    <div class="event-time">${timeStr || ''}</div>
+                    <div>
+                        <span class="event-icon">${icon}</span>
+                        <strong>${event.from}:</strong> ${event.message}
+                        ${toHtml}
+                        ${priorityHtml}
+                    </div>
+                `;
+
+                eventStream.appendChild(eventItem);
+            });
+        }
+
+        // SSE 连接（V2 自动化）
+        function connectSSE() {
+            const eventSource = new EventSource('/api/stream');
+
+            eventSource.onmessage = function(event) {
+                console.log('📡 状态已更新，刷新看板...');
+                loadState();
+            };
+
+            eventSource.onerror = function(error) {
+                console.error('SSE 连接错误:', error);
+                // 5秒后重连
+                setTimeout(() => {
+                    console.log('🔄 重新连接 SSE...');
+                    connectSSE();
+                }, 5000);
+            };
+
+            console.log('✅ SSE 已连接，实时更新已启用');
+        }
+
+        // 更新时间
+        function updateTime() {
+            const now = new Date();
+            const timeStr = now.getHours().toString().padStart(2, '0') + ':' +
+                           now.getMinutes().toString().padStart(2, '0');
+            const pulseEl = document.querySelector('.pulse');
+            if (pulseEl) {
+                pulseEl.textContent = timeStr;
+            }
+        }
+
+        // 初始加载
+        loadState();
+
+        // 连接 SSE（如果服务器运行中）
+        try {
+            connectSSE();
+        } catch (e) {
+            console.log('⚠️ SSE 连接失败，可能服务器未启动');
+            // 降级到每30秒轮询
+            setInterval(() => {
+                loadState();
+                updateTime();
+            }, 30000);
+        }
+
+        // 每秒更新时间显示
+        setInterval(updateTime, 1000);
+    </script>
+</body>
+</html>

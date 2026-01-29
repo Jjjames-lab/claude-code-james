@@ -4,8 +4,6 @@
  * 提供批量翻译、缓存管理、语言检测等功能
  */
 
-import { storageManager } from './storageManager';
-
 // 翻译段落
 export interface TranslateSegment {
   id: string;
@@ -25,12 +23,6 @@ interface TranslationCacheItem {
   translatedText: string;
   targetLang: string;
   timestamp: number;
-}
-
-// 翻译请求
-interface TranslationRequest {
-  segments: TranslateSegment[];
-  target_lang: 'zh' | 'en' | 'ko' | 'ja';
 }
 
 // 翻译响应
@@ -222,7 +214,7 @@ export class TranslationService {
    * 格式化语言显示
    */
   formatLanguage(lang: string): string {
-    const langMap = {
+    const langMap: Record<string, string> = {
       'zh': '中文',
       'en': 'English',
       'ko': '한국어',

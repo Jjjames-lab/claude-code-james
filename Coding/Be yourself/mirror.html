@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MIRROR - 深度自我对话</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700&family=Noto+Serif+SC:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        :root {
+            --bg-primary: #050505; --bg-secondary: #0d0d0d; --bg-tertiary: #141414;
+            --text-primary: #f0f0f0; --text-secondary: #666; --text-muted: #333;
+            --accent-primary: #e8e8e8; --accent-dim: #444; --accent-glow: rgba(255,255,255,0.08);
+            --border: #1a1a1a;
+        }
+        body {
+            font-family: 'Noto Sans SC', sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+        .ambient-bg {
+            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: -1;
+            background: radial-gradient(ellipse at center, rgba(30,30,30,0.5) 0%, transparent 70%);
+        }
+        /* Mirror animation */
+        .mirror-glow {
+            position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            width: 60vw; height: 60vw; max-width: 600px; max-height: 600px;
+            background: radial-gradient(circle, rgba(255,255,255,0.03) 0%, transparent 60%);
+            border-radius: 50%; pointer-events: none; animation: mirrorPulse 8s ease-in-out infinite;
+        }
+        @keyframes mirrorPulse { 0%, 100% { opacity: 0.5; transform: translate(-50%, -50%) scale(1); } 50% { opacity: 1; transform: translate(-50%, -50%) scale(1.1); } }
+        .header { padding: 32px 48px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); }
+        .logo { display: flex; align-items: center; gap: 16px; }
+        .mirror-icon { width: 40px; height: 40px; position: relative; }
+        .logo-text { font-family: 'Noto Serif SC', serif; font-size: 28px; font-weight: 400; letter-spacing: 0.3em; color: var(--text-primary); }
+        .tagline { font-size: 10px; color: var(--text-muted); letter-spacing: 0.4em; text-transform: uppercase; margin-top: 4px; }
+        .main-container { display: grid; grid-template-columns: 1fr 1fr; min-height: calc(100vh - 97px); }
+        /* Left - Conversation */
+        .conversation-panel { padding: 48px; display: flex; flex-direction: column; border-right: 1px solid var(--border); position: relative; }
+        .conversation-scroll { flex: 1; overflow-y: auto; padding-right: 16px; margin-bottom: 24px; }
+        .message { margin-bottom: 32px; opacity: 0; animation: fadeSlide 0.6s ease forwards; }
+        @keyframes fadeSlide { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        .message.user { animation-delay: 0s; }
+        .message.mirror { animation-delay: 0.2s; }
+        .message-avatar { width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 14px; margin-bottom: 12px; }
+        .message.user .message-avatar { background: linear-gradient(135deg, #666, #888); }
+        .message.mirror .message-avatar { background: linear-gradient(135deg, #333, #555); border: 1px solid var(--border); }
+        .message-label { font-size: 10px; color: var(--text-muted); letter-spacing: 0.2em; text-transform: uppercase; margin-bottom: 8px; }
+        .message-content { font-size: 15px; line-height: 1.9; color: var(--text-secondary); }
+        .message-content p { margin-bottom: 12px; }
+        .message-content strong { color: var(--text-primary); font-weight: 500; }
+        /* Input area */
+        .input-area { position: relative; }
+        .input-area::before {
+            content: ''; position: absolute; top: 0; left: 0; right: 0; height: 1px;
+            background: linear-gradient(90deg, transparent, var(--border), transparent);
+        }
+        .input-label { font-size: 10px; color: var(--text-muted); letter-spacing: 0.2em; text-transform: uppercase; padding: 16px 0; display: flex; align-items: center; gap: 8px; }
+        .input-label::after { content: ''; flex: 1; height: 1px; background: linear-gradient(90deg, var(--border), transparent); }
+        .conversation-input {
+            width: 100%; background: transparent; border: none; color: var(--text-primary);
+            font-size: 16px; line-height: 1.8; resize: none; font-family: inherit;
+            min-height: 100px; padding: 0 8px;
+        }
+        .conversation-input:focus { outline: none; }
+        .conversation-input::placeholder { color: var(--text-muted); }
+        .input-actions { display: flex; justify-content: flex-end; padding: 16px 0; }
+        .send-btn {
+            padding: 12px 40px; background: var(--text-primary); color: var(--bg-primary); border: none;
+            border-radius: 24px; font-size: 13px; cursor: pointer; transition: all 0.3s;
+        }
+        .send-btn:hover { transform: scale(1.02); box-shadow: 0 4px 24px rgba(255,255,255,0.2); }
+        /* Right - Deep reflection */
+        .reflection-panel { padding: 48px; background: var(--bg-secondary); overflow-y: auto; }
+        .reflection-title { font-size: 11px; color: var(--text-muted); letter-spacing: 0.2em; text-transform: uppercase; margin-bottom: 24px; display: flex; align-items: center; gap: 8px; }
+        .reflection-title::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+        .reflection-section { margin-bottom: 40px; }
+        .reflection-card {
+            background: var(--bg-tertiary); border: 1px solid var(--border); border-radius: 16px;
+            padding: 24px; margin-bottom: 16px; transition: all 0.3s;
+        }
+        .reflection-card:hover { border-color: var(--text-muted); transform: translateX(4px); }
+        .reflection-card-title { font-size: 14px; font-weight: 500; margin-bottom: 12px; display: flex; align-items: center; gap: 8px; }
+        .reflection-card-title .dot { width: 6px; height: 6px; border-radius: 50%; }
+        .reflection-card-content { font-size: 13px; line-height: 1.7; color: var(--text-secondary); }
+        /* Insight trees */
+        .insight-tree { margin-top: 24px; }
+        .insight-node {
+            padding: 16px 20px; background: var(--bg-tertiary); border-left: 2px solid var(--border);
+            margin-left: 20px; margin-bottom: 12px; position: relative;
+        }
+        .insight-node::before {
+            content: ''; position: absolute; left: -22px; top: 50%; width: 20px; height: 1px;
+            background: var(--border);
+        }
+        .insight-node::after {
+            content: ''; position: absolute; left: -22px; top: -12px; height: calc(50% + 12px);
+            width: 1px; background: var(--border);
+        }
+        .insight-node:first-child::after { display: none; }
+        .insight-title { font-size: 13px; font-weight: 500; margin-bottom: 6px; }
+        .insight-desc { font-size: 12px; color: var(--text-secondary); line-height: 1.6; }
+        /* Pattern visualization */
+        .pattern-viz { margin-top: 32px; }
+        .pattern-row { display: flex; align-items: center; margin-bottom: 16px; }
+        .pattern-label { width: 80px; font-size: 11px; color: var(--text-muted); letter-spacing: 0.1em; }
+        .pattern-bar-container { flex: 1; height: 8px; background: var(--bg-primary); border-radius: 4px; overflow: hidden; }
+        .pattern-bar { height: 100%; border-radius: 4px; transition: width 1s ease; }
+        .pattern-calm { background: linear-gradient(90deg, #555, #777); }
+        .pattern-pm { background: linear-gradient(90deg, #777, #999); }
+        .pattern-time { background: linear-gradient(90deg, #666, #888); }
+        .pattern-value { font-size: 12px; color: var(--text-secondary); margin-left: 12px; }
+        /* Self portrait */
+        .self-portrait {
+            text-align: center; padding: 32px; background: var(--bg-tertiary); border-radius: 20px;
+            margin-bottom: 32px; position: relative;
+        }
+        .portrait-ring {
+            width: 80px; height: 80px; border-radius: 50%; margin: 0 auto 20px;
+            border: 1px solid var(--border); display: flex; align-items: center; justify-content: center;
+            font-size: 28px; background: var(--bg-secondary);
+        }
+        .portrait-name { font-size: 18px; margin-bottom: 8px; }
+        .portrait-insight { font-size: 13px; color: var(--text-secondary); line-height: 1.6; }
+        /* Quote */
+        .daily-quote {
+            padding: 24px; background: var(--bg-primary); border-radius: 12px; border: 1px solid var(--border);
+            margin-top: 32px; position: relative;
+        }
+        .daily-quote::before {
+            content: '"'; position: absolute; top: -10px; left: 20px; font-size: 48px;
+            color: var(--text-muted); font-family: 'Noto Serif SC', serif;
+        }
+        .quote-text { font-size: 14px; line-height: 1.8; color: var(--text-secondary); font-style: italic; margin-bottom: 12px; padding-left: 16px; }
+        .quote-author { font-size: 11px; color: var(--text-muted); text-align: right; letter-spacing: 0.1em; }
+        ::-webkit-scrollbar { width: 4px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+        @media (max-width: 1024px) { .main-container { grid-template-columns: 1fr; } .conversation-panel { border-right: none; border-bottom: 1px solid var(--border); } }
+    </style>
+</head>
+<body>
+    <div class="ambient-bg"></div>
+    <div class="mirror-glow"></div>
+    <header class="header">
+        <div class="logo">
+            <div class="mirror-icon">
+                <svg viewBox="0 0 40 40" fill="none">
+                    <rect x="8" y="4" width="24" height="32" rx="2" stroke="#444" stroke-width="1.5"/>
+                    <rect x="12" y="8" width="16" height="24" rx="1" fill="none" stroke="#333" stroke-width="1"/>
+                    <ellipse cx="20" cy="20" rx="4" ry="8" fill="#222"/>
+                    <path d="M12 36l4-6 4 6 4-6 4 6" stroke="#333" stroke-width="1" fill="none"/>
+                </svg>
+            </div>
+            <div>
+                <div class="logo-text">MIRROR</div>
+                <div class="tagline">深度 · 串联式 · 自我对话</div>
+            </div>
+        </div>
+    </header>
+    <div class="main-container">
+        <div class="conversation-panel">
+            <div class="conversation-scroll" id="conversationScroll">
+                <div class="message user">
+                    <div class="message-avatar">J</div>
+                    <div class="message-label">你 · 2小时前</div>
+                    <div class="message-content">
+                        <p>今天看到Sam Altman说AI产品的核心是"减少摩擦"，但我有点困惑——有时候我觉得产品就是要给用户挑战和成长空间...</p>
+                    </div>
+                </div>
+                <div class="message mirror">
+                    <div class="message-avatar">◇</div>
+                    <div class="message-label">镜子里的你</div>
+                    <div class="message-content">
+                        <p>这是个很好的困惑。让我帮你看清<strong>你在纠结什么</strong>。</p>
+                        <p>你说"减少摩擦"，但你内心真正想问的是：<strong>什么是对用户真正的好？</strong></p>
+                        <p>让我追溯一下：</p>
+                        <p>1月15日你分享过"用户心理画像"，你写道"用户需要被理解，也需要被挑战"</p>
+                        <p>这两者不矛盾。减少的是<strong>认知摩擦</strong>（让用户能理解），保留的是<strong>成长摩擦</strong>（让用户愿意突破）。</p>
+                        <p><strong>真正的问题可能是</strong>：你在设计产品时，是否清楚哪些摩擦该保留，哪些该消除？</p>
+                    </div>
+                </div>
+            </div>
+            <div class="input-area">
+                <div class="input-label">与镜子对话</div>
+                <textarea class="conversation-input" id="conversationInput" placeholder="写下你的想法、困惑、感悟...镜子会帮你看见自己"></textarea>
+                <div class="input-actions">
+                    <button class="send-btn" id="sendBtn">对话</button>
+                </div>
+            </div>
+        </div>
+        <div class="reflection-panel">
+            <div class="reflection-title">自我洞察</div>
+            <div class="self-portrait">
+                <div class="portrait-ring">J</div>
+                <div class="portrait-name">James 的深层画像</div>
+                <div class="portrait-insight">
+                    你是一个<strong>意义寻求者</strong>。<br>
+                    表面在问产品问题，<br>
+                    深层在问"什么是对的"。<br>
+                    你的内耗来自：<br>
+                    想做好，但不确定什么是"好"。
+                </div>
+            </div>
+            <div class="reflection-section">
+                <div class="reflection-card">
+                    <div class="reflection-card-title"><span class="dot" style="background: #7b8cde;"></span>情绪模式</div>
+                    <div class="reflection-card-content">
+                        你倾向于<strong>过度思考</strong>。遇到问题时，会先想"是不是我的想法有问题"，而不是"这个想法对不对"。
+                    </div>
+                </div>
+                <div class="reflection-card">
+                    <div class="reflection-card-title"><span class="dot" style="background: #de7b7b;"></span>决策倾向</div>
+                    <div class="reflection-card-content">
+                        <strong>风险规避型</strong>。你渴望确定性，但产品创新本身就需要拥抱不确定性。这是你的张力所在。
+                    </div>
+                </div>
+                <div class="reflection-card">
+                    <div class="reflection-card-title"><span class="dot" style="background: #7bdec4;"></span>成长轨迹</div>
+                    <div class="reflection-card-content">
+                        过去30天，你深度思考了<strong>23个问题</strong>，其中产品类占60%，自我认知类占40%。你在构建一套自己的产品哲学。
+                    </div>
+                </div>
+            </div>
+            <div class="reflection-title">知识连接树</div>
+            <div class="insight-tree">
+                <div class="insight-node">
+                    <div class="insight-title">今天的困惑</div>
+                    <div class="insight-desc">AI产品设计中"减少摩擦"的边界在哪里？</div>
+                </div>
+                <div class="insight-node">
+                    <div class="insight-title">1月15日 · 用户心理画像</div>
+                    <div class="insight-desc">"用户需要被理解，也需要被挑战" ← 这是你的底层认知</div>
+                </div>
+                <div class="insight-node">
+                    <div class="insight-title">1月20日 · 产品营销策略</div>
+                    <div class="insight-desc">用户价值 = 获得的收益 - 付出的成本</div>
+                </div>
+                <div class="insight-node">
+                    <div class="insight-title">1月25日 · 极简设计</div>
+                    <div class="insight-desc">"少即是多"的本质是选择权交给用户</div>
+                </div>
+            </div>
+            <div class="pattern-viz">
+                <div class="reflection-title">思维模式分布</div>
+                <div class="pattern-row">
+                    <div class="pattern-label">理性分析</div>
+                    <div class="pattern-bar-container"><div class="pattern-bar pattern-calm" style="width: 75%;"></div></div>
+                    <div class="pattern-value">75%</div>
+                </div>
+                <div class="pattern-row">
+                    <div class="pattern-label">直觉判断</div>
+                    <div class="pattern-bar-container"><div class="pattern-bar pattern-pm" style="width: 45%;"></div></div>
+                    <div class="pattern-value">45%</div>
+                </div>
+                <div class="pattern-row">
+                    <div class="pattern-label">情感驱动</div>
+                    <div class="pattern-bar-container"><div class="pattern-bar pattern-time" style="width: 60%;"></div></div>
+                    <div class="pattern-value">60%</div>
+                </div>
+            </div>
+            <div class="daily-quote">
+                <div class="quote-text">
+                    "你内耗不是因为你不够好，<br>
+                    是因为你太在乎'好'这个概念本身。<br>
+                    放下对确定性的执念，<br>
+                    允许自己在一个模糊的状态里待一会儿。"
+                </div>
+                <div class="quote-author">— 镜子里的你 · 今日洞察</div>
+            </div>
+        </div>
+    </div>
+    <script>
+        const conversationInput = document.getElementById('conversationInput');
+        const sendBtn = document.getElementById('sendBtn');
+        const conversationScroll = document.getElementById('conversationScroll');
+
+        const mirrorResponses = {
+            confusion: [
+                "让我帮你看清你在纠结什么。",
+                "这个问题背后，藏着另一个问题。",
+                "你说的都对，但我想指出一个盲点。"
+            ],
+            reflection: [
+                "让我追溯一下你的思考历史。",
+                "这个问题你在1月X日也提到过，",
+                "我发现一个有趣的模式："
+            ],
+            insight: [
+                "你是一个意义寻求者。",
+                "你的内耗来自：想做好，但不确定什么是'好'。",
+                "这不奇怪，你在构建自己的产品哲学。"
+            ],
+            connection: [
+                "这和你之前分享的X有关联。",
+                "如果把Y和Z放在一起看，你会发现...",
+                "你的知识正在形成一张网。"
+            ]
+        };
+
+        function generateResponse(input) {
+            const lower = input.toLowerCase();
+            let response = "";
+            let delay = 1500;
+
+            if (lower.includes('困惑') || lower.includes('迷茫') || lower.includes('不确定')) {
+                response = `<p>${mirrorResponses.confusion[Math.floor(Math.random() * 3)]}</p>`;
+                response += `<p>让我追溯一下你的思考历史：</p>`;
+                response += `<p>1月15日你提到过"${['用户需要被理解，也需要被挑战', '产品要有温度'][Math.floor(Math.random() * 2)]}"</p>`;
+                response += `<p>这些想法构成了你的底层认知。新的问题往往是在检验这些认知。</p>`;
+                response += `<p><strong>我的建议是</strong>：不要急着找到答案。先问自己，这个问题触发了你哪些底层假设？</p>`;
+            } else if (lower.includes('选择') || lower.includes('应该')) {
+                response = `<p>你在问"应该"，这很好。但我想问你：</p>`;
+                response += `<p><strong>"应该"的背后，是谁在说话？</strong></p>`;
+                response += `<p>是你自己的声音，还是你假想的别人对你的期待？</p>`;
+                response += `<p>产品经理的工作常常需要我们在不确定中做决定。<br>你的价值不在于每次都选对，<br>而在于<strong>能够清晰地看到自己在选什么</strong>。</p>`;
+            } else {
+                response = `<p>${mirrorResponses.insight[Math.floor(Math.random() * 3)]}</p>`;
+                response += `<p>你说"${input.substring(0, 30)}..."</p>`;
+                response += `<p>这让我注意到一个模式：你在${['追求确定性的同时渴望突破', '理性分析但情感驱动', '渴望被认可又害怕冲突'][Math.floor(Math.random() * 3)]}。</p>`;
+                response += `<p>这不是问题，这是你的特点。关键是如何把这个特点变成优势。</p>`;
+                response += `<p><strong>继续说</strong>，镜子在听。</p>`;
+            }
+
+            return response;
+        }
+
+        function addMessage(content, isUser) {
+            const msg = document.createElement('div');
+            msg.className = `message ${isUser ? 'user' : 'mirror'}`;
+            msg.innerHTML = `
+                <div class="message-avatar">${isUser ? 'J' : '◇'}</div>
+                <div class="message-label">${isUser ? '你 · 刚刚' : '镜子里的你'}</div>
+                <div class="message-content">${content}</div>
+            `;
+            conversationScroll.appendChild(msg);
+            conversationScroll.scrollTop = conversationScroll.scrollHeight;
+        }
+
+        function handleSend() {
+            const content = conversationInput.value.trim();
+            if (!content) return;
+
+            addMessage(`<p>${content}</p>`, true);
+            conversationInput.value = '';
+
+            setTimeout(() => {
+                addMessage(generateResponse(content), false);
+            }, 1500 + Math.random() * 1000);
+        }
+
+        sendBtn.addEventListener('click', handleSend);
+        conversationInput.addEventListener('keydown', (e) => {
+            if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') handleSend();
+        });
+
+        // Animate pattern bars on load
+        setTimeout(() => {
+            document.querySelectorAll('.pattern-bar').forEach(bar => {
+                const width = bar.style.width;
+                bar.style.width = '0';
+                setTimeout(() => { bar.style.width = width; }, 100);
+            });
+        }, 500);
+    </script>
+</body>
+</html>

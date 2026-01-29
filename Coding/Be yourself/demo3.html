@@ -1,0 +1,1410 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BE YOURSELF - 学习规划助手</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;600&family=Noto+Serif+SC:wght@400;600&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        :root {
+            --bg-deep: #030305;
+            --bg-primary: #0a0a0e;
+            --bg-secondary: #111116;
+            --bg-tertiary: #18181e;
+            --bg-card: #1a1a22;
+            --border: #2a2a32;
+            --border-light: #3a3a44;
+
+            --text-primary: #f0f0f5;
+            --text-secondary: #888;
+            --text-muted: #555;
+            --text-dim: #444;
+
+            --accent-calm: #7b9cde;
+            --accent-pm: #de7b8b;
+            --accent-time: #7bdec4;
+            --accent-cross: #9b7bde;
+            --accent-critique: #decb7b;
+            --accent-match: #de9b7b;
+
+            --glow-calm: rgba(123, 156, 222, 0.2);
+            --glow-pm: rgba(222, 123, 139, 0.2);
+            --glow-time: rgba(123, 222, 196, 0.2);
+            --glow-cross: rgba(155, 123, 222, 0.2);
+        }
+
+        body {
+            font-family: 'Noto Sans SC', -apple-system, sans-serif;
+            background: var(--bg-deep);
+            color: var(--text-primary);
+            min-height: 100vh;
+            overflow: hidden;
+        }
+
+        /* Stars background */
+        .stars {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            background:
+                radial-gradient(ellipse at 20% 30%, rgba(123, 156, 222, 0.03) 0%, transparent 50%),
+                radial-gradient(ellipse at 80% 70%, rgba(155, 123, 222, 0.03) 0%, transparent 50%),
+                radial-gradient(ellipse at 50% 50%, rgba(123, 222, 196, 0.02) 0%, transparent 60%);
+        }
+
+        .stars::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image:
+                radial-gradient(1px 1px at 20px 30px, rgba(255,255,255,0.3), transparent),
+                radial-gradient(1px 1px at 40px 70px, rgba(255,255,255,0.2), transparent),
+                radial-gradient(1px 1px at 50px 160px, rgba(255,255,255,0.3), transparent),
+                radial-gradient(1px 1px at 90px 40px, rgba(255,255,255,0.2), transparent),
+                radial-gradient(1px 1px at 130px 80px, rgba(255,255,255,0.3), transparent),
+                radial-gradient(1px 1px at 160px 120px, rgba(255,255,255,0.2), transparent);
+            background-size: 200px 200px;
+            animation: twinkle 20s linear infinite;
+        }
+
+        @keyframes twinkle {
+            0% { transform: translateY(0); }
+            100% { transform: translateY(-200px); }
+        }
+
+        /* Header */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 32px;
+            border-bottom: 1px solid var(--border);
+            background: rgba(3,3,5,0.8);
+            backdrop-filter: blur(20px);
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .logo-mark {
+            width: 28px;
+            height: 28px;
+            position: relative;
+        }
+
+        .logo-mark svg {
+            width: 100%;
+            height: 100%;
+        }
+
+        .logo-text {
+            font-family: 'Noto Serif SC', serif;
+            font-size: 18px;
+            font-weight: 600;
+            letter-spacing: 0.15em;
+        }
+
+        .nav-tabs {
+            display: flex;
+            gap: 8px;
+        }
+
+        .nav-tab {
+            padding: 8px 20px;
+            font-size: 12px;
+            color: var(--text-muted);
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.3s;
+            border: 1px solid transparent;
+        }
+
+        .nav-tab:hover {
+            color: var(--text-secondary);
+            background: var(--bg-tertiary);
+        }
+
+        .nav-tab.active {
+            color: var(--text-primary);
+            background: var(--bg-tertiary);
+            border-color: var(--border);
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .streak {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 12px;
+            background: var(--bg-tertiary);
+            border-radius: 20px;
+            font-size: 11px;
+            color: var(--text-secondary);
+        }
+
+        .streak-dot {
+            width: 6px;
+            height: 6px;
+            background: var(--accent-time);
+            border-radius: 50%;
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .user-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--accent-calm), var(--accent-cross));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        /* Main Layout */
+        .main-container {
+            display: grid;
+            grid-template-columns: 320px 1fr 360px;
+            height: calc(100vh - 69px);
+        }
+
+        /* Left Panel - Capture & Collections */
+        .left-panel {
+            border-right: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .capture-section {
+            padding: 20px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .section-label {
+            font-size: 10px;
+            color: var(--text-muted);
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+            margin-bottom: 12px;
+        }
+
+        .capture-input {
+            width: 100%;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 16px;
+            color: var(--text-primary);
+            font-size: 14px;
+            line-height: 1.6;
+            font-family: inherit;
+            resize: none;
+            min-height: 100px;
+            transition: all 0.3s;
+        }
+
+        .capture-input:focus {
+            outline: none;
+            border-color: var(--border-light);
+        }
+
+        .capture-input::placeholder {
+            color: var(--text-dim);
+        }
+
+        .capture-actions {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 12px;
+        }
+
+        .platform-quick {
+            display: flex;
+            gap: 6px;
+        }
+
+        .platform-btn {
+            width: 28px;
+            height: 28px;
+            border-radius: 6px;
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .platform-btn:hover {
+            background: var(--bg-card);
+            border-color: var(--border-light);
+        }
+
+        .submit-btn {
+            padding: 8px 20px;
+            background: var(--text-primary);
+            color: var(--bg-deep);
+            border: none;
+            border-radius: 16px;
+            font-size: 12px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .submit-btn:hover {
+            transform: scale(1.02);
+            box-shadow: 0 4px 16px rgba(255,255,255,0.15);
+        }
+
+        .collections-section {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+        }
+
+        .collections-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+
+        .collections-title {
+            font-size: 10px;
+            color: var(--text-muted);
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+        }
+
+        .collections-count {
+            font-size: 11px;
+            color: var(--text-dim);
+        }
+
+        .collection-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .collection-item {
+            padding: 14px;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .collection-item:hover {
+            border-color: var(--border-light);
+            transform: translateX(4px);
+        }
+
+        .collection-item.active {
+            border-color: var(--accent-calm);
+            background: rgba(123, 156, 222, 0.05);
+        }
+
+        .collection-item.related {
+            border-left: 2px solid var(--accent-match);
+        }
+
+        .collection-meta {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 8px;
+            font-size: 10px;
+            color: var(--text-muted);
+        }
+
+        .collection-title {
+            font-size: 13px;
+            line-height: 1.5;
+            color: var(--text-secondary);
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .collection-tags {
+            display: flex;
+            gap: 6px;
+            margin-top: 10px;
+        }
+
+        .collection-tag {
+            padding: 3px 8px;
+            background: var(--bg-tertiary);
+            border-radius: 10px;
+            font-size: 10px;
+            color: var(--text-dim);
+        }
+
+        /* Center Panel - Main Workspace */
+        .center-panel {
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .perspective-bar {
+            padding: 16px 24px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            background: rgba(10,10,14,0.5);
+        }
+
+        .perspective-label {
+            font-size: 10px;
+            color: var(--text-muted);
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+        }
+
+        .perspective-chips {
+            display: flex;
+            gap: 8px;
+        }
+
+        .perspective-chip {
+            padding: 8px 16px;
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            font-size: 12px;
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .perspective-chip:hover {
+            background: var(--bg-card);
+            border-color: var(--border-light);
+        }
+
+        .perspective-chip.active {
+            border-color: transparent;
+            color: var(--text-primary);
+        }
+
+        .perspective-chip.calm.active { background: var(--glow-calm); color: var(--accent-calm); }
+        .perspective-chip.pm.active { background: var(--glow-pm); color: var(--accent-pm); }
+        .perspective-chip.time.active { background: var(--glow-time); color: var(--accent-time); }
+        .perspective-chip.cross.active { background: var(--glow-cross); color: var(--accent-cross); }
+
+        .workspace-content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 24px;
+        }
+
+        .current-content {
+            margin-bottom: 32px;
+        }
+
+        .content-label {
+            font-size: 10px;
+            color: var(--text-muted);
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+            margin-bottom: 12px;
+        }
+
+        .content-display {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 20px;
+            line-height: 1.8;
+            font-size: 15px;
+            color: var(--text-secondary);
+        }
+
+        .analysis-section {
+            margin-top: 24px;
+        }
+
+        .analysis-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 16px;
+            opacity: 0;
+            transform: translateY(20px);
+            animation: fadeUp 0.5s ease forwards;
+        }
+
+        .analysis-card:nth-child(1) { animation-delay: 0.1s; }
+        .analysis-card:nth-child(2) { animation-delay: 0.2s; }
+        .analysis-card:nth-child(3) { animation-delay: 0.3s; }
+
+        @keyframes fadeUp {
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .analysis-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 16px;
+        }
+
+        .analysis-perspective-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+        }
+
+        .analysis-perspective-name {
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        .analysis-content {
+            font-size: 14px;
+            line-height: 1.8;
+            color: var(--text-secondary);
+        }
+
+        .analysis-content p {
+            margin-bottom: 12px;
+        }
+
+        .analysis-content p:last-child {
+            margin-bottom: 0;
+        }
+
+        .analysis-content strong {
+            color: var(--text-primary);
+            font-weight: 500;
+        }
+
+        /* Plan Section */
+        .plan-section {
+            margin-top: 32px;
+            padding: 20px;
+            background: linear-gradient(135deg, rgba(123, 222, 196, 0.05), rgba(155, 123, 222, 0.05));
+            border: 1px solid rgba(123, 222, 196, 0.1);
+            border-radius: 12px;
+        }
+
+        .plan-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 16px;
+        }
+
+        .plan-icon {
+            font-size: 16px;
+        }
+
+        .plan-title {
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .plan-timeline {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .plan-item {
+            display: flex;
+            gap: 12px;
+            padding: 12px;
+            background: var(--bg-card);
+            border-radius: 8px;
+        }
+
+        .plan-time {
+            width: 60px;
+            font-size: 11px;
+            color: var(--text-muted);
+            padding-top: 2px;
+        }
+
+        .plan-content {
+            flex: 1;
+        }
+
+        .plan-task {
+            font-size: 13px;
+            color: var(--text-secondary);
+            margin-bottom: 4px;
+        }
+
+        .plan-desc {
+            font-size: 11px;
+            color: var(--text-dim);
+        }
+
+        /* Right Panel - User Profile & Insights */
+        .right-panel {
+            border-left: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .profile-section {
+            padding: 24px;
+            border-bottom: 1px solid var(--border);
+            text-align: center;
+        }
+
+        .profile-avatar {
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--accent-calm), var(--accent-cross));
+            margin: 0 auto 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            font-weight: 500;
+            position: relative;
+        }
+
+        .profile-avatar::after {
+            content: '';
+            position: absolute;
+            inset: -3px;
+            border-radius: 50%;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .profile-name {
+            font-size: 16px;
+            font-weight: 500;
+            margin-bottom: 4px;
+        }
+
+        .profile-role {
+            font-size: 12px;
+            color: var(--text-secondary);
+        }
+
+        .profile-traits {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            justify-content: center;
+            margin-top: 16px;
+        }
+
+        .trait-tag {
+            padding: 5px 12px;
+            background: var(--bg-tertiary);
+            border-radius: 14px;
+            font-size: 11px;
+            color: var(--text-secondary);
+        }
+
+        .stats-section {
+            padding: 20px 24px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+        }
+
+        .stat-card {
+            background: var(--bg-card);
+            border-radius: 10px;
+            padding: 14px;
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 22px;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .stat-label {
+            font-size: 10px;
+            color: var(--text-muted);
+        }
+
+        .goals-section {
+            padding: 20px 24px;
+            flex: 1;
+            overflow-y: auto;
+        }
+
+        .goal-card {
+            background: var(--bg-card);
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 16px;
+        }
+
+        .goal-type {
+            font-size: 10px;
+            color: var(--text-muted);
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .goal-type::before {
+            content: '';
+            width: 4px;
+            height: 4px;
+            border-radius: 50%;
+        }
+
+        .goal-card.long .goal-type::before { background: var(--accent-time); }
+        .goal-card.short .goal-type::before { background: var(--accent-pm); }
+
+        .goal-text {
+            font-size: 13px;
+            line-height: 1.6;
+            color: var(--text-secondary);
+        }
+
+        /* Recommendations */
+        .recommendations-section {
+            padding: 20px 24px;
+            background: var(--bg-tertiary);
+        }
+
+        .rec-header {
+            font-size: 10px;
+            color: var(--text-muted);
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .rec-dot {
+            width: 6px;
+            height: 6px;
+            background: var(--accent-match);
+            border-radius: 50%;
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        .rec-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            padding: 12px;
+            background: var(--bg-card);
+            border-radius: 8px;
+            margin-bottom: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .rec-item:hover {
+            background: var(--bg-secondary);
+        }
+
+        .rec-icon {
+            font-size: 14px;
+        }
+
+        .rec-content {
+            flex: 1;
+        }
+
+        .rec-title {
+            font-size: 12px;
+            color: var(--text-secondary);
+            line-height: 1.4;
+        }
+
+        .rec-meta {
+            font-size: 10px;
+            color: var(--text-muted);
+            margin-top: 4px;
+        }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar {
+            width: 4px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--border);
+            border-radius: 2px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--border-light);
+        }
+
+        /* Responsive */
+        @media (max-width: 1200px) {
+            .main-container {
+                grid-template-columns: 280px 1fr 300px;
+            }
+        }
+
+        @media (max-width: 900px) {
+            .main-container {
+                grid-template-columns: 1fr;
+            }
+
+            .left-panel, .right-panel {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="stars"></div>
+
+    <header class="header">
+        <div class="logo">
+            <div class="logo-mark">
+                <svg viewBox="0 0 28 28" fill="none">
+                    <circle cx="14" cy="14" r="12" stroke="url(#logoGrad)" stroke-width="1.5" fill="none"/>
+                    <circle cx="14" cy="14" r="4" fill="url(#logoGrad)"/>
+                    <path d="M14 2v4M14 22v4M2 14h4M22 14h4" stroke="url(#logoGrad)" stroke-width="1" stroke-linecap="round"/>
+                    <defs>
+                        <linearGradient id="logoGrad" x1="0%" y1="0%" x2="28%" y2="28%">
+                            <stop offset="0%" stop-color="#7b9cde"/>
+                            <stop offset="100%" stop-color="#9b7bde"/>
+                        </linearGradient>
+                    </defs>
+                </svg>
+            </div>
+            <span class="logo-text">BE YOURSELF</span>
+        </div>
+        <nav class="nav-tabs">
+            <div class="nav-tab active" data-tab="capture">捕获</div>
+            <div class="nav-tab" data-tab="learn">学习</div>
+            <div class="nav-tab" data-tab="plan">规划</div>
+        </nav>
+        <div class="user-info">
+            <div class="streak">
+                <div class="streak-dot"></div>
+                <span>5 天</span>
+            </div>
+            <div class="user-avatar">J</div>
+        </div>
+    </header>
+
+    <div class="main-container">
+        <!-- Left Panel -->
+        <div class="left-panel">
+            <div class="capture-section">
+                <div class="section-label">Capture</div>
+                <textarea class="capture-input" id="captureInput" placeholder="分享链接、文字、想法...&#10;&#10;我会帮你理解、分类、关联"></textarea>
+                <div class="capture-actions">
+                    <div class="platform-quick">
+                        <button class="platform-btn" title="X/Twitter">𝕏</button>
+                        <button class="platform-btn" title="小红书">📕</button>
+                        <button class="platform-btn" title="YouTube">📺</button>
+                        <button class="platform-btn" title="公众号">📄</button>
+                    </div>
+                    <button class="submit-btn" id="submitBtn">发送</button>
+                </div>
+            </div>
+            <div class="collections-section">
+                <div class="collections-header">
+                    <span class="collections-title">最近捕获</span>
+                    <span class="collections-count">12</span>
+                </div>
+                <div class="collection-list" id="collectionList">
+                    <div class="collection-item active">
+                        <div class="collection-meta">
+                            <span>𝕏</span>
+                            <span>·</span>
+                            <span>2小时前</span>
+                        </div>
+                        <div class="collection-title">Sam Altman：AI产品设计的五个核心原则</div>
+                        <div class="collection-tags">
+                            <span class="collection-tag">AI产品</span>
+                            <span class="collection-tag">设计</span>
+                        </div>
+                    </div>
+                    <div class="collection-item">
+                        <div class="collection-meta">
+                            <span>📕</span>
+                            <span>·</span>
+                            <span>1天前</span>
+                        </div>
+                        <div class="collection-title">极简UI设计指南：留白的艺术</div>
+                        <div class="collection-tags">
+                            <span class="collection-tag">UI</span>
+                            <span class="collection-tag">美学</span>
+                        </div>
+                    </div>
+                    <div class="collection-item">
+                        <div class="collection-meta">
+                            <span>📄</span>
+                            <span>·</span>
+                            <span>3天前</span>
+                        </div>
+                        <div class="collection-title">产品经理的自我修养：从执行到战略</div>
+                        <div class="collection-tags">
+                            <span class="collection-tag">PM成长</span>
+                            <span class="collection-tag">战略</span>
+                        </div>
+                    </div>
+                    <div class="collection-item related">
+                        <div class="collection-meta">
+                            <span>🔗</span>
+                            <span>·</span>
+                            <span>7天前</span>
+                        </div>
+                        <div class="collection-title">我想学视频剪辑，但觉得自己永远学不会...</div>
+                        <div class="collection-tags">
+                            <span class="collection-tag">学习障碍</span>
+                            <span class="collection-tag">自我怀疑</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Center Panel -->
+        <div class="center-panel">
+            <div class="perspective-bar">
+                <span class="perspective-label">视角</span>
+                <div class="perspective-chips">
+                    <div class="perspective-chip calm active" data-p="calm">冷静的你</div>
+                    <div class="perspective-chip pm" data-p="pm">产品经理</div>
+                    <div class="perspective-chip time" data-p="time">时间旅者</div>
+                    <div class="perspective-chip cross" data-p="cross">连接者</div>
+                </div>
+            </div>
+            <div class="workspace-content" id="workspaceContent">
+                <div class="current-content">
+                    <div class="content-label">当前内容</div>
+                    <div class="content-display">
+                        Sam Altman：AI产品设计的五个核心原则<br><br>
+                        1. 减少摩擦——让用户能快速上手<br>
+                        2. 渐进式复杂——先简单，逐步深入<br>
+                        3. 上下文感知——理解用户处境<br>
+                        4. 可预测性——建立用户信任<br>
+                        5. 人机协作——AI是增强而非替代
+                    </div>
+                </div>
+                <div class="analysis-section">
+                    <div class="analysis-card">
+                        <div class="analysis-header">
+                            <div class="analysis-perspective-dot" style="background: var(--accent-calm)"></div>
+                            <span class="analysis-perspective-name" style="color: var(--accent-calm)">冷静的你</span>
+                        </div>
+                        <div class="analysis-content">
+                            <p>这5个原则很好，但我想指出一个<strong>潜在盲点</strong>：</p>
+                            <p>"减少摩擦"和"渐进式复杂"有时是矛盾的。减少摩擦意味着简化，但渐进式复杂需要引入新的复杂性。</p>
+                            <p><strong>对你的启示</strong>：不是所有摩擦都要减少。你需要区分"无意义的摩擦"（该减少）和"有意义的挑战"（该保留）。</p>
+                        </div>
+                    </div>
+                    <div class="analysis-card">
+                        <div class="analysis-header">
+                            <div class="analysis-perspective-dot" style="background: var(--accent-pm)"></div>
+                            <span class="analysis-perspective-name" style="color: var(--accent-pm)">产品经理 James</span>
+                        </div>
+                        <div class="analysis-content">
+                            <p><strong>用户价值分析</strong>：</p>
+                            <p>这5个原则背后有一个共同点：<strong>降低用户的认知负担</strong>。</p>
+                            <p><strong>关联到你的目标</strong>：你想做产品宣传视频，这些原则完全可以应用到视频设计上——</p>
+                            <p>• 减少摩擦：视频开头10秒就要抓住注意力<br>
+                            • 渐进式复杂：先讲清楚what，再深入why<br>
+                            • 上下文感知：知道观众是谁，他们已经知道什么</p>
+                        </div>
+                    </div>
+                    <div class="analysis-card">
+                        <div class="analysis-header">
+                            <div class="analysis-perspective-dot" style="background: var(--accent-cross)"></div>
+                            <span class="analysis-perspective-name" style="color: var(--accent-cross)">跨学科连接者</span>
+                        </div>
+                        <div class="analysis-content">
+                            <p><strong>发现隐藏关联</strong>：</p>
+                            <p>这5个原则和<em>"1月15日你收藏的用户心理画像"</em>有关联——它们都在探讨如何减少用户的认知负担。</p>
+                            <p><strong>物理学视角</strong>：这些原则本质上是"熵减"——把无序的信息变得有序。</p>
+                            <p><strong>心理学视角</strong>：它们符合"认知负荷理论"——人的工作记忆有限。</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="plan-section">
+                    <div class="plan-header">
+                        <span class="plan-icon">📋</span>
+                        <span class="plan-title">建议学习计划</span>
+                    </div>
+                    <div class="plan-timeline">
+                        <div class="plan-item">
+                            <div class="plan-time">今天</div>
+                            <div class="plan-content">
+                                <div class="plan-task">阅读 Sam 的原文全文</div>
+                                <div class="plan-desc">用15分钟，深入理解每个原则的具体案例</div>
+                            </div>
+                        </div>
+                        <div class="plan-item">
+                            <div class="plan-time">明天</div>
+                            <div class="plan-content">
+                                <div class="plan-task">关联学习：用户认知负荷</div>
+                                <div class="plan-desc">回顾"用户心理画像"，做知识连接笔记</div>
+                            </div>
+                        </div>
+                        <div class="plan-item">
+                            <div class="plan-time">本周</div>
+                            <div class="plan-content">
+                                <div class="plan-task">实践：分析一个你喜欢的视频</div>
+                                <div class="plan-desc">用这5个原则拆解，积累案例库</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Panel -->
+        <div class="right-panel">
+            <div class="profile-section">
+                <div class="profile-avatar">J</div>
+                <div class="profile-name">James</div>
+                <div class="profile-role">产品经理</div>
+                <div class="profile-traits">
+                    <span class="trait-tag">视觉敏感</span>
+                    <span class="trait-tag">碎片学习</span>
+                    <span class="trait-tag">内省型</span>
+                    <span class="trait-tag">连接思维</span>
+                </div>
+            </div>
+            <div class="stats-section">
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-number">47</div>
+                        <div class="stat-label">已捕获</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number">12</div>
+                        <div class="stat-label">知识模块</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number">23</div>
+                        <div class="stat-label">关联发现</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number">8</div>
+                        <div class="stat-label">学习计划</div>
+                    </div>
+                </div>
+            </div>
+            <div class="goals-section">
+                <div class="goal-card long">
+                    <div class="goal-type">长期目标</div>
+                    <div class="goal-text">成为顶尖产品经理，打造有影响力的产品，影响千万用户</div>
+                </div>
+                <div class="goal-card short">
+                    <div class="goal-type">Q1 短期目标</div>
+                    <div class="goal-text">完成第一个产品宣传视频，学习AI产品设计方法论</div>
+                </div>
+            </div>
+            <div class="recommendations-section">
+                <div class="rec-header">
+                    <div class="rec-dot"></div>
+                    <span>可能对你有帮助</span>
+                </div>
+                <div class="rec-item">
+                    <div class="rec-icon">🔗</div>
+                    <div class="rec-content">
+                        <div class="rec-title">你7天前说想学视频剪辑</div>
+                        <div class="rec-meta">今天的AI产品原则可以应用到视频设计中</div>
+                    </div>
+                </div>
+                <div class="rec-item">
+                    <div class="rec-icon">📄</div>
+                    <div class="rec-content">
+                        <div class="rec-title">产品经理的自我修养</div>
+                        <div class="rec-meta">与本文的"从执行到战略"形成互补</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // State
+        const state = {
+            currentPerspective: 'calm',
+            currentTab: 'capture',
+            collections: [],
+            isProcessing: false
+        };
+
+        // DOM Elements
+        const captureInput = document.getElementById('captureInput');
+        const submitBtn = document.getElementById('submitBtn');
+        const perspectiveChips = document.querySelectorAll('.perspective-chip');
+        const navTabs = document.querySelectorAll('.nav-tab');
+        const collectionList = document.getElementById('collectionList');
+        const workspaceContent = document.getElementById('workspaceContent');
+
+        // Initialize
+        function init() {
+            loadFromStorage();
+            setupEventListeners();
+        }
+
+        // Load from localStorage
+        function loadFromStorage() {
+            const saved = localStorage.getItem('beyourself_data');
+            if (saved) {
+                const data = JSON.parse(saved);
+                state.collections = data.collections || [];
+            }
+        }
+
+        // Save to localStorage
+        function saveToStorage() {
+            localStorage.setItem('beyourself_data', JSON.stringify({
+                collections: state.collections
+            }));
+        }
+
+        // Setup event listeners
+        function setupEventListeners() {
+            // Perspective selection
+            perspectiveChips.forEach(chip => {
+                chip.addEventListener('click', () => {
+                    perspectiveChips.forEach(c => c.classList.remove('active'));
+                    chip.classList.add('active');
+                    state.currentPerspective = chip.dataset.p;
+                });
+            });
+
+            // Navigation tabs
+            navTabs.forEach(tab => {
+                tab.addEventListener('click', () => {
+                    navTabs.forEach(t => t.classList.remove('active'));
+                    tab.classList.add('active');
+                    state.currentTab = tab.dataset.tab;
+                });
+            });
+
+            // Submit button
+            submitBtn.addEventListener('click', handleCapture);
+
+            // Enter key to submit
+            captureInput.addEventListener('keydown', (e) => {
+                if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') {
+                    handleCapture();
+                }
+            });
+
+            // Collection item click
+            collectionList.addEventListener('click', (e) => {
+                const item = e.target.closest('.collection-item');
+                if (item) {
+                    document.querySelectorAll('.collection-item').forEach(i => i.classList.remove('active'));
+                    item.classList.add('active');
+                    loadCollection(item);
+                }
+            });
+        }
+
+        // Handle content capture
+        function handleCapture() {
+            const content = captureInput.value.trim();
+            if (!content || state.isProcessing) return;
+
+            state.isProcessing = true;
+            submitBtn.disabled = true;
+            submitBtn.textContent = '处理中...';
+
+            // Simulate processing
+            setTimeout(() => {
+                const collection = {
+                    id: Date.now(),
+                    content: content,
+                    timestamp: new Date().toISOString(),
+                    tags: extractTags(content),
+                    perspective: state.currentPerspective,
+                    analyzed: false
+                };
+
+                state.collections.unshift(collection);
+                saveToStorage();
+
+                captureInput.value = '';
+                submitBtn.disabled = false;
+                submitBtn.textContent = '发送';
+                state.isProcessing = false;
+
+                // Add to collection list
+                addCollectionItem(collection, true);
+
+                // Generate analysis
+                generateAnalysis(collection);
+            }, 1500 + Math.random() * 1000);
+        }
+
+        // Extract tags from content
+        function extractTags(content) {
+            const tags = new Set();
+            const keywords = ['产品', 'AI', '设计', '学习', '视频', '营销', '用户', '产品经理', '策略', '方法论'];
+            keywords.forEach(keyword => {
+                if (content.includes(keyword)) {
+                    tags.add(keyword);
+                }
+            });
+            return Array.from(tags);
+        }
+
+        // Add collection item to list
+        function addCollectionItem(collection, isNew = false) {
+            const platform = getRandomPlatform();
+            const item = document.createElement('div');
+            item.className = `collection-item${isNew ? ' active' : ''}`;
+            item.dataset.id = collection.id;
+            item.innerHTML = `
+                <div class="collection-meta">
+                    <span>${platform.icon}</span>
+                    <span>·</span>
+                    <span>刚刚</span>
+                </div>
+                <div class="collection-title">${escapeHtml(collection.content.substring(0, 60))}...</div>
+                <div class="collection-tags">
+                    ${collection.tags.slice(0, 2).map(tag => `<span class="collection-tag">${tag}</span>`).join('')}
+                </div>
+            `;
+            item.addEventListener('click', () => {
+                document.querySelectorAll('.collection-item').forEach(i => i.classList.remove('active'));
+                item.classList.add('active');
+                loadCollection(collection);
+            });
+
+            // Remove active from others
+            document.querySelectorAll('.collection-item').forEach(i => i.classList.remove('active'));
+
+            collectionList.insertBefore(item, collectionList.firstChild);
+        }
+
+        // Get random platform
+        function getRandomPlatform() {
+            const platforms = [
+                { icon: '𝕏', name: 'X' },
+                { icon: '📕', name: '小红书' },
+                { icon: '📺', name: 'YouTube' },
+                { icon: '📄', name: '公众号' }
+            ];
+            return platforms[Math.floor(Math.random() * platforms.length)];
+        }
+
+        // Load collection
+        function loadCollection(collection) {
+            workspaceContent.innerHTML = `
+                <div class="current-content">
+                    <div class="content-label">当前内容</div>
+                    <div class="content-display">${escapeHtml(collection.content)}</div>
+                </div>
+                <div class="analysis-section">
+                    <div class="analysis-card">
+                        <div class="analysis-header">
+                            <div class="analysis-perspective-dot" style="background: var(--accent-calm)"></div>
+                            <span class="analysis-perspective-name" style="color: var(--accent-calm)">冷静的你</span>
+                        </div>
+                        <div class="analysis-content">
+                            <p>让我帮你<strong>重新理解</strong>这个内容...</p>
+                            <p>你之前在<em>${formatTime(collection.timestamp)}</em>分享过类似的内容。</p>
+                            <p><strong>核心洞察</strong>：${getCalmInsight(collection)}</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="plan-section">
+                    <div class="plan-header">
+                        <span class="plan-icon">📋</span>
+                        <span class="plan-title">相关学习计划</span>
+                    </div>
+                    <div class="plan-timeline">
+                        <div class="plan-item">
+                            <div class="plan-time">今天</div>
+                            <div class="plan-content">
+                                <div class="plan-task">复习这个内容</div>
+                                <div class="plan-desc">花15分钟，重新思考它的含义</div>
+                            </div>
+                        </div>
+                        <div class="plan-item">
+                            <div class="plan-time">明天</div>
+                            <div class="plan-content">
+                                <div class="plan-task">关联到你的目标</div>
+                                <div class="plan-desc">思考如何应用到你的实际工作中</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Generate analysis
+        function generateAnalysis(collection) {
+            workspaceContent.innerHTML = `
+                <div class="current-content">
+                    <div class="content-label">当前内容</div>
+                    <div class="content-display">${escapeHtml(collection.content)}</div>
+                </div>
+                <div class="analysis-section">
+                    <div class="analysis-card">
+                        <div class="analysis-header">
+                            <div class="analysis-perspective-dot" style="background: var(--accent-calm)"></div>
+                            <span class="analysis-perspective-name" style="color: var(--accent-calm)">冷静的你</span>
+                        </div>
+                        <div class="analysis-content">
+                            <p>收到。我来帮你<strong>拆解这个内容</strong>...</p>
+                            <p>这看起来是关于<em>${collection.tags.join('、')}</em>的内容。</p>
+                            <p><strong>我的初步判断</strong>：${getCalmInsight(collection)}</p>
+                        </div>
+                    </div>
+                    <div class="analysis-card">
+                        <div class="analysis-header">
+                            <div class="analysis-perspective-dot" style="background: var(--accent-pm)"></div>
+                            <span class="analysis-perspective-name" style="color: var(--accent-pm)">产品经理 James</span>
+                        </div>
+                        <div class="analysis-content">
+                            <p><strong>产品视角分析</strong>：</p>
+                            <p>• <strong>用户价值</strong>：这个内容解决什么问题？<br>
+                            • <strong>核心场景</strong>：谁会用？在什么情况下用？<br>
+                            • <strong>可执行点</strong>：${getPMAction(collection)}</p>
+                        </div>
+                    </div>
+                    <div class="analysis-card">
+                        <div class="analysis-header">
+                            <div class="analysis-perspective-dot" style="background: var(--accent-cross)"></div>
+                            <span class="analysis-perspective-name" style="color: var(--accent-cross)">跨学科连接者</span>
+                        </div>
+                        <div class="analysis-content">
+                            <p><strong>关联发现</strong>：</p>
+                            <p>这与你<em>3天前</em>分享的"产品经理自我修养"有关联。</p>
+                            <p><strong>知识网络</strong>：${collection.tags.join(' - ')}正在形成一个知识模块。</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="plan-section">
+                    <div class="plan-header">
+                        <span class="plan-icon">📋</span>
+                        <span class="plan-title">建议学习计划</span>
+                    </div>
+                    <div class="plan-timeline">
+                        <div class="plan-item">
+                            <div class="plan-time">今天</div>
+                            <div class="plan-content">
+                                <div class="plan-task">深入阅读理解</div>
+                                <div class="plan-desc">用15分钟消化核心观点</div>
+                            </div>
+                        </div>
+                        <div class="plan-item">
+                            <div class="plan-time">明天</div>
+                            <div class="plan-content">
+                                <div class="plan-task">实践尝试</div>
+                                <div class="plan-desc">选择一个点应用到你的工作中</div>
+                            </div>
+                        </div>
+                        <div class="plan-item">
+                            <div class="plan-time">本周</div>
+                            <div class="plan-content">
+                                <div class="plan-task">复盘总结</div>
+                                <div class="plan-desc">写下你的理解和收获</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            // Update stats
+            document.getElementById('collectionCount')?.parentElement.querySelector('.stat-number').textContent = state.collections.length;
+        }
+
+        // Helper functions
+        function getCalmInsight(collection) {
+            if (collection.tags.includes('产品')) {
+                return "这涉及到产品设计的核心问题。你在思考如何做出更好的产品决策。";
+            } else if (collection.tags.includes('AI')) {
+                return "AI正在改变产品设计的方式。你在关注这个趋势，很好。";
+            } else if (collection.tags.includes('学习')) {
+                return "你在主动寻求成长。这很好，但要注意避免"收藏但不行动"的陷阱。";
+            }
+            return "这是一个有价值的内容，值得深入理解。";
+        }
+
+        function getPMAction(collection) {
+            if (collection.tags.includes('产品')) {
+                return "思考如何把这些原则应用到你的产品中";
+            } else if (collection.tags.includes('视频')) {
+                return "考虑做一个产品宣传视频来实践";
+            }
+            return "找到一个可以立即实践的点";
+        }
+
+        function formatTime(timestamp) {
+            const date = new Date(timestamp);
+            const now = new Date();
+            const diff = now - date;
+
+            if (diff < 60000) return '刚刚';
+            if (diff < 3600000) return `${Math.floor(diff / 60000)}分钟前`;
+            if (diff < 86400000) return `${Math.floor(diff / 3600000)}小时前`;
+            if (diff < 604800000) return `${Math.floor(diff / 86400000)}天前`;
+
+            return date.toLocaleDateString('zh-CN');
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML.replace(/\n/g, '<br>');
+        }
+
+        // Initialize app
+        init();
+    </script>
+</body>
+</html>

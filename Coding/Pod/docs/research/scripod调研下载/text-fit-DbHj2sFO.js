@@ -1,0 +1,1 @@
+import{r as e,j as s,c as o}from"./main-BC3yBi8Q.js";const x={className:"font-inter-tight"},u=({children:r,className:i,disabled:n})=>{const t=e.useRef(null),[a,c]=e.useState();return e.useEffect(()=>{t.current&&c(t.current.offsetWidth+1)},[]),s.jsx("div",{className:o("w-fit",i),style:{maxWidth:n?void 0:a},children:s.jsx("span",{ref:t,children:r})})};export{u as T,x as i};

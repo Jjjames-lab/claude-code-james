@@ -1,0 +1,1 @@
+import{q as e,s as a,v as r}from"./main-BC3yBi8Q.js";const c=a("8e9cb58ffcc8bb8aecc945f639aa0abdf0e1332c0430f579ebd38808b4b74ec0"),o=e({method:"GET"}).handler(c);r("/api/bookmarks/list")({});export{o as g};
