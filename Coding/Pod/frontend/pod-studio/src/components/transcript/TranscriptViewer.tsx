@@ -51,15 +51,15 @@ export const TranscriptViewer = ({ segments, highlightedSegmentId, podcastId }: 
     if (segments.length > 0) {
       console.log('First segment:', {
         id: segments[0].id,
-        startTime: segments[0].startTime,
-        endTime: segments[0].endTime,
+        start: segments[0].start,  // 使用正确的字段名
+        end: segments[0].end,      // 使用正确的字段名
         speaker: segments[0].speaker,
         textPreview: segments[0].text?.substring(0, 50),
         wordsCount: segments[0].words?.length,
       });
       console.log('Second segment:', {
-        startTime: segments[1]?.startTime,
-        endTime: segments[1]?.endTime,
+        start: segments[1]?.start,
+        end: segments[1]?.end,
         textPreview: segments[1]?.text?.substring(0, 50),
       });
       console.log('Full first segment:', segments[0]);
@@ -97,8 +97,8 @@ export const TranscriptViewer = ({ segments, highlightedSegmentId, podcastId }: 
       count: segments.length,
       firstSegment: segments[0] ? {
         id: segments[0].id,
-        startTime: segments[0].startTime,
-        endTime: segments[0].endTime,
+        start: segments[0].start,  // 使用正确的字段名
+        end: segments[0].end,      // 使用正确的字段名
         text: segments[0].text?.substring(0, 50),
       } : 'NO SEGMENTS',
     });
@@ -114,8 +114,8 @@ export const TranscriptViewer = ({ segments, highlightedSegmentId, podcastId }: 
       if (currentLength > 0 && (currentLength > 150 || segment.text.startsWith('\n'))) {
         paragraphs.push({
           segments: currentParagraph,
-          startTime: currentParagraph[0].startTime,
-          endTime: currentParagraph[currentParagraph.length - 1].endTime,
+          startTime: currentParagraph[0].start,  // 使用 start
+          endTime: currentParagraph[currentParagraph.length - 1].end,  // 使用 end
           text: currentParagraph.map(s => s.text).join(''),
           id: currentParagraph[0].id,
         });
@@ -131,8 +131,8 @@ export const TranscriptViewer = ({ segments, highlightedSegmentId, podcastId }: 
     if (currentParagraph.length > 0) {
       paragraphs.push({
         segments: currentParagraph,
-        startTime: currentParagraph[0].startTime,
-        endTime: currentParagraph[currentParagraph.length - 1].endTime,
+        startTime: currentParagraph[0].start,  // 使用 start
+        endTime: currentParagraph[currentParagraph.length - 1].end,  // 使用 end
         text: currentParagraph.map(s => s.text).join(''),
         id: currentParagraph[0].id,
       });
@@ -339,7 +339,10 @@ export const TranscriptViewer = ({ segments, highlightedSegmentId, podcastId }: 
                 </span>
 
                 {/* 笔记标识 */}
-                {paragraph.segments.some(seg => hasNoteAtTimestamp(seg.startTime)) && (
+                {paragraph.segments.some(seg => {
+                  const segStart = seg.start;  // 使用 start 字段
+                  return hasNoteAtTimestamp(segStart);
+                }) && (
                   <div
                     className="flex items-center gap-1 px-1.5 py-0.5 rounded cursor-pointer text-xs"
                     style={{
@@ -363,9 +366,9 @@ export const TranscriptViewer = ({ segments, highlightedSegmentId, podcastId }: 
                 {paragraph.segments.map((segment, segIndex) => (
                   <span
                     key={`${paragraph.id}-${segment.id}-${segIndex}`}
-                    data-start-time={segment.startTime}
-                    onClick={() => seek(segment.startTime)}
-                    title={`跳转到 ${formatTime(segment.startTime)}`}
+                    data-start-time={segment.start}  // 使用 start 字段
+                    onClick={() => seek(segment.start)}  // 使用 start 字段
+                    title={`跳转到 ${formatTime(segment.start)}`}  // 使用 start 字段
                   >
                     {segment.text}
                   </span>
