@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { usePlayerStore } from '../stores/playerStore';
 import { useThemeStore } from '../stores/themeStore';
 import { storageManager } from '../utils/storageManager';
+import { BarChart3, Settings, Keyboard, FileText, FileTextPlus, File } from 'lucide-react';
 
 // === 新设计组件 (v2.0) ===
 import { AudioPlayerEnhanced } from '../components/audio/AudioPlayerEnhanced';
@@ -750,7 +751,7 @@ export const HomePage = () => {
                   e.currentTarget.style.color = 'rgba(255, 255, 255, 0.5)';
                 }}
               >
-                <span style={{ fontSize: '20px' }}>📊</span>
+                <BarChart3 style={{ width: '20px', height: '20px' }} />
                 <span style={{ fontWeight: 500 }}>
                   学习统计
                 </span>
@@ -776,7 +777,7 @@ export const HomePage = () => {
                   e.currentTarget.style.color = 'rgba(255, 255, 255, 0.5)';
                 }}
               >
-                <span style={{ fontSize: '20px' }}>⚙️</span>
+                <Settings style={{ width: '20px', height: '20px' }} />
                 <span style={{ fontWeight: 500 }}>
                   设置
                 </span>
@@ -1005,10 +1006,10 @@ export const HomePage = () => {
                     <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-xl p-2">
                       <div className="space-y-1">
                         {[
-                          { key: 'overview', label: '概览', icon: '📊' },
-                          { key: 'chapters', label: '章节', icon: '📑' },
-                          { key: 'transcript', label: '逐字稿', icon: '📝' },
-                          { key: 'shownote', label: '节目单', icon: '📄' },
+                          { key: 'overview', label: '概览', icon: BarChart3 },
+                          { key: 'chapters', label: '章节', icon: FileText },
+                          { key: 'transcript', label: '逐字稿', icon: FileTextPlus },
+                          { key: 'shownote', label: '节目单', icon: File },
                         ].map((tab) => (
                           <button
                             key={tab.key}
@@ -1021,7 +1022,7 @@ export const HomePage = () => {
                                          : 'text-slate-400 hover:text-white hover:bg-white/5'
                                        }`}
                           >
-                            <span className="text-lg">{tab.icon}</span>
+                            <tab.icon className="w-5 h-5" />
                             <span className="text-sm font-medium">{tab.label}</span>
                           </button>
                         ))}
@@ -1069,7 +1070,7 @@ export const HomePage = () => {
                       }}
                       title="按 ? 查看所有快捷键"
                     >
-                      <span>⌨️</span>
+                      <Keyboard className="w-4 h-4" />
                       <span className="font-medium">快捷键</span>
                       <span
                         className="px-1.5 py-0.5 rounded text-xs font-mono"
@@ -1173,10 +1174,10 @@ export const HomePage = () => {
             >
               <div className="flex items-center justify-around">
                 {[
-                  { key: 'overview' as TabKey, icon: '📊', label: '概览' },
-                  { key: 'chapters' as TabKey, icon: '📑', label: '章节' },
-                  { key: 'transcript' as TabKey, icon: '📝', label: '逐字稿' },
-                  { key: 'shownote' as TabKey, icon: '📄', label: '节目单' },
+                  { key: 'overview' as TabKey, icon: BarChart3, label: '概览' },
+                  { key: 'chapters' as TabKey, icon: FileText, label: '章节' },
+                  { key: 'transcript' as TabKey, icon: FileTextPlus, label: '逐字稿' },
+                  { key: 'shownote' as TabKey, icon: File, label: '节目单' },
                 ].map((tab) => (
                   <button
                     key={tab.key}
@@ -1194,7 +1195,7 @@ export const HomePage = () => {
                           }
                     }
                   >
-                    <span className="text-xl">{tab.icon}</span>
+                    <tab.icon className="w-5 h-5" />
                     <span className="text-xs font-medium">{tab.label}</span>
                   </button>
                 ))}

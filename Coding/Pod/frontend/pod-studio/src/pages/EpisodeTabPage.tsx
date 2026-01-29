@@ -9,7 +9,7 @@ import { UrlInputEnhanced } from '../components/url/UrlInputEnhanced';
 import { TranscriptViewer } from '../components/transcript/TranscriptViewer';
 import { ChaptersSectionEnhanced } from '../components/chapters/ChaptersSectionEnhanced';
 import type { ChapterData } from '../services/api';
-import { Clock } from 'lucide-react';
+import { Clock, Mic } from 'lucide-react';
 
 // type TabKey = 'transcript' | 'chapters' | 'notes';
 
@@ -385,7 +385,7 @@ export const EpisodeTabPage = () => {
                       <p className="text-white/60 text-lg mb-4">该单集尚未处理</p>
                       <button
                         onClick={handleStartTranscription}
-                        className="px-8 py-4 rounded-xl font-semibold text-base transition-all duration-300 hover:scale-105"
+                        className="px-8 py-4 rounded-xl font-semibold text-base transition-all duration-300 hover:scale-105 flex items-center gap-3"
                         style={{
                           backgroundColor: 'rgba(212, 197, 185, 0.2)',
                           color: 'rgba(212, 197, 185, 1)',
@@ -393,7 +393,8 @@ export const EpisodeTabPage = () => {
                           boxShadow: '0 8px 32px rgba(212, 197, 185, 0.1)',
                         }}
                       >
-                        🎙️ Run AI Processing
+                        <Mic className="w-5 h-5" />
+                        <span>Run AI Processing</span>
                       </button>
                     </div>
                   </div>
