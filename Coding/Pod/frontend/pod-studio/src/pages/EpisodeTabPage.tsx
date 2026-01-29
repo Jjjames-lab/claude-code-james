@@ -310,9 +310,9 @@ export const EpisodeTabPage = () => {
       // 切换到双语模式
       setViewMode('bilingual');
 
-      // 构造待翻译的段落
+      // 构造待翻译的段落（使用 start 作为唯一 ID）
       const segments = savedData.utterances.map((utt: any) => ({
-        id: utt.id,
+        id: utt.start?.toString() || `seg-${Math.random().toString(36).substr(2, 9)}`,
         text: utt.text,
       }));
 

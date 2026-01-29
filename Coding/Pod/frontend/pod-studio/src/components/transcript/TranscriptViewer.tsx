@@ -307,7 +307,7 @@ export const TranscriptViewer = ({ segments, highlightedSegmentId, podcastId }: 
               </div>
 
               {/* 翻译文字（双语模式） */}
-              {viewMode === 'bilingual' && paragraph.segments.some(seg => translations.has(seg.id)) && (
+              {viewMode === 'bilingual' && paragraph.segments.some(seg => translations.has(seg.start?.toString())) && (
                 <div
                   className="mt-3 pt-3"
                   style={{
@@ -318,7 +318,7 @@ export const TranscriptViewer = ({ segments, highlightedSegmentId, podcastId }: 
                   }}
                 >
                   {paragraph.segments.map((segment, segIndex) => {
-                    const translation = translations.get(segment.id);
+                    const translation = translations.get(segment.start?.toString());
                     if (!translation) return null;
                     return (
                       <span
