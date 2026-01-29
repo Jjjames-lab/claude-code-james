@@ -367,18 +367,18 @@ export const EpisodeTabPage = () => {
         </div>
 
         {/* Tab 功能区 - 双栏布局 */}
-        <div className="h-screen flex flex-col">
+        <div className="flex flex-col" style={{ height: 'calc(100vh - 80px)' }}>
           {/* 双栏内容区 */}
           <div className="flex-1 flex overflow-hidden">
             {/* 左侧（40%）：播放器 + 章节导航 */}
             <div className="w-[40%] flex flex-col border-r border-white/10">
               {/* 上层：播放器窗口 */}
-              <div className="p-6 border-b border-white/10">
+              <div className="p-4 border-b border-white/10 flex-shrink-0">
                 <AudioPlayerEnhanced mode="full" />
               </div>
 
               {/* 下层：章节导航（竖向列表） */}
-              <div className="flex-1 overflow-y-auto p-4">
+              <div className="flex-1 overflow-y-auto px-4 py-3">
                 {!isProcessed && !isTranscribing && (
                   <div className="flex items-center justify-center h-full">
                     <div className="text-center">
@@ -420,15 +420,13 @@ export const EpisodeTabPage = () => {
                 )}
 
                 {isProcessed && savedData && chapters && (
-                  <div className="space-y-3">
+                  <div className="space-y-2">
                     {chapters.chapters.map((chapter, idx) => (
                       <div
                         key={idx}
-                        className={`p-4 rounded-xl cursor-pointer transition-all duration-200 hover:scale-[1.02] ${
-                          false ? 'bg-white/5' : 'bg-white/10'
-                        }`}
+                        className="p-3 rounded-lg cursor-pointer transition-all duration-200 hover:scale-[1.01] bg-white/5 hover:bg-white/8"
                         style={{
-                          border: '1px solid rgba(255, 255, 255, 0.06)',
+                          border: '1px solid rgba(255, 255, 255, 0.05)',
                         }}
                         onClick={() => {
                           const utterance = savedData.utterances[chapter.segment_index];
@@ -438,12 +436,12 @@ export const EpisodeTabPage = () => {
                           }
                         }}
                       >
-                        <div className="flex items-center gap-3 mb-2">
+                        <div className="flex items-center gap-2 mb-1.5">
                           <div
-                            className="w-8 h-8 rounded-lg flex items-center justify-center text-sm font-medium"
+                            className="w-6 h-6 rounded-md flex items-center justify-center text-xs font-medium flex-shrink-0"
                             style={{
-                              backgroundColor: 'rgba(212, 197, 185, 0.2)',
-                              color: 'rgba(212, 197, 185, 0.9)',
+                              backgroundColor: 'rgba(212, 197, 185, 0.15)',
+                              color: 'rgba(212, 197, 185, 0.8)',
                             }}
                           >
                             {idx + 1}
@@ -451,11 +449,11 @@ export const EpisodeTabPage = () => {
                           {(() => {
                             const utterance = savedData.utterances[chapter.segment_index];
                             return utterance ? (
-                              <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs" style={{
-                              backgroundColor: 'rgba(255, 255, 255, 0.05)',
-                              fontFamily: 'monospace',
-                              color: 'rgba(255, 255, 255, 0.4)',
-                            }}>
+                              <div className="flex items-center gap-1 px-2 py-0.5 rounded text-xs" style={{
+                                backgroundColor: 'rgba(255, 255, 255, 0.03)',
+                                fontFamily: 'monospace',
+                                color: 'rgba(255, 255, 255, 0.35)',
+                              }}>
                                 <Clock className="w-3 h-3" />
                                 {Math.floor(utterance.start / 1000 / 60)}:{(Math.floor(utterance.start / 1000) % 60).toString().padStart(2, '0')}
                               </div>
@@ -463,23 +461,28 @@ export const EpisodeTabPage = () => {
                           })()}
                         </div>
 
-                        <h3 className="text-base font-medium text-white mb-2 leading-snug">
+                        <h3 className="text-sm font-medium text-white mb-1 leading-snug">
                           {chapter.title}
                         </h3>
 
                         {chapter.points && chapter.points.length > 0 && (
-                          <ul className="space-y-1">
-                            {chapter.points.map((point, pointIdx) => (
+                          <ul className="space-y-0.5">
+                            {chapter.points.slice(0, 2).map((point, pointIdx) => (
                               <li
                                 key={pointIdx}
-                                className="text-sm flex items-start gap-2 text-white/60"
+                                className="text-xs flex items-start gap-1.5 text-white/50 leading-relaxed"
                               >
-                                <span className="flex-shrink-0 mt-0.5 text-xs" style={{ color: 'rgba(212, 197, 185, 0.6)' }}>
+                                <span className="flex-shrink-0 text-[10px]" style={{ color: 'rgba(212, 197, 185, 0.5)' }}>
                                   •
                                 </span>
-                                <span className="flex-1">{point}</span>
+                                <span className="flex-1 line-clamp-1">{point}</span>
                               </li>
                             ))}
+                            {chapter.points.length > 2 && (
+                              <li className="text-xs text-white/30 pl-3.5">
+                                +{chapter.points.length - 2} 更多
+                              </li>
+                            )}
                           </ul>
                         )}
                       </div>
@@ -527,7 +530,7 @@ export const EpisodeTabPage = () => {
               </div>
 
               {/* 文字稿内容区 */}
-              <div className="flex-1 overflow-y-auto p-6">
+              <div className="flex-1 overflow-y-auto px-4 py-4">
                 {!isProcessed && !isTranscribing && (
                   <div className="flex items-center justify-center h-full">
                     <p className="text-white/60">处理完成后显示文字稿</p>

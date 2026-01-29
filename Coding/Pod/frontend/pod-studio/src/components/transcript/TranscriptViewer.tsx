@@ -209,15 +209,15 @@ export const TranscriptViewer = ({ segments, highlightedSegmentId, podcastId }: 
 
   return (
     <div className="w-full" onMouseUp={handleMouseUp}>
-      {/* 最佳阅读宽度容器 */}
-      <div className="max-w-2xl mx-auto">
+      {/* 文字稿容器 - 左对齐，自然阅读 */}
+      <div>
         <div
           ref={containerRef}
-          className="space-y-6 max-h-[calc(100vh-16rem)] overflow-y-auto pr-2"
+          className="overflow-y-auto pr-2"
           style={{
-            // 18px 字号，1.8 行高
-            fontSize: '18px',
+            fontSize: '16px',
             lineHeight: 1.8,
+            maxHeight: 'calc(100vh - 200px)',
           }}
         >
           {segmentSentences.map(({ segment, sentences }, segIndex) => {
@@ -231,25 +231,25 @@ export const TranscriptViewer = ({ segments, highlightedSegmentId, podcastId }: 
                 data-segment-index={segIndex}
                 className="group transition-all duration-250"
                 style={{
-                  // 极淡的米色背景（当前播放）
+                  // 当前播放的段落有极淡背景
                   ...(isActive || isHighlighted ? {
-                    backgroundColor: 'rgba(212, 197, 185, 0.08)',
-                    borderRadius: '8px',
-                    padding: '16px 20px',
+                    backgroundColor: 'rgba(212, 197, 185, 0.05)',
+                    borderRadius: '6px',
+                    padding: '8px 12px',
+                    margin: '4px 0',
                   } : {
-                    padding: '16px 20px',
+                    padding: '4px 12px',
+                    margin: '2px 0',
                   }),
-                  transition: 'all 250ms cubic-bezier(0.25, 0.46, 0.45, 0.94)',
+                  transition: 'all 200ms cubic-bezier(0.25, 0.46, 0.45, 0.94)',
                 }}
               >
-                {/* 时间戳和笔记标识 - SF Mono，极简 */}
-                <div className="flex items-center gap-3 mb-3">
+                {/* 时间戳和笔记标识 - 极简 */}
+                <div className="flex items-center gap-2 mb-2">
                   <span
                     className="text-xs font-mono cursor-pointer hover:underline"
                     style={{
-                      color: 'rgba(255, 255, 255, 0.3)',
-                      fontFamily: "'SF Mono', Monaco, 'Cascadia Code', monospace",
-                      transition: 'color 150ms cubic-bezier(0.25, 0.46, 0.45, 0.94)',
+                      color: 'rgba(255, 255, 255, 0.25)',
                     }}
                     onClick={() => seek(segment.startTime)}
                     title={`跳转到 ${formatTime(segment.startTime)}`}
@@ -260,31 +260,14 @@ export const TranscriptViewer = ({ segments, highlightedSegmentId, podcastId }: 
                   {/* 笔记标识 */}
                   {hasNoteAtTimestamp(segment.startTime) && (
                     <div
-                      className="flex items-center gap-1.5 px-2 py-1 rounded cursor-pointer text-xs font-medium"
+                      className="flex items-center gap-1 px-1.5 py-0.5 rounded cursor-pointer text-xs"
                       style={{
                         backgroundColor: 'rgba(212, 197, 185, 0.08)',
-                        color: 'rgba(212, 197, 185, 0.6)',
-                        border: '1px solid rgba(212, 197, 185, 0.15)',
-                        transition: 'all 150ms cubic-bezier(0.25, 0.46, 0.45, 0.94)',
-                      }}
-                      onMouseEnter={(e) => {
-                        e.currentTarget.style.backgroundColor = 'rgba(212, 197, 185, 0.15)';
-                        e.currentTarget.style.borderColor = 'rgba(212, 197, 185, 0.25)';
-                      }}
-                      onMouseLeave={(e) => {
-                        e.currentTarget.style.backgroundColor = 'rgba(212, 197, 185, 0.08)';
-                        e.currentTarget.style.borderColor = 'rgba(212, 197, 185, 0.15)';
-                      }}
-                      onClick={() => {
-                        // 滚动到笔记列表（如果存在）
-                        const notesSection = document.querySelector('[data-notes-section]');
-                        if (notesSection) {
-                          notesSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                        }
+                        color: 'rgba(212, 197, 185, 0.7)',
                       }}
                       title={`该段落有 ${getNoteCountAtTimestamp(segment.startTime)} 条笔记`}
                     >
-                      <MessageSquare className="w-3 h-3" style={{ width: '12px', height: '12px' }} />
+                      <MessageSquare className="w-3 h-3" style={{ width: '11px', height: '11px' }} />
                       <span>{getNoteCountAtTimestamp(segment.startTime)}</span>
                     </div>
                   )}
