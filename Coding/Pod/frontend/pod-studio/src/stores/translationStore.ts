@@ -70,6 +70,10 @@ export const useTranslationStore = create<TranslationState>()(
         set({ isTranslating: true, translatingProgress: { current: 0, total: segments.length } });
 
         try {
+          // 清除旧缓存（因为之前使用的是错误的key）
+          const newTranslations = new Map<string, string>();
+          console.log('[TranslationStore] 清除旧翻译缓存');
+
           // 分批翻译：每批10个段落，避免超过LLM输入限制
           const BATCH_SIZE = 10;
           const batches = [];
@@ -78,8 +82,6 @@ export const useTranslationStore = create<TranslationState>()(
           }
 
           console.log(`[TranslationStore] 分 ${batches.length} 批翻译，每批最多 ${BATCH_SIZE} 个段落`);
-
-          const newTranslations = new Map(translations);
 
           // 逐批翻译
           for (let batchIndex = 0; batchIndex < batches.length; batchIndex++) {
@@ -100,6 +102,9 @@ export const useTranslationStore = create<TranslationState>()(
             for (const [id, text] of result) {
               newTranslations.set(id, text);
             }
+
+            console.log(`[TranslationStore] 第 ${batchIndex + 1} 批翻译完成，新增 ${result.size} 条`);
+            console.log(`[TranslationStore] 翻译示例 ID:`, Array.from(result.keys())[0]);
 
             // 更新翻译结果（实时显示）
             set({ translations: newTranslations });

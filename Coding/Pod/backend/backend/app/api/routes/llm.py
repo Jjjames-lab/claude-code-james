@@ -588,11 +588,15 @@ def _parse_translate_response(content: str, segments: List[TranslateSegment]) ->
         data = json.loads(content)
 
         translations = []
-        for trans_data in data.get("translations", []):
-            translations.append(TranslatedSegment(
-                id=trans_data.get("id", ""),
-                translated_text=trans_data.get("translated_text", "")
-            ))
+        llm_translations = data.get("translations", [])
+
+        # 按顺序匹配：LLM返回的第i个翻译对应请求的第i个segment
+        for idx, trans_data in enumerate(llm_translations):
+            if idx < len(segments):
+                translations.append(TranslatedSegment(
+                    id=segments[idx].id,  # 使用真实的segment ID
+                    translated_text=trans_data.get("translated_text", "")
+                ))
 
         return translations
 

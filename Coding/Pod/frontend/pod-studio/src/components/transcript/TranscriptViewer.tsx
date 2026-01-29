@@ -77,6 +77,20 @@ export const TranscriptViewer = ({ segments, highlightedSegmentId, podcastId }: 
     let currentParagraph: TranscriptSegment[] = [];
     let currentLength = 0;
 
+    // 调试：检查第一个segment的id和start
+    if (segments.length > 0) {
+      console.log('[TranscriptViewer] 第一个segment:', {
+        id: segments[0].id,
+        start: segments[0].start,
+        startType: typeof segments[0].start,
+        hasId: !!segments[0].id,
+      });
+    }
+
+    // 调试：检查翻译数据
+    console.log('[TranscriptViewer] 翻译数据keys示例:', Array.from(translations.keys()).slice(0, 5));
+    console.log('[TranscriptViewer] 翻译数量:', translations.size);
+
     segments.forEach((segment) => {
       const segmentLength = segment.text.length;
 
