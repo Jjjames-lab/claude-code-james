@@ -40,7 +40,6 @@ export const TranscriptViewer = ({ segments, highlightedSegmentId, podcastId }: 
   const { currentTime, seek, isPlaying } = usePlayerStore();
   const { selectedText, setSelectedText, openNoteInput, notes, filterNotes } = useNoteStore();
   const [selection, setSelection] = useState<SelectionState | null>(null);
-  const [hoveredSegmentId, setHoveredSegmentId] = useState<string | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const lastActiveIndexRef = useRef<number>(-1);
   const lastScrollTimeRef = useRef<number>(0);
@@ -112,9 +111,14 @@ export const TranscriptViewer = ({ segments, highlightedSegmentId, podcastId }: 
 
   // 计算当前应该高亮的段落索引
   const activeParagraphIndex = useMemo(() => {
-    return mergedParagraphs.findIndex(
+    const index = mergedParagraphs.findIndex(
       (para) => currentTime >= para.startTime && currentTime <= para.endTime
     );
+    // 调试日志
+    if (index >= 0) {
+      console.log('[TranscriptViewer] Current:', formatTime(currentTime), 'Active paragraph:', index, mergedParagraphs[index]?.text?.substring(0, 20));
+    }
+    return index;
   }, [mergedParagraphs, currentTime]);
 
   // 滚动到高亮段落（手动跳转时）
@@ -140,11 +144,16 @@ export const TranscriptViewer = ({ segments, highlightedSegmentId, podcastId }: 
     lastActiveIndexRef.current = activeParagraphIndex;
     lastScrollTimeRef.current = now;
 
+    console.log('[TranscriptViewer] Scrolling to paragraph:', activeParagraphIndex);
+
     const container = containerRef.current;
     if (!container) return;
 
     const activeElement = container.querySelector(`[data-paragraph-index="${activeParagraphIndex}"]`);
-    if (!activeElement) return;
+    if (!activeElement) {
+      console.error('[TranscriptViewer] Element not found for index:', activeParagraphIndex);
+      return;
+    }
 
     // 平滑滚动到视口中心
     activeElement.scrollIntoView({
@@ -232,7 +241,6 @@ export const TranscriptViewer = ({ segments, highlightedSegmentId, podcastId }: 
       >
         {mergedParagraphs.map((paragraph, paraIndex) => {
           const isActive = paraIndex === activeParagraphIndex;
-          const isHovered = hoveredSegmentId === paragraph.id;
 
           return (
             <div
@@ -246,8 +254,8 @@ export const TranscriptViewer = ({ segments, highlightedSegmentId, podcastId }: 
                 margin: '8px 0',
                 // 当前段落：明显的视觉提示
                 ...(isActive ? {
-                  backgroundColor: 'rgba(212, 197, 185, 0.08)', // 增强到 8%
-                  borderLeft: '4px solid rgba(212, 197, 185, 0.8)', // 加粗到 4px，不透明度 80%
+                  backgroundColor: 'rgba(212, 197, 185, 0.08)',
+                  borderLeft: '4px solid rgba(212, 197, 185, 0.8)',
                   paddingLeft: '12px',
                   borderRadius: '4px',
                 } : {
@@ -255,38 +263,34 @@ export const TranscriptViewer = ({ segments, highlightedSegmentId, podcastId }: 
                   paddingLeft: '12px',
                 }),
               }}
-              onMouseEnter={() => setHoveredSegmentId(paragraph.id)}
-              onMouseLeave={() => setHoveredSegmentId(null)}
             >
-              {/* 时间戳和笔记标识 - 仅悬停时显示 */}
-              {isHovered && (
-                <div className="flex items-center gap-2 mb-2">
-                  <span
-                    className="text-xs font-mono cursor-pointer hover:underline"
-                    style={{
-                      color: 'rgba(212, 197, 185, 0.7)',
-                    }}
-                    onClick={() => seek(paragraph.startTime)}
-                    title={`跳转到 ${formatTime(paragraph.startTime)}`}
-                  >
-                    {formatTime(paragraph.startTime)}
-                  </span>
+              {/* 时间戳和笔记标识 - 常驻显示 */}
+              <div className="flex items-center gap-2 mb-2">
+                <span
+                  className="text-xs font-mono cursor-pointer hover:underline"
+                  style={{
+                    color: 'rgba(212, 197, 185, 0.6)',
+                  }}
+                  onClick={() => seek(paragraph.startTime)}
+                  title={`跳转到 ${formatTime(paragraph.startTime)}`}
+                >
+                  {formatTime(paragraph.startTime)}
+                </span>
 
-                  {/* 笔记标识 */}
-                  {paragraph.segments.some(seg => hasNoteAtTimestamp(seg.startTime)) && (
-                    <div
-                      className="flex items-center gap-1 px-1.5 py-0.5 rounded cursor-pointer text-xs"
-                      style={{
-                        backgroundColor: 'rgba(212, 197, 185, 0.1)',
-                        color: 'rgba(212, 197, 185, 0.8)',
-                      }}
-                      title={`该段落有笔记`}
-                    >
-                      <MessageSquare className="w-3 h-3" style={{ width: '11px', height: '11px' }} />
-                    </div>
-                  )}
-                </div>
-              )}
+                {/* 笔记标识 */}
+                {paragraph.segments.some(seg => hasNoteAtTimestamp(seg.startTime)) && (
+                  <div
+                    className="flex items-center gap-1 px-1.5 py-0.5 rounded cursor-pointer text-xs"
+                    style={{
+                      backgroundColor: 'rgba(212, 197, 185, 0.1)',
+                      color: 'rgba(212, 197, 185, 0.8)',
+                    }}
+                    title={`该段落有笔记`}
+                  >
+                    <MessageSquare className="w-3 h-3" style={{ width: '11px', height: '11px' }} />
+                  </div>
+                )}
+              </div>
 
               {/* 转录文字 */}
               <div
@@ -299,7 +303,6 @@ export const TranscriptViewer = ({ segments, highlightedSegmentId, podcastId }: 
                   <span
                     key={segment.id}
                     data-start-time={segment.startTime}
-                    className="transition-colors duration-200"
                     onClick={() => seek(segment.startTime)}
                     title={`跳转到 ${formatTime(segment.startTime)}`}
                   >
