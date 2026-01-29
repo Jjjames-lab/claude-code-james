@@ -337,7 +337,7 @@ export const AudioPlayerEnhanced = ({ mode = 'compact' }: AudioPlayerEnhancedPro
             <div className="flex items-center gap-2">
               {/* 后退 */}
               <button
-                onClick={() => skip(-5)}
+                onClick={() => skip(-15)}
                 className="w-10 h-10 rounded-xl flex items-center justify-center"
                 style={{
                   color: 'rgba(255, 255, 255, 0.4)',
@@ -353,7 +353,7 @@ export const AudioPlayerEnhanced = ({ mode = 'compact' }: AudioPlayerEnhancedPro
                   e.currentTarget.style.color = 'rgba(255, 255, 255, 0.4)';
                   e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.03)';
                 }}
-                title="后退 5 秒"
+                title="后退 15 秒"
               >
                 <SkipBack className="w-4 h-4" />
               </button>
@@ -388,7 +388,7 @@ export const AudioPlayerEnhanced = ({ mode = 'compact' }: AudioPlayerEnhancedPro
 
               {/* 前进 */}
               <button
-                onClick={() => skip(5)}
+                onClick={() => skip(15)}
                 className="w-10 h-10 rounded-xl flex items-center justify-center"
                 style={{
                   color: 'rgba(255, 255, 255, 0.4)',
@@ -404,7 +404,7 @@ export const AudioPlayerEnhanced = ({ mode = 'compact' }: AudioPlayerEnhancedPro
                   e.currentTarget.style.color = 'rgba(255, 255, 255, 0.4)';
                   e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.03)';
                 }}
-                title="前进 5 秒"
+                title="前进 15 秒"
               >
                 <SkipForward className="w-4 h-4" />
               </button>
