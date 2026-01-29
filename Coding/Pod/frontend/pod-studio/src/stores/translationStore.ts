@@ -74,26 +74,20 @@ export const useTranslationStore = create<TranslationState>()(
           const newTranslations = new Map<string, string>();
           console.log('[TranslationStore] 清除旧翻译缓存');
 
-          // 分批翻译：每批30个段落，平衡速度和稳定性
-          const BATCH_SIZE = 30;
+          // 分批翻译：每批40个段落，减少批次数
+          const BATCH_SIZE = 40;
           const batches = [];
           for (let i = 0; i < segments.length; i += BATCH_SIZE) {
             batches.push(segments.slice(i, i + BATCH_SIZE));
           }
 
           console.log(`[TranslationStore] 分 ${batches.length} 批翻译，每批最多 ${BATCH_SIZE} 个段落`);
+          console.log(`[TranslationStore] ⚡ 高速模式：所有批次同时并发`);
 
-          // 并发翻译：同时发送3批请求
-          const CONCURRENT_BATCHES = 3;
-
-          for (let batchStart = 0; batchStart < batches.length; batchStart += CONCURRENT_BATCHES) {
-            const concurrentBatches = batches.slice(batchStart, batchStart + CONCURRENT_BATCHES);
-
-            // 并发执行多个批次
-            const results = await Promise.all(
-              concurrentBatches.map(async (batch, idx) => {
-                const batchIndex = batchStart + idx;
-                console.log(`[TranslationStore] 正在翻译第 ${batchIndex + 1}/${batches.length} 批`);
+          // 并发执行所有批次
+          const results = await Promise.all(
+            batches.map(async (batch, batchIndex) => {
+              console.log(`[TranslationStore] 正在翻译第 ${batchIndex + 1}/${batches.length} 批`);
 
                 const result = await translationService.translate(
                   batch,
