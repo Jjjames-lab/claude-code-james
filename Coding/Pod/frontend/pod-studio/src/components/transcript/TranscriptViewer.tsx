@@ -44,6 +44,28 @@ export const TranscriptViewer = ({ segments, highlightedSegmentId, podcastId }: 
   const lastActiveIndexRef = useRef<number>(-1);
   const lastScrollTimeRef = useRef<number>(0);
 
+  // 🔍 调试：打印原始 segments 数据
+  useEffect(() => {
+    console.log('[TranscriptViewer] === RAW SEGMENTS DATA ===');
+    console.log('Segments count:', segments.length);
+    if (segments.length > 0) {
+      console.log('First segment:', {
+        id: segments[0].id,
+        startTime: segments[0].startTime,
+        endTime: segments[0].endTime,
+        speaker: segments[0].speaker,
+        textPreview: segments[0].text?.substring(0, 50),
+        wordsCount: segments[0].words?.length,
+      });
+      console.log('Second segment:', {
+        startTime: segments[1]?.startTime,
+        endTime: segments[1]?.endTime,
+        textPreview: segments[1]?.text?.substring(0, 50),
+      });
+      console.log('Full first segment:', segments[0]);
+    }
+  }, [segments]);
+
   // 获取当前播客的笔记
   const podcastNotes = useMemo(() => {
     if (!podcastId) return [];
@@ -340,7 +362,7 @@ export const TranscriptViewer = ({ segments, highlightedSegmentId, podcastId }: 
               >
                 {paragraph.segments.map((segment, segIndex) => (
                   <span
-                    key={segment.id}
+                    key={`${paragraph.id}-${segment.id}-${segIndex}`}
                     data-start-time={segment.startTime}
                     onClick={() => seek(segment.startTime)}
                     title={`跳转到 ${formatTime(segment.startTime)}`}
