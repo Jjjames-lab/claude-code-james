@@ -150,7 +150,7 @@ async def transcribe_from_url(
                 logger.warning(f"豆包标准版失败: {e}，切换到极速版（带 fallback）")
                 # 标准版失败，下载音频并使用极速版（会自动 fallback 到 Qwen）
                 import httpx
-                async with httpx.AsyncClient(timeout=30.0) as client:
+                async with httpx.AsyncClient(timeout=30.0, follow_redirects=True) as client:
                     response = await client.get(url)
                     response.raise_for_status()
                     audio_data = response.content
@@ -174,8 +174,8 @@ async def transcribe_from_url(
         # 否则使用极速版（下载音频）
         import httpx
 
-        # 下载音频
-        async with httpx.AsyncClient(timeout=30.0) as client:
+        # 下载音频（跟随重定向）
+        async with httpx.AsyncClient(timeout=30.0, follow_redirects=True) as client:
             response = await client.get(url)
             response.raise_for_status()
             audio_data = response.content
