@@ -70,21 +70,47 @@ export const useTranslationStore = create<TranslationState>()(
         set({ isTranslating: true, translatingProgress: { current: 0, total: segments.length } });
 
         try {
-          const result = await translationService.translate(
-            segments,
-            targetLang,
-            (current, total) => {
-              set({ translatingProgress: { current, total } });
-            }
-          );
-
-          // 合并到现有翻译中
-          const newTranslations = new Map(translations);
-          for (const [id, text] of result) {
-            newTranslations.set(id, text);
+          // 分批翻译：每批10个段落，避免超过LLM输入限制
+          const BATCH_SIZE = 10;
+          const batches = [];
+          for (let i = 0; i < segments.length; i += BATCH_SIZE) {
+            batches.push(segments.slice(i, i + BATCH_SIZE));
           }
 
-          set({ translations: newTranslations });
+          console.log(`[TranslationStore] 分 ${batches.length} 批翻译，每批最多 ${BATCH_SIZE} 个段落`);
+
+          const newTranslations = new Map(translations);
+
+          // 逐批翻译
+          for (let batchIndex = 0; batchIndex < batches.length; batchIndex++) {
+            const batch = batches[batchIndex];
+            console.log(`[TranslationStore] 正在翻译第 ${batchIndex + 1}/${batches.length} 批`);
+
+            const result = await translationService.translate(
+              batch,
+              targetLang,
+              (current, total) => {
+                // 更新总体进度
+                const completedCount = batchIndex * BATCH_SIZE + current;
+                set({ translatingProgress: { current: completedCount, total: segments.length } });
+              }
+            );
+
+            // 合并到现有翻译中
+            for (const [id, text] of result) {
+              newTranslations.set(id, text);
+            }
+
+            // 更新翻译结果（实时显示）
+            set({ translations: newTranslations });
+
+            // 批次之间暂停1秒，避免API限流
+            if (batchIndex < batches.length - 1) {
+              await new Promise(resolve => setTimeout(resolve, 1000));
+            }
+          }
+
+          console.log('[TranslationStore] 所有批次翻译完成');
         } catch (error) {
           console.error('[TranslationStore] 翻译失败:', error);
           throw error;
